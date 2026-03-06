@@ -5,6 +5,7 @@ site/
 __pycache__/
 *.pyc
 .work/
+*-workspace/
 
 # Auto-generated docs (built by CI, not tracked in source)
 PLUGINS.md

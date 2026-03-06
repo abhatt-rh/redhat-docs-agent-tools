@@ -12,6 +12,8 @@ icon: lucide/plus-circle
     │   └── plugin.json
     ├── commands/
     │   └── my-command.md
+    ├── evals/          # optional
+    │   └── evals.json
     └── README.md
     ```
 

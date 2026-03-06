@@ -1,0 +1,59 @@
+{
+  "skill_name": "hello-world-greet",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "/hello-world:greet",
+      "expected_output": "Hello! Welcome to Red Hat Docs Agent Tools.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "correct_greeting_text",
+          "type": "contains",
+          "value": "Hello! Welcome to Red Hat Docs Agent Tools."
+        },
+        {
+          "name": "no_name_included",
+          "type": "not_contains",
+          "value": "Hello,"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "/hello-world:greet Alice",
+      "expected_output": "Hello, Alice! Welcome to Red Hat Docs Agent Tools.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "correct_personalized_greeting",
+          "type": "contains",
+          "value": "Hello, Alice! Welcome to Red Hat Docs Agent Tools."
+        },
+        {
+          "name": "name_present",
+          "type": "contains",
+          "value": "Alice"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "/hello-world:greet Dr. Smith",
+      "expected_output": "Hello, Dr. Smith! Welcome to Red Hat Docs Agent Tools.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "correct_multiword_greeting",
+          "type": "contains",
+          "value": "Hello, Dr. Smith! Welcome to Red Hat Docs Agent Tools."
+        },
+        {
+          "name": "full_name_preserved",
+          "type": "contains",
+          "value": "Dr. Smith"
+        }
+      ]
+    }
+  ]
+}

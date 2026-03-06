@@ -20,6 +20,7 @@ nav = [
     {"Contributing" = [
         {"Contributing" = "contributing/index.md"},
         {"Creating a new plugin" = "contributing/creating-a-new-plugin.md"},
+        {"Evaluating skills" = "contributing/evaluating-skills.md"},
     ]},
 ]
 
