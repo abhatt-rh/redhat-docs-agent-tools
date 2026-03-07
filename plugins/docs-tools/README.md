@@ -28,7 +28,7 @@
 - Install Python packages
 
     ```bash
-    python3 -m pip install python-pptx install PyGithub python-gitlab jira pyyaml ratelimit requests beautifulsoup4 html2text
+    python3 -m pip install python-pptx PyGithub python-gitlab jira pyyaml ratelimit requests beautifulsoup4 html2text
     ```
 
     The `python-pptx` package is only required for Google Slides conversion. Google Docs and Sheets conversion has no extra dependencies.
@@ -38,8 +38,8 @@
     ```bash
     JIRA_AUTH_TOKEN=your_jira_token
     JIRA_URL=https://issues.redhat.com          # optional: override default JIRA instance
-    GITHUB_TOKEN=your_github_pat                # repo scope for private, public_repo for public
-    GITLAB_TOKEN=your_gitlab_pat                # api scope
+    GITHUB_TOKEN=your_github_pat                # set repo scope for private, public_repo for public
+    GITLAB_TOKEN=your_gitlab_pat                # set API scope
     ```
     
 - Add the following to the end of your `~/.bashrc` (Linux default) or `~/.zshrc` (Apple OSX default):
