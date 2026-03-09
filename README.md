@@ -51,13 +51,14 @@ make update
 ├── .claude-plugin/        # Plugin marketplace configuration
 ├── docs/                  # Zensical site source (Markdown)
 ├── plugins/               # Plugin implementations
-│   └── hello-world/       # Reference plugin
+│   ├── docs-tools/        # Documentation review, writing, and workflow tools
+│   ├── hello-world/       # Reference plugin
+│   └── vale-tools/        # Vale linting tools
 ├── scripts/               # Doc generation scripts
 ├── zensical.toml          # Zensical site config
 ├── Makefile               # Build automation
 ├── CLAUDE.md              # Claude Code project config
 ├── CONTRIBUTING.md        # Contribution guidelines
-├── PLUGINS.md             # Auto-generated plugin catalog
 └── LICENSE                # Apache-2.0
 ```
 

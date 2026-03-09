@@ -11,8 +11,14 @@
 Each plugin lives under `plugins/<plugin-name>/` and must contain:
 
 - `.claude-plugin/plugin.json` - Plugin metadata
-- `commands/` - Command definitions as Markdown files
 - `README.md` - Plugin documentation
+
+Plugins may also include:
+
+- `commands/` - Command definitions as Markdown files
+- `skills/` - Skill definitions (flat `*.md` or subdirectory `<name>/SKILL.md`)
+- `agents/` - Agent definitions as Markdown files
+- `templates/` - Shared templates used by agents or skills
 
 ## Versioning
 
@@ -26,10 +32,9 @@ Plugins follow [semver](https://semver.org/). Bump the version in `plugin.json` 
 
 These files are built by CI on every merge to main and are gitignored (not tracked in source):
 
-- `PLUGINS.md`
 - `docs/plugins.md`
 - `docs/plugins/*.md`
-- `docs/installation.md`
+- `docs/install/index.md`
 
 Run `make update` locally to generate and preview them.
 
