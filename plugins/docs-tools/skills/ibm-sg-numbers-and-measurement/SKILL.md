@@ -8,6 +8,8 @@ description: Review documentation for IBM Style Guide number and measurement iss
 
 Review documentation for number and measurement issues: numerals vs. words, formatting, currency, dates, times, units, and phone numbers.
 
+**Precedence**: For Red Hat documentation, the Red Hat Supplementary Style Guide (SSG) takes precedence over IBM Style Guide rules. Where guidance conflicts, follow the RH SSG skill for that topic (e.g., `rh-ssg-formatting` for date formats).
+
 ## Checklist
 
 ### Numerals vs. words

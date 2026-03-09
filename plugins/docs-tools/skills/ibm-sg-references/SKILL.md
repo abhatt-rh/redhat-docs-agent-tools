@@ -8,6 +8,8 @@ description: Review documentation for IBM Style Guide reference issues including
 
 Review documentation for reference issues: citations, footnotes, geographic locations, names, product and service names, trademarks, and product versions.
 
+**Precedence**: For Red Hat documentation, the Red Hat Supplementary Style Guide (SSG) takes precedence over IBM Style Guide rules where guidance conflicts.
+
 ## Checklist
 
 ### Citations and references

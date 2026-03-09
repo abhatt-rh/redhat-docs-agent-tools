@@ -8,6 +8,8 @@ description: Review documentation for IBM Style Guide punctuation issues includi
 
 Review documentation for punctuation issues: colons, commas, dashes, hyphens, parentheses, periods, quotation marks, semicolons, and slashes.
 
+**Precedence**: For Red Hat documentation, the Red Hat Supplementary Style Guide (SSG) takes precedence over IBM Style Guide rules where guidance conflicts.
+
 ## Checklist
 
 ### Colons

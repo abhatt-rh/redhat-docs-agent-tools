@@ -37,9 +37,12 @@
 
     ```bash
     JIRA_AUTH_TOKEN=your_jira_token
-    JIRA_URL=https://issues.redhat.com          # Optional: defaults to https://issues.redhat.com if not set
-    GITHUB_TOKEN=your_github_pat                # Required scopes: "repo" for private repos, "public_repo" for public repos
-    GITLAB_TOKEN=your_gitlab_pat                # Required scope: "api"
+    # Optional: defaults to https://issues.redhat.com if not set
+    JIRA_URL=https://issues.redhat.com
+    # Required scopes: "repo" for private repos, "public_repo" for public repos
+    GITHUB_TOKEN=your_github_pat
+    # Required scope: "api"
+    GITLAB_TOKEN=your_gitlab_pat
     ```
     
 - Add the following to the end of your `~/.bashrc` (Linux) or `~/.zshrc` (macOS):

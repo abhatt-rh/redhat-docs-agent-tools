@@ -123,15 +123,15 @@ You MUST write complete `.adoc` files organized by JIRA ID. Each file must be:
 5. Write assembly files to `.claude/docs/drafts/<jira-id>/assembly_<name>.adoc`
 6. Create an index file at `.claude/docs/drafts/<jira-id>/_index.md`
 
-## Module templates
+## Module templates and reference
 
-Read the AsciiDoc module templates before writing any modules:
+Read the AsciiDoc reference before writing any modules:
 
 ```bash
-cat ${CLAUDE_PLUGIN_ROOT}/templates/asciidoc-templates.md
+cat ${CLAUDE_PLUGIN_ROOT}/reference/asciidoc-reference.md
 ```
 
-This file contains the canonical templates for ASSEMBLY, CONCEPT, PROCEDURE, REFERENCE, and SNIPPET module types. Use these templates as the starting structure for every new module.
+This file contains the canonical templates, structural rules, and detailed guidance for ASSEMBLY, CONCEPT, PROCEDURE, REFERENCE, and SNIPPET module types. Use these templates as the starting structure for every new module.
 
 ### Key template rules
 
