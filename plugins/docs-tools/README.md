@@ -9,7 +9,7 @@ Documentation tools for converting and working with Google Docs, Slides, and She
 Export Google content using the `gcloud` CLI for authentication:
 
 - **Google Docs** → Markdown (`.md`)
-- **Google Slides** → Structured Markdown (`.md`) via PPTX with slide titles, bullet points, tables, and speaker notes
+- **Google Slides** → Markdown (`.md`) via PPTX with slide titles, bullet points, tables, and speaker notes
 - **Google Sheets** → CSV (`.csv`)
 
 ## Prerequisites

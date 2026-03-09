@@ -1,6 +1,6 @@
 ---
 name: docs-convert-gdoc-md
-description: Read a Google Docs document, Google Slides presentation, or Google Sheets spreadsheet and output as Markdown, structured Markdown, or CSV. Use this skill when asked to read, fetch, import, or convert a Google Doc, Google Slides, or Google Sheets URL.
+description: Read a Google Docs document, Google Slides presentation, or Google Sheets spreadsheet and output as Markdown or CSV. Use this skill when asked to read, fetch, import, or convert a Google Doc, Google Slides, or Google Sheets URL.
 model: claude-haiku-4-5@20251001
 allowed-tools: Bash, Read, Write
 ---
@@ -10,7 +10,7 @@ allowed-tools: Bash, Read, Write
 Export Google content using the `gcloud` CLI for authentication:
 
 - **Google Docs** → Markdown (`.md`)
-- **Google Slides** → Structured Markdown (`.md`) via PPTX with slide titles, bullet points, tables, and speaker notes
+- **Google Slides** → Markdown (`.md`) via PPTX with slide titles, bullet points, tables, and speaker notes
 - **Google Sheets** → CSV (`.csv`)
 
 ## Prerequisites
