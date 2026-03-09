@@ -125,13 +125,14 @@ def pptx_to_markdown(data):
         for shape in slide.shapes:
             if shape.has_text_frame:
                 for paragraph in shape.text_frame.paragraphs:
-                    text = paragraph.text.strip()
+                    text = paragraph.text.replace("\x0b", "\n").strip()
                     if not text:
                         continue
                     level = paragraph.level
                     if level > 0:
                         indent = "  " * (level - 1)
-                        lines.append(f"{indent}- {text}")
+                        for subline in text.split("\n"):
+                            lines.append(f"{indent}- {subline}")
                     else:
                         lines.append(text)
                 lines.append("")
