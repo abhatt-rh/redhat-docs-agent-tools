@@ -1,5 +1,5 @@
 ---
-name: vale
+name: lint-with-vale
 description: Run Vale linting to check for style guide violations. Supports Markdown, AsciiDoc, reStructuredText, HTML, XML, and source code comments. Use this skill when asked to lint, check style, or validate documentation.
 model: claude-haiku-4-5@20251001
 allowed-tools: Bash, Glob, Read
