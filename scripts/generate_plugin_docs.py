@@ -105,8 +105,7 @@ def _process_readme(readme: str) -> str:
     """Process README content for embedding in a plugin detail page.
 
     - Strip the first heading line (replaced by the plugin title)
-    - Rename the first remaining section to 'About'
-    - Increase all heading levels by one (# -> ##, ## -> ###, etc.)
+    - Return all remaining content as-is
     """
     if not readme:
         return ""
@@ -128,26 +127,7 @@ def _process_readme(readme: str) -> str:
     if not body_lines:
         return ""
 
-    # Check if there's body text before the first heading
-    has_preamble = False
-    for line in body_lines:
-        if re.match(r"^#{1,6}\s", line):
-            break
-        if line.strip():
-            has_preamble = True
-            break
-
-    result = []
-    if has_preamble:
-        result.append("## About")
-        result.append("")
-    for line in body_lines:
-        if re.match(r"^#{1,6}\s", line):
-            result.append(f"#{line}")
-        else:
-            result.append(line)
-
-    return "\n".join(result)
+    return "\n".join(body_lines)
 
 
 def generate_plugin_detail_page(plugin: dict) -> str:
