@@ -57,20 +57,3 @@
 
     Restart your terminal and Claude Code for changes to take effect.
 
-## Required related plugins
-
-The `requirements-analyst` agent references skills from these companion plugins. Add the marketplace first, then install the plugins:
-
-```bash
-# Add the related marketplace
-/plugin marketplace add https://gitlab.cee.redhat.com/aireilly/marketplace.git
-
-# Install JIRA and Red Hat docs plugins
-/plugin install docs-rh-plugins@redhat-docs-marketplace
-/plugin install pr-plugins@redhat-docs-marketplace
-```
-
-| Plugin | Skills used |
-|--------|-------------|
-| pr-plugins | `jira-reader`, `git-pr-reader` |
-| docs-rh-plugins | `article-extractor`, `redhat-docs-toc` |
