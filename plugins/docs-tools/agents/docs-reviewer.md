@@ -17,25 +17,25 @@ Apply all review skills listed below. Process one file at a time, write findings
 
 | Skill | Purpose |
 |-------|---------|
-| **vale** | Style guide linting (RedHat, IBM, Vale rules) |
-| **docs-review-modular-docs** | Module types, anchor IDs, assemblies (.adoc) |
-| **docs-review-content-quality** | Logical flow, user journey, scannability, conciseness |
-| **ibm-sg-audience-and-medium** | Accessibility, global audiences, tone |
-| **ibm-sg-language-and-grammar** | Abbreviations, capitalization, active voice, inclusive language |
-| **ibm-sg-punctuation** | Colons, commas, dashes, hyphens, quotes |
-| **ibm-sg-numbers-and-measurement** | Numerals, formatting, currency, dates, units |
-| **ibm-sg-structure-and-format** | Headings, lists, procedures, tables, emphasis |
-| **ibm-sg-references** | Citations, product names, versions |
-| **ibm-sg-technical-elements** | Code, commands, syntax, files, UI elements |
-| **ibm-sg-legal-information** | Claims, trademarks, copyright, personal info |
-| **rh-ssg-grammar-and-language** | Conscious language, contractions, minimalism |
-| **rh-ssg-formatting** | Code blocks, user values, titles, product names |
-| **rh-ssg-structure** | Admonitions, lead-ins, prerequisites, short descriptions |
-| **rh-ssg-technical-examples** | Root privileges, YAML, IPs/MACs, syntax highlighting |
-| **rh-ssg-gui-and-links** | Screenshots, UI elements, links, cross-references |
-| **rh-ssg-legal-and-support** | Cost refs, future releases, Developer/Technology Preview |
-| **rh-ssg-accessibility** | Colors, images, links, tables, WCAG |
-| **rh-ssg-release-notes** | Release note style, tenses, Jira refs (.adoc only) |
+| **vale-tools:lint-with-vale** | Style guide linting (RedHat, IBM, Vale rules) |
+| **docs-tools:docs-review-modular-docs** | Module types, anchor IDs, assemblies (.adoc) |
+| **docs-tools:docs-review-content-quality** | Logical flow, user journey, scannability, conciseness |
+| **docs-tools:ibm-sg-audience-and-medium** | Accessibility, global audiences, tone |
+| **docs-tools:ibm-sg-language-and-grammar** | Abbreviations, capitalization, active voice, inclusive language |
+| **docs-tools:ibm-sg-punctuation** | Colons, commas, dashes, hyphens, quotes |
+| **docs-tools:ibm-sg-numbers-and-measurement** | Numerals, formatting, currency, dates, units |
+| **docs-tools:ibm-sg-structure-and-format** | Headings, lists, procedures, tables, emphasis |
+| **docs-tools:ibm-sg-references** | Citations, product names, versions |
+| **docs-tools:ibm-sg-technical-elements** | Code, commands, syntax, files, UI elements |
+| **docs-tools:ibm-sg-legal-information** | Claims, trademarks, copyright, personal info |
+| **docs-tools:rh-ssg-grammar-and-language** | Conscious language, contractions, minimalism |
+| **docs-tools:rh-ssg-formatting** | Code blocks, user values, titles, product names |
+| **docs-tools:rh-ssg-structure** | Admonitions, lead-ins, prerequisites, short descriptions |
+| **docs-tools:rh-ssg-technical-examples** | Root privileges, YAML, IPs/MACs, syntax highlighting |
+| **docs-tools:rh-ssg-gui-and-links** | Screenshots, UI elements, links, cross-references |
+| **docs-tools:rh-ssg-legal-and-support** | Cost refs, future releases, Developer/Technology Preview |
+| **docs-tools:rh-ssg-accessibility** | Colors, images, links, tables, WCAG |
+| **docs-tools:rh-ssg-release-notes** | Release note style, tenses, Jira refs (.adoc only) |
 
 ## When invoked
 

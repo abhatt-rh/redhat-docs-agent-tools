@@ -690,9 +690,9 @@ OUTPUT_FORMAT=$(jq -r '.options.format // "adoc"' "$STATE_FILE")
 > 1. Run Vale linting once (use the `vale-tools:lint-with-vale` skill)
 > 2. Fix obvious errors where the fix is clear and unambiguous
 > 3. Run documentation review skills:
->    - Red Hat docs: modular-docs, content-quality
->    - IBM Style Guide: audience-and-medium, language-and-grammar, punctuation, numbers-and-measurement, structure-and-format, references, technical-elements, legal-information
->    - Red Hat SSG: grammar-and-language, formatting, structure, technical-examples, gui-and-links, legal-and-support, accessibility, release-notes (if applicable)
+>    - Red Hat docs: docs-tools:docs-review-modular-docs, docs-tools:docs-review-content-quality
+>    - IBM Style Guide: docs-tools:ibm-sg-audience-and-medium, docs-tools:ibm-sg-language-and-grammar, docs-tools:ibm-sg-punctuation, docs-tools:ibm-sg-numbers-and-measurement, docs-tools:ibm-sg-structure-and-format, docs-tools:ibm-sg-references, docs-tools:ibm-sg-technical-elements, docs-tools:ibm-sg-legal-information
+>    - Red Hat SSG: docs-tools:rh-ssg-grammar-and-language, docs-tools:rh-ssg-formatting, docs-tools:rh-ssg-structure, docs-tools:rh-ssg-technical-examples, docs-tools:rh-ssg-gui-and-links, docs-tools:rh-ssg-legal-and-support, docs-tools:rh-ssg-accessibility, docs-tools:rh-ssg-release-notes (if applicable)
 > 4. Skip ambiguous issues that require broader context
 >
 > Save the review report to: `<DRAFTS_DIR>/_review_report.md`
@@ -719,9 +719,9 @@ OUTPUT_FORMAT=$(jq -r '.options.format // "adoc"' "$STATE_FILE")
 > 1. Run Vale linting once (use the `vale-tools:lint-with-vale` skill)
 > 2. Fix obvious errors where the fix is clear and unambiguous
 > 3. Run documentation review skills:
->    - Content quality: content-quality
->    - IBM Style Guide: audience-and-medium, language-and-grammar, punctuation, numbers-and-measurement, structure-and-format, references, technical-elements, legal-information
->    - Red Hat SSG: grammar-and-language, formatting, structure, technical-examples, gui-and-links, legal-and-support, accessibility
+>    - Content quality: docs-tools:docs-review-content-quality
+>    - IBM Style Guide: docs-tools:ibm-sg-audience-and-medium, docs-tools:ibm-sg-language-and-grammar, docs-tools:ibm-sg-punctuation, docs-tools:ibm-sg-numbers-and-measurement, docs-tools:ibm-sg-structure-and-format, docs-tools:ibm-sg-references, docs-tools:ibm-sg-technical-elements, docs-tools:ibm-sg-legal-information
+>    - Red Hat SSG: docs-tools:rh-ssg-grammar-and-language, docs-tools:rh-ssg-formatting, docs-tools:rh-ssg-structure, docs-tools:rh-ssg-technical-examples, docs-tools:rh-ssg-gui-and-links, docs-tools:rh-ssg-legal-and-support, docs-tools:rh-ssg-accessibility
 > 4. Skip ambiguous issues that require broader context
 >
 > Save the review report to: `<DRAFTS_DIR>/_review_report.md`
@@ -1149,4 +1149,4 @@ Add JIRA creation on resume (after review completes):
 - The created JIRA description contains three sections from the documentation plan (JTBD, workflow context, contacts), with the full docs plan attached for private projects only
 - For **public projects**, the detailed docs plan is NOT attached to the JIRA ticket. Project visibility is determined by making an unauthenticated curl request to the JIRA project endpoint — HTTP 200 means public, any other status means private
 - The JIRA description is converted from markdown to JIRA wiki markup before submission, and the JSON payload is built using Python and passed via `--data @file` to avoid shell interpolation issues with large descriptions
-- The `--mkdocs` flag switches output from AsciiDoc to Material for MkDocs Markdown. The same agents are used — the writing and review prompts adapt to produce `.md` files with MkDocs conventions. The review stage omits `modular-docs` checks (AsciiDoc-specific) and uses content-quality plus IBM/Red Hat style guide skills
+- The `--mkdocs` flag switches output from AsciiDoc to Material for MkDocs Markdown. The same agents are used — the writing and review prompts adapt to produce `.md` files with MkDocs conventions. The review stage omits `docs-tools:docs-review-modular-docs` checks (AsciiDoc-specific) and uses `docs-tools:docs-review-content-quality` plus IBM/Red Hat style guide skills

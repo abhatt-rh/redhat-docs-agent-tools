@@ -89,7 +89,7 @@ For detailed module type guidance, templates, and structural rules, read @plugin
 
 ## Integrates with
 
-- **Vale skill**: Run `vale <file>` for automated style linting
+- **vale-tools:lint-with-vale**: Run `vale <file>` for automated style linting
 
 ## References
 
