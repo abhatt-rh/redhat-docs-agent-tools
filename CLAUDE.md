@@ -18,6 +18,21 @@ plugins/<name>/
 - `make serve` - Start local Zensical dev server
 - `make build` - Build the Zensical site
 
+## Skill naming convention
+
+Always use fully qualified `plugin:skill` names when referencing skills anywhere — agent frontmatter, Skill tool invocations, inline text references, and cross-references between skills:
+
+- `docs-tools:jira-reader` (not `jira-reader`)
+- `docs-tools:rh-ssg-formatting` (not `rh-ssg-formatting`)
+- `vale-tools:lint-with-vale` (not `vale`)
+
+In agent files, use the `Skill:` pseudocode format for invocation examples:
+```
+Skill: docs-tools:jira-reader, args: "PROJ-123"
+```
+
+Do NOT use old slash-command syntax (e.g., `/jira-reader --issue PROJ-123`).
+
 ## Contributing rules
 
 - Use kebab-case for plugin and command names
