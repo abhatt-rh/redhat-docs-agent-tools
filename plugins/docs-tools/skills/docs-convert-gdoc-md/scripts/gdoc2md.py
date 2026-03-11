@@ -11,6 +11,7 @@ import json
 import re
 import subprocess
 import sys
+import time
 from io import BytesIO
 from pathlib import Path
 from urllib.request import Request, urlopen
@@ -125,29 +126,38 @@ def get_token() -> str:
 # Download
 # ---------------------------------------------------------------------------
 
-def download(url: str, token: str) -> bytes:
+def download(url: str, token: str, retries: int = 3) -> bytes:
     req = Request(url, headers={"Authorization": f"Bearer {token}"})
-    try:
-        with urlopen(req) as resp:
-            return resp.read()
-    except HTTPError as e:
-        messages = {
-            401: (
-                "Authentication failed (401). "
-                "Try: gcloud auth login "
-                "--enable-gdrive-access"
-            ),
-            403: (
-                "Access denied (403). Check you have "
-                "permission to access this file."
-            ),
-            404: "Not found (404). Check the URL is correct.",
-        }
-        print(
-            f"Error: {messages.get(e.code, f'HTTP {e.code}')}",
-            file=sys.stderr,
-        )
-        sys.exit(1)
+    for attempt in range(retries + 1):
+        try:
+            with urlopen(req) as resp:
+                return resp.read()
+        except HTTPError as e:
+            if e.code == 429 and attempt < retries:
+                wait = 2 ** attempt
+                print(
+                    f"Rate limited (429), retrying in {wait}s...",
+                    file=sys.stderr,
+                )
+                time.sleep(wait)
+                continue
+            messages = {
+                401: (
+                    "Authentication failed (401). "
+                    "Try: gcloud auth login "
+                    "--enable-gdrive-access"
+                ),
+                403: (
+                    "Access denied (403). Check you have "
+                    "permission to access this file."
+                ),
+                404: "Not found (404). Check the URL is correct.",
+            }
+            print(
+                f"Error: {messages.get(e.code, f'HTTP {e.code}')}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
 
 
 # ---------------------------------------------------------------------------
@@ -292,7 +302,17 @@ def _fetch_sheets(
     file_id: str, output: str, token: str, base: str
 ):
     """Export every sheet in a spreadsheet as a separate CSV."""
-    sheets = get_sheet_metadata(file_id, token)
+    try:
+        sheets = get_sheet_metadata(file_id, token)
+    except SystemExit:
+        # Sheets API not enabled — fall back to default first sheet
+        print(
+            "Warning: Could not fetch sheet metadata "
+            "(Sheets API may not be enabled). "
+            "Exporting first sheet only.",
+            file=sys.stderr,
+        )
+        sheets = [(0, "Sheet1")]
     out_path = Path(output)
     stem = out_path.stem
     parent = out_path.parent
