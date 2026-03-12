@@ -64,7 +64,7 @@ make update
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on creating plugins and submitting changes.
+Contributions are welcome from anyone using any editor or AI coding tool. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on creating plugins and submitting changes.
 
 ## License
 

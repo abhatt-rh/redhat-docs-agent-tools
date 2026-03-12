@@ -4,7 +4,7 @@ icon: lucide/flask-conical
 
 # Evaluating skills
 
-Use the [skill-creator](https://claude.com/plugins/skill-creator) Claude Code skill to test plugin commands and skills against defined test cases. This helps verify that commands produce consistent, expected output.
+Evals verify that skills and commands produce consistent, expected output. They are strongly encouraged for all contributions, though not required to submit a pull request. The eval runner described below is a Claude Code tool; if you use a different coding tool, you can still write eval definitions in `evals.json` and describe expected behavior in your PR for reviewers to verify.
 
 ## Eval structure
 

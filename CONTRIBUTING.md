@@ -1,6 +1,6 @@
 # Contributing to Red Hat Docs Agent Tools
 
-This repository is the canonical collection of Claude Code plugins, skills, agents, and commands for Red Hat documentation workflows. Contributions are welcome from anyone in the Red Hat documentation community.
+This repository is a collection of plugins, skills, agents, and commands for Red Hat documentation workflows. The plugin format targets Claude Code, but contributions are primarily Markdown files — skills, reference material, checklists, and style guides — that can be authored in any editor or AI coding tool. Contributions are welcome from anyone in the Red Hat documentation community.
 
 This guide helps you contribute effectively and helps maintainers review efficiently.
 
@@ -40,7 +40,7 @@ Contributions are accepted when they meet **all** of the following criteria:
 
 - **Useful to the Red Hat documentation community.** The capability addresses a real workflow need shared by multiple documentation teams or contributors.
 - **Non-duplicative.** No existing skill, command, or agent already covers the same use case.
-- **Tested.** Skills and commands include evals that demonstrate the capability works as described (see [Evaluating skills](docs/contribute/evaluating-skills.md)).
+- **Tested where possible.** Skills and commands should include evals that demonstrate the capability works as described (see [Evaluating skills](docs/contribute/evaluating-skills.md)). If you cannot run evals, describe how reviewers can verify the capability works.
 - **Well-scoped.** Each skill, command, or agent does one thing well. Avoid monolithic capabilities that try to do everything.
 - **Documented.** The plugin README explains what it does, any prerequisites, and how to use it. Commands and skills have clear descriptions.
 - **Follows conventions.** Uses the repo structure, naming conventions, and patterns described below.
@@ -49,7 +49,7 @@ Contributions are accepted when they meet **all** of the following criteria:
 
 - **Duplicates of existing capabilities.** If a skill for AsciiDoc review already exists, don't create another one. Improve the existing one.
 - **Personal or team-specific tooling.** If a capability is only useful to one person or one team's private workflow, maintain it in your own fork or a separate marketplace.
-- **Capabilities without evals.** Skills and commands must include test cases that demonstrate they work. Untested contributions will not be merged.
+- **Contributions without any form of testing or demonstration.** Evals are strongly encouraged; if you cannot run them, describe how reviewers can verify the capability works.
 - **Overly broad or vague capabilities.** A skill called "improve docs" with no specific guidance is not useful. Be specific about what the skill does and when it applies.
 - **Capabilities that require proprietary or inaccessible dependencies.** All prerequisites must be available to the broader Red Hat documentation community.
 - **Changes that break existing functionality.** If your change modifies an existing skill or command, ensure backward compatibility or clearly document the breaking change with a major version bump.
@@ -87,10 +87,9 @@ make update
 
 # Preview the site
 make serve
-
-# Run evals for your skill/command
-/skill-creator test the <plugin-name> skill at plugins/<plugin-name>/commands/<command>.md
 ```
+
+If you can run evals, test your skill or command using the eval runner described in [Evaluating skills](docs/contribute/evaluating-skills.md).
 
 ### 5. Submit a pull request
 
@@ -175,7 +174,7 @@ Agents are specialized personas. A good agent:
 
 ## Writing evals
 
-Every skill and command must include evals. See [Evaluating skills](docs/contribute/evaluating-skills.md) for the full guide.
+Every skill and command should include evals where possible. See [Evaluating skills](docs/contribute/evaluating-skills.md) for the full guide.
 
 At minimum, your `evals/evals.json` should include:
 

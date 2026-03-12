@@ -4,7 +4,7 @@ icon: lucide/git-pull-request
 
 # Contributing
 
-This repository is the canonical collection of Claude Code plugins for Red Hat documentation workflows. Contributions are welcome from anyone in the community.
+This repository is a collection of plugins for Red Hat documentation workflows. Contributions are primarily Markdown files — skills, reference material, checklists, and style guides — that can be authored in any editor or AI coding tool. Contributions are welcome from anyone in the community.
 
 For the full contributor guide, see [CONTRIBUTING.md](https://github.com/redhat-documentation/redhat-docs-agent-tools/blob/main/CONTRIBUTING.md).
 
@@ -20,7 +20,7 @@ Keep pull requests focused. Each PR should add or modify a single skill, command
 
 ### Test your work
 
-Every skill and command must include evals that demonstrate it works. See [Evaluating skills](evaluating-skills.md) for how to write and run tests.
+Every skill and command should include evals that demonstrate it works. See [Evaluating skills](evaluating-skills.md) for how to write and run tests. If you cannot run evals, describe how reviewers can verify the capability works.
 
 ### Open an issue first
 
@@ -37,7 +37,7 @@ For anything beyond trivial fixes, open an issue to discuss your contribution be
 
 - Duplicates of existing capabilities
 - Personal or single-team-specific tooling
-- Skills and commands without evals
+- Contributions without any form of testing or demonstration
 - Overly broad or vague capabilities
 - Dependencies that aren't accessible to the community
 
