@@ -9,6 +9,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PLUGINS_DIR = REPO_ROOT / "plugins"
 DOCS_DIR = REPO_ROOT / "docs"
+GITHUB_BASE = "https://github.com/redhat-documentation/redhat-docs-agent-tools/blob/main"
 
 
 def parse_frontmatter(text: str) -> dict:
@@ -50,6 +51,7 @@ def load_plugins() -> list[dict]:
                     "name": cmd_file.stem,
                     "description": fm.get("description", ""),
                     "argument_hint": fm.get("argument-hint", ""),
+                    "source": str(cmd_file.relative_to(REPO_ROOT)),
                 })
 
         skills = []
@@ -62,6 +64,7 @@ def load_plugins() -> list[dict]:
                 skills.append({
                     "name": skill_file.stem,
                     "description": fm.get("description", ""),
+                    "source": str(skill_file.relative_to(REPO_ROOT)),
                 })
             for skill_file in sorted(skills_dir.glob("*/SKILL.md")):
                 skill_text = skill_file.read_text()
@@ -69,6 +72,7 @@ def load_plugins() -> list[dict]:
                 skills.append({
                     "name": skill_file.parent.name,
                     "description": fm.get("description", fm.get("name", "")),
+                    "source": str(skill_file.relative_to(REPO_ROOT)),
                 })
 
         agents = []
@@ -80,6 +84,7 @@ def load_plugins() -> list[dict]:
                 agents.append({
                     "name": fm.get("name", agent_file.stem),
                     "description": fm.get("description", ""),
+                    "source": str(agent_file.relative_to(REPO_ROOT)),
                 })
 
         readme_content = ""
@@ -170,6 +175,9 @@ def generate_plugin_detail_page(plugin: dict) -> str:
         lines.append("")
         for cmd in p["commands"]:
             hint = f" {cmd['argument_hint']}" if cmd["argument_hint"] else ""
+            source_url = f"{GITHUB_BASE}/{cmd['source']}"
+            lines.append(f"### [`{cmd['name']}`]({source_url})")
+            lines.append("")
             lines.append("```bash")
             lines.append(f"/{p['name']}:{cmd['name']}{hint}")
             lines.append("```")
@@ -183,7 +191,8 @@ def generate_plugin_detail_page(plugin: dict) -> str:
         lines.append("| Agent | Description |")
         lines.append("|-------|-------------|")
         for agent in p["agents"]:
-            lines.append(f"| `{agent['name']}` | {agent['description']} |")
+            source_url = f"{GITHUB_BASE}/{agent['source']}"
+            lines.append(f"| [`{agent['name']}`]({source_url}) | {agent['description']} |")
         lines.append("")
 
     if p["skills"]:
@@ -192,7 +201,8 @@ def generate_plugin_detail_page(plugin: dict) -> str:
         lines.append("| Skill | Description |")
         lines.append("|-------|-------------|")
         for skill in p["skills"]:
-            lines.append(f"| `{skill['name']}` | {skill['description']} |")
+            source_url = f"{GITHUB_BASE}/{skill['source']}"
+            lines.append(f"| [`{skill['name']}`]({source_url}) | {skill['description']} |")
         lines.append("")
 
     return "\n".join(lines)
