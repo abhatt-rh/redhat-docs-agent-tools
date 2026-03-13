@@ -6,7 +6,7 @@ allowed-tools: Read, Write, Glob, Grep, Edit, Bash, Skill, WebFetch, Agent, AskU
 
 ## Name
 
-docs-review
+docs-tools:docs-review
 
 ## Synopsis
 

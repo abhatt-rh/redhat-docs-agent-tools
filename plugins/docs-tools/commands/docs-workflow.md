@@ -6,7 +6,7 @@ allowed-tools: Read, Write, Glob, Grep, Edit, Bash, Skill, Task, WebSearch, WebF
 
 ## Name
 
-docs-workflow
+docs-tools:docs-workflow
 
 ## Synopsis
 

@@ -6,7 +6,7 @@ allowed-tools: Read, Write, Glob, Grep, Edit, Bash, Skill, TodoWrite
 
 ## Name
 
-dita-rework
+dita-tools:dita-rework
 
 ## Synopsis
 

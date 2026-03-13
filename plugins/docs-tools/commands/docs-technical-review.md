@@ -6,7 +6,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Skill, WebFetch, AskUserQues
 
 ## Name
 
-docs-technical-review
+docs-tools:docs-technical-review
 
 ## Synopsis
 

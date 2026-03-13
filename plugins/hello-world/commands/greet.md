@@ -5,7 +5,7 @@ argument-hint: "[name]"
 
 ## Name
 
-greet
+hello-world:greet
 
 ## Synopsis
 
