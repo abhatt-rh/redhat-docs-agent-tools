@@ -522,7 +522,7 @@ Use when document has multiple installation, deployment, or configuration method
 | Method | Best For | Complexity | Repeatability | Prerequisites |
 |--------|----------|------------|---------------|---------------|
 | GUI installer | Interactive setups, beginners | Low | Manual | UI access |
-| CLI (`jtbd run`) | Scripted workflows, CI/CD | Medium | High | CLI installed |
+| CLI | Scripted workflows, CI/CD | Medium | High | CLI installed |
 | Kickstart/automated | Mass deployments | High | Very High | Automation infra |
 
 **Choose based on:**

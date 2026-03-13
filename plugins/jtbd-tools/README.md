@@ -1,12 +1,14 @@
-# JTBD Tools for Claude Code
+# JTBD tools for Claude Code
 
-## Dependencies
+!!! tip
 
-All skills work directly in Claude Code without additional dependencies — the LLM performs JTBD extraction using the methodology files included in the plugin.
+    **These skills are designed for local AsciiDoc documentation repositories** — they read `master.adoc` files, `_topic_map.yml` structures, and modular doc assemblies directly from disk. They do not crawl or scrape websites. If you need to harvest and analyze documentation from HTML websites, use the [JTBD Agentic Orchestration](https://gitlab.cee.redhat.com/dobrenna/jtbd_agentic_orchestration) pipeline instead.
 
-**For AsciiDoc analysis (`jtbd-analyze-adoc`, `jtbd-analyze-topicmap`):**
+## Prerequisites
 
-The `asciidoctor-reducer` Ruby gem is required to flatten AsciiDoc includes before analysis:
+**Ruby (for AsciiDoc skills):**
+
+The `asciidoctor-reducer` gem is required by any skill that processes AsciiDoc files (`jtbd-analyze-adoc`, `jtbd-analyze-topicmap`, `jtbd-workflow-adoc`, `jtbd-workflow-topicmap`):
 
 ```bash
 gem install asciidoctor-reducer
@@ -15,70 +17,72 @@ gem install asciidoctor-reducer
 brew install ruby   # macOS
 ```
 
-**Optional: `jtbd` CLI tool**
+**Python 3 (for batch-runner scripts only):**
 
-The `jtbd` CLI is only needed if you want to run the pipeline programmatically outside Claude Code (e.g., `jtbd run-adoc`, `jtbd csv` for JSONL-to-CSV conversion). It is not required for interactive use with Claude Code.
+The batch-runner scripts use only the Python standard library — no `pip install` required. They need the `claude` CLI to be available on `$PATH`.
 
-```bash
-# From the jtbd-pipeline repo (https://gitlab.cee.redhat.com/dobrenna/jtbd-pipeline)
-python3 -m pip install -e .
-```
+All other skills work directly in Claude Code without additional dependencies. The LLM performs JTBD extraction using the methodology files included in the plugin.
 
 ## Usage
 
-Once installed, invoke skills in Claude Code:
-
 ```bash
-# Analyze a document
-Skill: jtbd-tools:jtbd-analyze, args: "docs_raw/rhoai/deploying-models.md"
+# Analyze a markdown document
+/jtbd-tools:jtbd-analyze docs_raw/rhoai/deploying-models.md
 
 # Analyze an AsciiDoc book
-Skill: jtbd-tools:jtbd-analyze-adoc, args: "path/to/master.adoc --variant self-managed"
+/jtbd-tools:jtbd-analyze-adoc path/to/master.adoc --variant self-managed
 
 # Analyze a topic map-based book (OpenShift docs)
-Skill: jtbd-tools:jtbd-analyze-topicmap, args: "path/to/repo --book installing_gitops --distro openshift-gitops"
+/jtbd-tools:jtbd-analyze-topicmap path/to/repo --book installing_gitops --distro openshift-gitops
 
 # Generate TOC from analysis results
-Skill: jtbd-tools:jtbd-toc, args: "analysis/rhoai/deploying-models/"
+/jtbd-tools:jtbd-toc analysis/rhoai/deploying-models/
 
 # Compare current vs proposed structure
-Skill: jtbd-tools:jtbd-compare, args: "docs_raw/rhoai/deploying-models.md"
+/jtbd-tools:jtbd-compare docs_raw/rhoai/deploying-models.md
 
 # Generate consolidation report
-Skill: jtbd-tools:jtbd-consolidate, args: "analysis/rhoai/deploying-models/"
-
-# Harvest docs from a URL
-Skill: jtbd-tools:jtbd-harvest, args: "https://docs.example.com/guide --project myproject"
+/jtbd-tools:jtbd-consolidate analysis/rhoai/deploying-models/
 
 # End-to-end workflow (all 4 steps in one command)
-Skill: jtbd-tools:jtbd-workflow-topicmap, args: "path/to/repo --book installing_gitops --distro openshift-gitops"
-Skill: jtbd-tools:jtbd-workflow-adoc, args: "path/to/master.adoc --variant self-managed"
+/jtbd-tools:jtbd-workflow-topicmap path/to/repo --book installing_gitops --distro openshift-gitops
+
+/jtbd-tools:jtbd-workflow-adoc path/to/master.adoc --variant self-managed
 
 # Batch processing
-Skill: jtbd-tools:jtbd-workflow-topicmap, args: "path/to/repo --books-file books.txt --distro openshift-enterprise --batch"
-Skill: jtbd-tools:jtbd-workflow-adoc, args: "--docs-file docs.txt --variant self-managed --batch"
+/jtbd-tools:jtbd-workflow-topicmap path/to/repo --books-file books.txt --distro openshift-enterprise --batch
+
+/jtbd-tools:jtbd-workflow-adoc --docs-file docs.txt --variant self-managed --batch
 ```
 
-## Typical Workflow
+## Typical workflow
 
 **Individual steps:**
-```
-1. jtbd-tools:jtbd-harvest       (or provide existing docs)
-2. jtbd-tools:jtbd-analyze       (extract JTBD records)
-3. jtbd-tools:jtbd-toc           (generate proposed TOC)
-4. jtbd-tools:jtbd-compare       (side-by-side comparison)
-5. jtbd-tools:jtbd-consolidate   (stakeholder report)
+
+```bash
+# extract JTBD records from markdown or AsciiDoc
+/jtbd-tools:jtbd-analyze
+
+# generate proposed TOC
+/jtbd-tools:jtbd-toc
+
+# side-by-side comparison
+/jtbd-tools:jtbd-compare
+
+# stakeholder report
+/jtbd-tools:jtbd-consolidate
 ```
 
 **One-command workflow (recommended for AsciiDoc repos):**
-```
-Skill: jtbd-tools:jtbd-workflow-topicmap, args: "path/to/repo --book book_name --distro distro-name"
-Skill: jtbd-tools:jtbd-workflow-adoc, args: "path/to/master.adoc --variant self-managed"
+```bash
+/jtbd-tools:jtbd-workflow-topicmap path/to/repo --book book_name --distro distro-name
+
+/jtbd-tools:jtbd-workflow-adoc path/to/master.adoc --variant self-managed
 ```
 
 These workflow skills run all 4 steps (analyze, TOC, compare, consolidate) automatically and produce all output artifacts in one invocation.
 
-## Workflow Skills
+## Workflow skills
 
 The workflow skills (`jtbd-workflow-topicmap` and `jtbd-workflow-adoc`) combine all 4 analysis steps into a single command. Instead of invoking analyze, TOC, compare, and consolidate separately, one workflow invocation runs all steps in sequence and produces every output artifact.
 
@@ -87,20 +91,20 @@ Two separate workflow skills exist because the analysis entry points differ:
 - **`jtbd-workflow-topicmap`** — For repos structured with `_topic_maps/_topic_map.yml` (e.g., openshift-docs, openshift-gitops). You specify a book directory name from the topic map.
 - **`jtbd-workflow-adoc`** — For repos using `master.adoc` entry points (e.g., RHOAI, RHEL AI, Satellite). You point directly to a `master.adoc` file.
 
-### `jtbd-workflow-topicmap`
+### jtbd-workflow-topicmap
 
 ```bash
 # List available books in the topic map (filtered by distro)
-Skill: jtbd-tools:jtbd-workflow-topicmap, args: "~/Documents/openshift-docs --list-books --distro openshift-gitops"
+/jtbd-tools:jtbd-workflow-topicmap ~/Documents/openshift-docs --list-books --distro openshift-gitops
 
 # Analyze a single book (all 4 steps)
-Skill: jtbd-tools:jtbd-workflow-topicmap, args: "~/Documents/openshift-docs --book installing_gitops --distro openshift-gitops"
+/jtbd-tools:jtbd-workflow-topicmap ~/Documents/openshift-docs --book installing_gitops --distro openshift-gitops
 
 # With domain-specific research personas
-Skill: jtbd-tools:jtbd-workflow-topicmap, args: "~/Documents/openshift-docs --book installing_gitops --distro openshift-gitops --research-file ~/my-project/research.yaml"
+/jtbd-tools:jtbd-workflow-topicmap ~/Documents/openshift-docs --book installing_gitops --distro openshift-gitops --research-file ~/my-project/research.yaml
 
 # Custom output directory
-Skill: jtbd-tools:jtbd-workflow-topicmap, args: "~/Documents/openshift-docs --book installing_gitops --distro openshift-gitops --output analysis/gitops/installing/"
+/jtbd-tools:jtbd-workflow-topicmap ~/Documents/openshift-docs --book installing_gitops --distro openshift-gitops --output analysis/gitops/installing/
 ```
 
 **Arguments:**
@@ -111,24 +115,24 @@ Skill: jtbd-tools:jtbd-workflow-topicmap, args: "~/Documents/openshift-docs --bo
 | `--book` | Yes (unless `--list-books` or `--batch`) | Book directory name (e.g., `installing_gitops`) |
 | `--distro` | No | Filter books by distro (e.g., `openshift-gitops`, `openshift-enterprise`) |
 | `--list-books` | No | Display available books in a table and exit |
-| `--research-file` | No | Path to research config YAML (see [Custom Research Configs](#custom-research-configs)) |
+| `--research-file` | No | Path to research config YAML (see [Custom research configs](#custom-research-configs)) |
 | `--books-file` | No | Text file listing book directory names, one per line |
 | `--batch` | No | Enable batch mode (requires `--books-file`) |
 | `--batch-size` | No | Number of books per invocation (default 5, max 10) |
 | `--output` | No | Output base directory. Default: `analysis/<distro>/<book>/` |
 | `--skip-validation` | No | Skip grounding validation step |
 
-### `jtbd-workflow-adoc`
+### jtbd-workflow-adoc
 
 ```bash
 # Analyze a single book (all 4 steps)
-Skill: jtbd-tools:jtbd-workflow-adoc, args: "~/Documents/RHAI_DOCS/deploying-models/master.adoc --variant self-managed"
+/jtbd-tools:jtbd-workflow-adoc ~/Documents/RHAI_DOCS/deploying-models/master.adoc --variant self-managed
 
 # With domain-specific research personas
-Skill: jtbd-tools:jtbd-workflow-adoc, args: "~/Documents/RHAI_DOCS/deploying-models/master.adoc --variant self-managed --research-file ~/research/redhat-ai.yaml"
+/jtbd-tools:jtbd-workflow-adoc ~/Documents/RHAI_DOCS/deploying-models/master.adoc --variant self-managed --research-file ~/research/redhat-ai.yaml
 
 # Custom output directory
-Skill: jtbd-tools:jtbd-workflow-adoc, args: "~/Documents/RHAI_DOCS/deploying-models/master.adoc --variant self-managed --output analysis/rhoai/deploying-models/"
+/jtbd-tools:jtbd-workflow-adoc ~/Documents/RHAI_DOCS/deploying-models/master.adoc --variant self-managed --output analysis/rhoai/deploying-models/
 ```
 
 **Arguments:**
@@ -137,14 +141,14 @@ Skill: jtbd-tools:jtbd-workflow-adoc, args: "~/Documents/RHAI_DOCS/deploying-mod
 |----------|----------|-------------|
 | `path` | Yes (single-doc mode) | Path to assembly or `master.adoc` file |
 | `--variant` | No | Conditional variant for `ifdef` resolution (`self-managed`, `cloud-service`) |
-| `--research-file` | No | Path to research config YAML (see [Custom Research Configs](#custom-research-configs)) |
+| `--research-file` | No | Path to research config YAML (see [Custom research configs](#custom-research-configs)) |
 | `--docs-file` | No | Text file listing paths to `master.adoc` files, one per line |
 | `--batch` | No | Enable batch mode (requires `--docs-file`) |
 | `--batch-size` | No | Number of docs per invocation (default 5, max 10) |
 | `--output` | No | Output directory |
 | `--skip-validation` | No | Skip grounding validation step |
 
-### What Each Step Produces
+### What each step produces
 
 A single workflow invocation generates these files in the output directory:
 
@@ -154,11 +158,13 @@ A single workflow invocation generates these files in the output directory:
 | `<name>-jtbd.csv` | 1. Analyze | Same records in CSV format |
 | `<name>-*-reduced.adoc` | 1. Analyze | Flattened AsciiDoc with all includes resolved |
 | `<name>-include-graph.json` | 1. Analyze | Module provenance map (assembly -> module -> type) |
+| `<name>-combined.adoc` | 1. Analyze | Concatenated reduced content (topicmap workflow only) |
+| `<name>-topicmap.json` | 1. Analyze | Extracted topic map structure (topicmap workflow only) |
 | `<name>-toc-new_taxonomy.md` | 2. TOC | JTBD-oriented Table of Contents |
 | `<name>-comparison.md` | 3. Compare | Side-by-side current vs proposed structure |
 | `<name>-consolidation-report.md` | 4. Consolidate | Stakeholder-facing report with gap analysis |
 
-### Batch Processing
+### Batch processing
 
 Both workflow skills can process multiple books or documents in a single invocation. This is useful when you need to analyze an entire documentation set rather than one book at a time.
 
@@ -178,10 +184,10 @@ Both workflow skills can process multiple books or documents in a single invocat
 # configuring_gitops
 # monitoring_gitops
 
-Skill: jtbd-tools:jtbd-workflow-topicmap, args: "~/Documents/openshift-docs --books-file books.txt --distro openshift-gitops --batch --batch-size 5"
+/jtbd-tools:jtbd-workflow-topicmap ~/Documents/openshift-docs --books-file books.txt --distro openshift-gitops --batch --batch-size 5"
 ```
 
-**Adoc batch example:**
+**adoc batch example:**
 
 ```bash
 # docs.txt (one master.adoc path per line):
@@ -189,12 +195,12 @@ Skill: jtbd-tools:jtbd-workflow-topicmap, args: "~/Documents/openshift-docs --bo
 # ~/Documents/RHAI_DOCS/creating-a-workbench/master.adoc
 # ~/Documents/RHAI_DOCS/working-on-projects/master.adoc
 
-Skill: jtbd-tools:jtbd-workflow-adoc, args: "--docs-file docs.txt --variant self-managed --batch --batch-size 5"
+/jtbd-tools:jtbd-workflow-adoc --docs-file docs.txt --variant self-managed --batch -batch-size 5"
 ```
 
 **Batch size limits:** Each invocation processes up to `--batch-size` items (default 5, max 10). If the file lists more items than the batch size, only the first N are processed and the remaining count is reported.
 
-**Large batches (>10 items):** The plugin includes batch-runner scripts that split large lists into groups and invoke the Claude Code CLI for each group. They track progress in a state file and support `--resume` to continue after interruption.
+**Large batches (>10 items):** The plugin includes Python batch-runner scripts that split large lists into groups and invoke the Claude Code CLI for each group. They track progress in a state file and support `--resume` to continue after interruption. These scripts use only the Python standard library (no pip dependencies).
 
 ```bash
 # Process 30 books in groups of 5
@@ -202,6 +208,12 @@ python3 plugins/jtbd-tools/scripts/batch-runner-topicmap.py \
   --repo ~/Documents/openshift-docs \
   --books-file all-books.txt \
   --distro openshift-enterprise \
+  --batch-size 5
+
+# Process multiple AsciiDoc docs
+python3 plugins/jtbd-tools/scripts/batch-runner-adoc.py \
+  --docs-file docs.txt \
+  --variant self-managed \
   --batch-size 5
 
 # Resume after interruption
@@ -213,11 +225,11 @@ python3 plugins/jtbd-tools/scripts/batch-runner-topicmap.py \
   --resume
 ```
 
-## Custom Research Configs
+## Custom research configs
 
 By default, the workflow skills use generic persona detection — they infer roles from the documentation content (e.g., "cluster admin" language maps to a platform/admin role). To use domain-specific personas from UX research, provide a YAML config file with `--research-file`.
 
-### Creating a Research Config
+### Creating a research config
 
 Create a YAML file with your project's personas, schema extensions, and canonical jobs:
 
@@ -286,17 +298,17 @@ pain_point_patterns:
     maps_to: "Compliance monitoring gap"
 ```
 
-### Using It
+### Using it
 
 ```bash
 # Topic map repo
-Skill: jtbd-tools:jtbd-workflow-topicmap, args: "~/Documents/satellite-docs --book managing_hosts --research-file ~/research/satellite-research.yaml"
+/jtbd-tools:jtbd-workflow-topicmap ~/Documents/satellite-docs --book managing_hosts -research-file ~/research/satellite-research.yaml
 
 # AsciiDoc repo
-Skill: jtbd-tools:jtbd-workflow-adoc, args: "~/Documents/satellite-docs/managing-hosts/master.adoc --research-file ~/research/satellite-research.yaml"
+/jtbd-tools:jtbd-workflow-adoc ~/Documents/satellite-docs/managing-hosts/master.adoc--research-file ~/research/satellite-research.yaml
 ```
 
-### What It Does
+### What it does
 
 When `--research-file` is provided:
 
@@ -307,7 +319,7 @@ When `--research-file` is provided:
 5. **Pain point patterns** detect text patterns in documentation and capture them in the `pain_points` field.
 6. **UX Research sections** appear in comparison and consolidation reports when research fields are populated.
 
-### YAML Sections Reference
+### YAML sections reference
 
 | Section | Required | Description |
 |---------|----------|-------------|
@@ -321,9 +333,9 @@ When `--research-file` is provided:
 
 All sections except `name` and `version` are optional. A minimal config with just personas works fine.
 
-## Plugin Structure
+## Plugin structure
 
-```
+```bash
 jtbd-tools/
 ├── .claude-plugin/
 │   └── plugin.json                    # plugin manifest (v1.1.0)
@@ -335,24 +347,23 @@ jtbd-tools/
 │   ├── toc-guidelines.md              # TOC generation guidelines
 │   └── example-toc.md                 # example TOC output
 ├── skills/
-│   ├── jtbd-analyze/                  # each skill has only SKILL.md
-│   ├── jtbd-analyze-adoc/
-│   ├── jtbd-analyze-topicmap/
-│   ├── jtbd-toc/
-│   ├── jtbd-compare/
-│   ├── jtbd-consolidate/
-│   ├── jtbd-harvest/
-│   ├── jtbd-workflow-adoc/
-│   └── jtbd-workflow-topicmap/
+│   ├── jtbd-analyze/                  # markdown analysis
+│   ├── jtbd-analyze-adoc/             # AsciiDoc analysis (reduce + extract)
+│   ├── jtbd-analyze-topicmap/         # topic map analysis (parse + reduce + extract)
+│   ├── jtbd-toc/                      # TOC generation from JSONL records
+│   ├── jtbd-compare/                  # current vs proposed comparison
+│   ├── jtbd-consolidate/              # stakeholder consolidation report
+│   ├── jtbd-workflow-adoc/            # end-to-end: analyze + TOC + compare + consolidate
+│   └── jtbd-workflow-topicmap/        # end-to-end: analyze + TOC + compare + consolidate
 ├── scripts/
 │   ├── batch-runner-adoc.py           # large batch helper for AsciiDoc workflows
 │   └── batch-runner-topicmap.py       # large batch helper for topic map workflows
 └── README.md
 ```
 
-Shared files are maintained once in `reference/` and referenced from SKILL.md files using `Read @plugins/jtbd-tools/reference/<file>.md`.
+Shared files are maintained once in `reference/` and referenced from SKILL.md files using `@plugins/jtbd-tools/reference/<file>.md`.
 
-## JTBD Framework
+## JTBD framework
 
 These skills implement the Outcome-Driven Innovation (ODI) variant of JTBD:
 
@@ -360,7 +371,3 @@ These skills implement the Outcome-Driven Innovation (ODI) variant of JTBD:
 - **Granularity levels:** main_job (10-15 per guide) > user_story (2-7 per job) > procedure
 - **Job map stages:** Get Started, Plan, Configure, Deploy, Monitor, Troubleshoot, Reference, etc.
 - **Grounding validation:** Each extracted record is verified against source content to prevent hallucination (can be skipped with `--skip-validation`)
-
-## License
-
-Internal use only.

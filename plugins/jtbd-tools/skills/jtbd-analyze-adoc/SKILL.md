@@ -45,11 +45,6 @@ Extract Jobs-To-Be-Done records from AsciiDoc documentation repositories, specif
    brew install ruby   # macOS
    ```
 
-2. **jtbd CLI** must be installed:
-   ```bash
-   pip install -e .
-   ```
-
 ## What This Skill Does
 
 ### Phase 1: Reduce (Flatten)
@@ -157,20 +152,6 @@ When `--variant` is specified:
 - `ifdef::self-managed[]` blocks are included (or excluded for cloud-service)
 - `ifdef::cloud-service[]` blocks are included (or excluded for self-managed)
 - Shared content (outside conditionals) is always included
-
-## CLI Integration
-
-This skill wraps two CLI commands:
-
-```bash
-# Step 1: Reduce only
-jtbd reduce path/to/master.adoc --variant self-managed --output analysis/rhoai-adoc/deploying-models/
-
-# Step 2: Full pipeline (reduce + analyze)
-jtbd run-adoc path/to/master.adoc --variant self-managed --project rhoai-adoc --doc deploying-models
-```
-
-The skill prefers using the CLI commands when available, falling back to direct Python calls if needed.
 
 ## Workflow
 

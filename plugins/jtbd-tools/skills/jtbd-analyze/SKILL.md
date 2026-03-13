@@ -36,7 +36,7 @@ Extract Jobs-To-Be-Done records from technical documentation using the methodolo
 3. **Assesses document size** to determine processing strategy
 4. **Extracts JTBD records** following the methodology in `@plugins/jtbd-tools/reference/methodology.md`
 5. **Writes JSONL output** to `--output` path or default `analysis/<project>/<doc>/<doc>-jtbd.jsonl`
-6. **Converts to CSV** by calling `jtbd csv --input <jsonl-path>` for spreadsheet viewing
+6. **Converts to CSV** from the JSONL output for spreadsheet viewing
 
 ## Processing Strategy
 
@@ -174,13 +174,7 @@ analysis/rhoai/creating-a-workbench-skill/creating-a-workbench-jtbd.csv
 
 ### CSV Conversion
 
-After writing the JSONL file, the skill calls the CLI to generate a CSV:
-
-```bash
-jtbd csv --input <output-path>/<doc>-jtbd.jsonl
-```
-
-**Prerequisite:** The `jtbd` CLI must be installed (`pip install -e .`). See the README for setup instructions.
+After writing the JSONL file, the skill converts it to CSV format for spreadsheet viewing. The CSV is written to the same output directory as the JSONL file.
 
 ## Chunk Processing Details
 
