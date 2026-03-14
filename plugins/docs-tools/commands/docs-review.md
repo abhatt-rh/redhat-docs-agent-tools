@@ -1,7 +1,7 @@
 ---
 description: Multi-agent documentation review with confidence scoring — local, PR/MR, or action comments
 argument-hint: "[--local | --pr <url> [--post-comments] | --action-comments [url]] [--threshold <0-100>]"
-allowed-tools: Read, Write, Glob, Grep, Edit, Bash, Skill, WebFetch, Agent, AskUserQuestion
+allowed-tools: Read, Write, Glob, Grep, Edit, Bash, WebFetch, Task, AskUserQuestion
 ---
 
 ## Name
@@ -196,12 +196,15 @@ Launch 4 agents in parallel to independently review the documentation changes. E
 
 For `--pr` mode, use `python ${CLAUDE_PLUGIN_ROOT}/commands/scripts/git_review_api.py extract` for deterministic line numbers from the diff.
 
-The 4 agents are defined below. Each agent should read and follow the referenced agent file for detailed review instructions, checklists, and output format.
+The 4 agents are defined below. Each uses a dedicated `subagent_type` that loads the agent's instructions and enforces its declared tool restrictions automatically.
 
 **Important**: The agent files describe a JIRA-based drafts workflow for their standalone use. In this docs-review command context, ignore the JIRA/drafts workflow sections — instead, review the changed files from the diff (Step 3) and return issues in the format described above (file, line, description, reason, confidence, severity).
 
-**Agent 1: Style guide compliance (sonnet)**
-Read and follow @plugins/docs-tools/agents/docs-reviewer.md for review checklists and severity levels. Focus on these skills only:
+**Agent 1: Style guide compliance**
+- `subagent_type`: `docs-tools:docs-reviewer`
+- `model`: `sonnet`
+
+Focus on these skills only:
 - `docs-tools:ibm-sg-language-and-grammar` — abbreviations, capitalization, active voice, inclusive language
 - `docs-tools:ibm-sg-punctuation` — colons, commas, dashes, hyphens, quotes
 - `docs-tools:ibm-sg-structure-and-format` — headings, lists, procedures, tables, emphasis
@@ -211,8 +214,11 @@ Read and follow @plugins/docs-tools/agents/docs-reviewer.md for review checklist
 - `docs-tools:rh-ssg-structure` — admonitions, lead-ins, prerequisites, short descriptions
 - `docs-tools:rh-ssg-technical-examples` — root privileges, YAML, IPs/MACs, syntax highlighting
 
-**Agent 2: Style guide compliance (sonnet)**
-Read and follow @plugins/docs-tools/agents/docs-reviewer.md for review checklists and severity levels. Focus on these skills only:
+**Agent 2: Style guide compliance**
+- `subagent_type`: `docs-tools:docs-reviewer`
+- `model`: `sonnet`
+
+Focus on these skills only:
 - `docs-tools:ibm-sg-audience-and-medium` — accessibility, global audiences, tone
 - `docs-tools:ibm-sg-numbers-and-measurement` — numerals, formatting, currency, dates, units
 - `docs-tools:ibm-sg-references` — citations, product names, versions
@@ -222,14 +228,18 @@ Read and follow @plugins/docs-tools/agents/docs-reviewer.md for review checklist
 - `docs-tools:rh-ssg-accessibility` — colors, images, links, tables, WCAG
 - `docs-tools:rh-ssg-release-notes` — release note style, tenses, Jira refs (apply only to .adoc files that appear to be release notes)
 
-**Agent 3: Modular docs structure and content quality (opus)**
-Read and follow @plugins/docs-tools/agents/docs-reviewer.md for the full modular docs checklist and content quality review process, including Vale integration. Focus on these skills only:
+**Agent 3: Modular docs structure and content quality**
+- `subagent_type`: `docs-tools:docs-reviewer`
+Focus on these skills only:
 - `docs-tools:docs-review-modular-docs` — module types, anchor IDs, assemblies, title conventions
 - `docs-tools:docs-review-content-quality` — logical flow, user journey, scannability, conciseness
 - Run Vale once per file if Vale is available. Fix clear errors, skip ambiguous issues.
 
-**Agent 4: Technical accuracy and consistency (opus)**
-Read and follow @plugins/docs-tools/agents/technical-reviewer.md for the full technical review process, including doc type detection, reviewer persona (developer/architect lens), the 6 review dimensions (code integrity, prerequisites, command accuracy, failure paths, architectural coherence, audience level), confidence scoring, and output format. Do not duplicate style or formatting checks — those are covered by Agents 1-3.
+**Agent 4: Technical accuracy and consistency**
+- `subagent_type`: `docs-tools:technical-reviewer`
+- `model`: `opus`
+
+Follow the full technical review process, including doc type detection, reviewer persona (developer/architect lens), the 6 review dimensions (code integrity, prerequisites, command accuracy, failure paths, architectural coherence, audience level), confidence scoring, and output format. Use `docs-tools:jira-reader`, `docs-tools:git-pr-reader`, and `docs-tools:article-extractor` skills to cross-check technical claims against source materials when PR or JIRA context is available. Do not duplicate style or formatting checks — those are covered by Agents 1-3.
 
 **CRITICAL: We only want HIGH SIGNAL issues.** Flag issues where:
 - The documentation will actively mislead users (wrong commands, broken examples, incorrect terminology)

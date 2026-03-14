@@ -1,7 +1,7 @@
 ---
 description: Run the multi-stage documentation workflow for a JIRA ticket. Orchestrates agents sequentially — requirements analysis, planning, writing, technical review, and style review
 argument-hint: [action] <ticket> [--pr <url>] [--create-jira <PROJECT>] [--mkdocs] [--integrate]
-allowed-tools: Read, Write, Glob, Grep, Edit, Bash, Skill, Task, WebSearch, WebFetch
+allowed-tools: Read, Write, Glob, Grep, Edit, Bash, Task, WebSearch, WebFetch
 ---
 
 ## Name

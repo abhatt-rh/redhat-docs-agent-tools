@@ -1,7 +1,7 @@
 ---
 description: Validate documentation technical accuracy against code repositories — detects stale commands, flags, APIs, config keys, code examples, and file paths. Use when asked to check if docs match the code, verify examples, find outdated references, or run a technical review.
 argument-hint: --docs <source> [--docs <source>...] [--code URL] [--jira TICKET] [--pr URL] [--gdoc URL] [--fix]
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Skill, WebFetch, AskUserQuestion
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Task, WebFetch, AskUserQuestion
 ---
 
 ## Name
@@ -182,7 +182,7 @@ This step is **mandatory** and runs regardless of whether issues were found in S
 
 #### Path 1: Report only (no `--fix`)
 
-Write `.claude_docs/technical-review-report.md` with these sections:
+Write `.claude/docs/technical-review-report.md` with these sections:
 
 1. **Header** — docs sources, timestamp, repo count
 2. **Discovery Summary** — discovered schemas, CLI definitions, and scope classification stats (how many commands were external/in-scope/unknown)
@@ -229,7 +229,7 @@ Reasoning: Exact command exists, only the flag changed — likely a rename
 
 4. **Apply fix** using content-based matching: `Edit(file_path=FILE, old_string=old_text, new_string=new_text)`
 
-**After all items**: Write `.claude_docs/technical-review-report.md` with the same sections as Path 1, plus:
+**After all items**: Write `.claude/docs/technical-review-report.md` with the same sections as Path 1, plus:
 
 - **Issues Auto-Fixed** — each with ID (`AF-N`), location, issue, evidence, before/after diff
 - **Issues Interactively Resolved** — each with ID, action taken (applied/modified/deleted)
