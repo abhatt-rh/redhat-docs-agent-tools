@@ -27,24 +27,33 @@ Always use fully qualified `plugin:skill` names when referencing skills anywhere
 - `docs-tools:rh-ssg-formatting` (not `rh-ssg-formatting`)
 - `vale-tools:lint-with-vale` (not `vale`)
 
-## Calling skills from commands and agents
+## Calling scripts from skills and commands
 
-When a skill has a backing script (Python, Ruby, Bash), call it directly via `${CLAUDE_PLUGIN_ROOT}` — do NOT use `Skill:` invocations:
+### From within a skill (internal calls)
+
+When a skill's own Markdown calls its co-located script, use a relative path from the skill directory:
 
 ```bash
-# Correct — direct script call
+python3 scripts/git_pr_reader.py info <url> --json
+ruby scripts/callouts.rb "$file"
+bash scripts/find_includes.sh "$file"
+```
+
+### From other commands and agents (cross-skill calls)
+
+When a command or agent calls a script that belongs to a different skill, use `${CLAUDE_PLUGIN_ROOT}`:
+
+```bash
 python3 ${CLAUDE_PLUGIN_ROOT}/skills/git-pr-reader/scripts/git_pr_reader.py info <url> --json
 ruby ${CLAUDE_PLUGIN_ROOT}/skills/dita-callouts/scripts/callouts.rb "$file"
 bash ${CLAUDE_PLUGIN_ROOT}/skills/dita-includes/scripts/find_includes.sh "$file"
 ```
 
-```
-# Wrong — Skill invocation for a scriptable operation
-Skill: docs-tools:git-pr-reader, args: "info <url> --json"
-```
+### Knowledge-only skills
 
 Use `Skill:` pseudocode only for pure knowledge/checklist skills that have no backing script:
-```
+
+```bash
 Skill: docs-tools:rh-ssg-formatting, args: "review path/to/file.adoc"
 ```
 
@@ -54,7 +63,8 @@ Do NOT use old slash-command syntax (e.g., `/jira-reader --issue PROJ-123`).
 
 | Approach | When to use | Examples |
 |---|---|---|
-| `python3 ${CLAUDE_PLUGIN_ROOT}/...` | Running a script to fetch data, post comments, detect state | `git_pr_reader.py info`, `jira_reader.py`, `callouts.rb` |
+| `python3 scripts/...` | Calling a co-located script from within the same skill | `scripts/git_pr_reader.py`, `scripts/callouts.rb` |
+| `python3 ${CLAUDE_PLUGIN_ROOT}/...` | Cross-skill/command script calls | `git_pr_reader.py info`, `jira_reader.py`, `callouts.rb` |
 | `Skill: plugin:skill` | Loading full skill knowledge — rules, checklists, domain expertise the LLM applies | `rh-ssg-formatting`, `ibm-sg-punctuation`, review skills |
 
 ## Contributing rules
