@@ -43,33 +43,33 @@ Before starting any checks, ask the user two questions:
 
 | Skill | Parameters Covered |
 |-------|-------------------|
-| `cqa-vale-check` | P1 |
-| `cqa-modularization` | P2, P3, P4, P5, P6, P7 |
-| `cqa-titles-descriptions` | P8, P9, P10, P11, Q11 |
-| `cqa-procedures` | P12, Q12, Q13, Q14, Q15, Q16 |
-| `cqa-editorial` | P13, P14, Q1, Q2, Q3, Q4, Q5, Q18, Q20 |
-| `cqa-links` | P15, P16, P17, Q24, Q25 |
-| `cqa-legal-branding` | P18, P19, Q17, Q23, O1, O2, O3, O4, O5 |
-| `cqa-user-focus` | Q6, Q7, Q8, Q9, Q10 |
-| `cqa-tables-images` | Q19, Q21, Q22 |
-| `cqa-onboarding` | O6, O7, O8, O9, O10 |
-| `cqa-report` | Final report generation |
+| `cqa-tools:cqa-vale-check` | P1 |
+| `cqa-tools:cqa-modularization` | P2, P3, P4, P5, P6, P7 |
+| `cqa-tools:cqa-titles-descriptions` | P8, P9, P10, P11 |
+| `cqa-tools:cqa-procedures` | P12, Q12, Q13, Q14, Q15, Q16 |
+| `cqa-tools:cqa-editorial` | P13, P14, Q1, Q2, Q3, Q4, Q5, Q18, Q20 |
+| `cqa-tools:cqa-links` | P15, P16, P17, Q24, Q25 |
+| `cqa-tools:cqa-legal-branding` | P18, P19, Q17, Q23, O1, O2, O3, O4, O5 |
+| `cqa-tools:cqa-user-focus` | Q6, Q7, Q8, Q9, Q10, Q11 |
+| `cqa-tools:cqa-tables-images` | Q19, Q21, Q22 |
+| `cqa-tools:cqa-onboarding` | O6, O7, O8, O9, O10 |
+| `cqa-tools:cqa-report` | Final report generation |
 
 ## Assessment Order
 
 Recommended order (dependencies flow downward):
 
-1. `cqa-vale-check` — foundational; fixes here affect other checks
-2. `cqa-modularization` — structural compliance
-3. `cqa-titles-descriptions` — metadata quality
-4. `cqa-procedures` — procedure structure
-5. `cqa-editorial` — writing quality
-6. `cqa-links` — cross-references and URLs
-7. `cqa-legal-branding` — compliance
-8. `cqa-user-focus` — content quality
-9. `cqa-tables-images` — visual elements
-10. `cqa-onboarding` — publishing readiness
-11. `cqa-report` — final summary
+1. `cqa-tools:cqa-vale-check` — foundational; fixes here affect other checks
+2. `cqa-tools:cqa-modularization` — structural compliance
+3. `cqa-tools:cqa-titles-descriptions` — metadata quality
+4. `cqa-tools:cqa-procedures` — procedure structure
+5. `cqa-tools:cqa-editorial` — writing quality
+6. `cqa-tools:cqa-links` — cross-references and URLs
+7. `cqa-tools:cqa-legal-branding` — compliance
+8. `cqa-tools:cqa-user-focus` — content quality
+9. `cqa-tools:cqa-tables-images` — visual elements
+10. `cqa-tools:cqa-onboarding` — publishing readiness
+11. `cqa-tools:cqa-report` — final summary
 
 ## Automation Scripts
 
@@ -77,16 +77,16 @@ Reusable scripts in `skills/cqa-assess/scripts/` automate repetitive checks. Eac
 
 | Script | Skill | Parameters |
 |--------|-------|-----------|
-| `check-product-names.py` | `cqa-legal-branding` | P18, O1, O3 |
-| `check-conscious-language.py` | `cqa-legal-branding` | Q23, O4 |
-| `check-content-types.py` | `cqa-modularization` | P3, P4, P5 |
-| `check-tp-disclaimers.py` | `cqa-legal-branding` | P19, O5 |
-| `check-external-links.py` | `cqa-legal-branding` | Q17 |
-| `check-legal-notices.py` | `cqa-legal-branding` | O2 |
-| `check-scannability.py` | `cqa-editorial` | Q1 |
-| `check-simple-words.py` | `cqa-editorial` | Q3 |
-| `check-readability.py` | `cqa-editorial` | Q4 |
-| `check-fluff.py` | `cqa-editorial` | Q5 |
+| `check-product-names.py` | `cqa-tools:cqa-legal-branding` | P18, O1, O3 |
+| `check-conscious-language.py` | `cqa-tools:cqa-legal-branding` | Q23, O4 |
+| `check-content-types.py` | `cqa-tools:cqa-modularization` | P3, P4, P5 |
+| `check-tp-disclaimers.py` | `cqa-tools:cqa-legal-branding` | P19, O5 |
+| `check-external-links.py` | `cqa-tools:cqa-legal-branding` | Q17 |
+| `check-legal-notices.py` | `cqa-tools:cqa-legal-branding` | O2 |
+| `check-scannability.py` | `cqa-tools:cqa-editorial` | Q1 |
+| `check-simple-words.py` | `cqa-tools:cqa-editorial` | Q3 |
+| `check-readability.py` | `cqa-tools:cqa-editorial` | Q4 |
+| `check-fluff.py` | `cqa-tools:cqa-editorial` | Q5 |
 
 Run all at once:
 

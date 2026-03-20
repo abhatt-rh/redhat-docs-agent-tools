@@ -67,7 +67,7 @@ Or invoke individual skills:
 |-------|-------|------------|------------------|
 | 1 | `cqa-tools:cqa-vale-check` | P1 | Vale DITA linting — foundational, fixes here affect all other checks |
 | 2 | `cqa-tools:cqa-modularization` | P2-P7 | Assembly structure, module prefixes, content types, nesting rules |
-| 3 | `cqa-tools:cqa-titles-descriptions` | P8-P11, Q11 | Title quality, short descriptions, DITA abstracts, assembly intros |
+| 3 | `cqa-tools:cqa-titles-descriptions` | P8-P11 | Title quality, short descriptions, DITA abstracts |
 | 4 | `cqa-tools:cqa-procedures` | P12, Q12-Q16 | Prerequisites, step count, command examples, verification sections |
 | 5 | `cqa-tools:cqa-editorial` | P13-P14, Q1-Q5, Q18, Q20 | Scannability, readability, complex words, fluff, tone, style guide |
 | 6 | `cqa-tools:cqa-links` | P15-P17, Q24-Q25 | Broken xrefs, missing includes, dead URLs, content journey |

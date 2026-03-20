@@ -1,10 +1,10 @@
 ---
 name: cqa-titles-descriptions
-description: Use when assessing CQA parameters P8-P11 and Q11 (titles and short descriptions). Checks abstract quality, character limits, title conventions, and assembly intro targeting.
+description: Use when assessing CQA parameters P8-P11 (titles and short descriptions). Checks abstract quality, character limits, and title conventions.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 ---
 
-# CQA P8-P11, Q11: Titles and Short Descriptions
+# CQA P8-P11: Titles and Short Descriptions
 
 ## Parameters
 
@@ -14,7 +14,6 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 | P9 | Short descriptions: 50-300 chars, `[role="_abstract"]` present | Required |
 | P10 | Titles support short, long, and descriptive forms (DITA) | Important |
 | P11 | Titles are brief, complete, and descriptive | Required |
-| Q11 | Assembly intros target audience and persona | Important |
 
 ## Step 1: Identify the docs repo
 
@@ -207,46 +206,7 @@ An assembly is task-based if it contains procedure modules.
 | **2** | Multiple titles with wrong form, length violations, or quality issues |
 | **1** | Titles not checked or widespread violations |
 
-## Step 6: Q11 — Assembly introduction quality
-
-### Rule
-
-Assembly introductions must consider the target audience and apply to a specific persona or skill level. The introduction is the user story reworded.
-
-Reference: https://redhat-documentation.github.io/modular-docs/#assembly-definition
-
-### Check procedure
-
-For each assembly file:
-
-1. **User story framing**: The introduction must explain what the user will accomplish (the goal), not just describe what the assembly contains.
-2. **Audience identification**: The introduction should identify or imply the target persona. Admin Guide assemblies target cluster administrators and platform engineers. User Guide assemblies target developers.
-3. **WHAT + WHY**: The introduction must state both WHAT the user will do and WHY it matters. Introductions stating only WHAT are adequate but not ideal.
-4. **Concise scope**: 1-3 sentences providing context. Avoid embedding concept-level detail, reference material, or procedural content in the introduction.
-5. **Title alignment**: Assembly title form must match content — gerund for task-based, noun phrase for non-procedural.
-6. **No self-referential language**: No "This section describes...", "This chapter contains...", "The following modules cover..."
-7. **No rendered text between includes**: DITA maps do not accept rendered text between includes. All text must appear before the first `include::`.
-8. **Attribute usage**: Use `{prod-short}`, `{orch-name}` instead of hardcoded product names.
-
-### Quality levels
-
-| Level | Criteria | Example |
-|-------|----------|---------|
-| Excellent | Multi-sentence, WHAT + WHY + context, implies persona | "Configure OAuth to allow {prod-short} users to interact with remote Git repositories without re-entering credentials." |
-| Good | WHAT + WHY or WHAT + scope | "Configure networking for {prod-short} to secure communications, enable custom routing, and support restricted environments." |
-| Adequate | WHAT only, single sentence, no WHY | "Configure storage for {prod-short} workspaces, including storage classes, strategies, and sizes." |
-| Poor | Title repetition with "You can" prefix, or missing | — |
-
-### Scoring
-
-| Score | Criteria |
-|-------|----------|
-| **4** | All assemblies have substantive introductions. All state WHAT. ≥75% are good-to-excellent (WHAT + WHY). No self-referential language. No rendered text between includes. Titles match content form. |
-| **3** | All assemblies have introductions. Most state WHAT. Some lack WHY. 1-2 overly long intros. Minor title issues. |
-| **2** | Multiple assemblies lack introductions or have title-repetition intros. Rendered text between includes. |
-| **1** | Missing introductions. No audience awareness. Rendered text between includes. |
-
-## Step 7: Verify
+## Step 6: Verify
 
 After fixing any violations, run Vale to ensure no new warnings were introduced:
 

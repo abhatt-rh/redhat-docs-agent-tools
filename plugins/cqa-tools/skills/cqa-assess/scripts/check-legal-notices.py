@@ -68,11 +68,8 @@ def check_docinfo(title_dir, title_name):
     if year_match:
         return True, True, int(year_match.group(1)), docinfo_path
 
-    year_match = re.search(r'(?:Copyright|©|\(c\))\s*(\d{4})', content, re.IGNORECASE)
-    if year_match:
-        return True, True, int(year_match.group(1)), docinfo_path
-
     # Year range with copyright context: Copyright 2020-2024 / © 2020–2024
+    # Check ranges BEFORE single-year to avoid matching only the first year.
     year_match = re.search(
         r'(?:Copyright|©|\(c\)|All rights reserved)[^\n]{0,80}?(\d{4})\s*[-\u2013]\s*(\d{4})',
         content,
@@ -80,6 +77,10 @@ def check_docinfo(title_dir, title_name):
     )
     if year_match:
         return True, True, int(year_match.group(2)), docinfo_path
+
+    year_match = re.search(r'(?:Copyright|©|\(c\))\s*(\d{4})', content, re.IGNORECASE)
+    if year_match:
+        return True, True, int(year_match.group(1)), docinfo_path
 
     return True, False, None, docinfo_path
 

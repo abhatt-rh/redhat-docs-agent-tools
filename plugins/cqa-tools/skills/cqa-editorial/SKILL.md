@@ -234,7 +234,7 @@ Scans prose in `topics/` and `assemblies/` for all 10 complex word patterns. Exc
 
 The readability score is computed using the Flesch-Kincaid formula:
 
-```
+```text
 FK Grade = 0.39 * (words/sentences) + 11.8 * (syllables/words) - 15.59
 ```
 

@@ -451,7 +451,7 @@ def main():
     # Verbose: show all files
     if args.verbose:
         print("ALL FILE GRADES:")
-        for rel_path, grade, sents, words in sorted(
+        for rel_path, grade, sents, _words in sorted(
             file_grades, key=lambda x: -x[1]
         ):
             marker = ""
