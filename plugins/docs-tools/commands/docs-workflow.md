@@ -209,23 +209,6 @@ echo ""
 
 **If JIRA_AUTH_TOKEN is missing, STOP IMMEDIATELY.** Do not proceed without it. Display the error and available env files.
 
-#### JIRA Environment File Fallback
-
-If JIRA access fails later during requirements analysis, try alternate env files:
-
-1. Search for `~/.env*` files containing "jira"
-2. Source each alternate file and retry
-3. If all fail, reset to `~/.env` and retry
-4. If still failing, STOP and report the error
-
-```bash
-# List alternate JIRA env files
-ls -la ~/.env*jira* ~/.env*.jira* 2>/dev/null
-
-# Source an alternate env file
-set -a && source ~/.env.jira_internal && set +a
-```
-
 ### Step 2b: Create Work Branch (default mode only)
 
 **Skip this step entirely when `--draft` is set or when the action is not `start`.** Only create a branch on `start` in default (update-in-place) mode.
@@ -299,7 +282,10 @@ mkdir -p "${CLAUDE_DOCS_DIR}/workflow" "${CLAUDE_DOCS_DIR}/requirements" "${CLAU
 
 #### For `start` action
 
-If a state file already exists, treat it as a resume. Otherwise, create a new state file:
+There are two cases:
+
+1. **State file exists**: The workflow is in progress. Treat it as a resume — load the existing state file and skip to Step 4.
+2. **No state file exists**: Create a new state file using the template below.
 
 ```bash
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
