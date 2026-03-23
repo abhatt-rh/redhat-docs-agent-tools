@@ -88,7 +88,7 @@ This parameter requires human confirmation and cannot be fully assessed through 
 
 3. **CI/CD pipeline validation**: Verify the pipeline runs automated checks that catch technical issues:
    - Vale DITA linting
-   - Cross-reference validation (the docs repo's own `scripts/validate-refs.py`)
+   - Cross-reference validation (`validate-refs.py`)
    - Build validation (ccutil compile)
 
 4. **SME merge requests**: Check for recent MRs from SMEs that update technical content:

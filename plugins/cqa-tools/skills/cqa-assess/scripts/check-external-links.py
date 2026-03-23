@@ -42,20 +42,16 @@ RH_DOMAINS = {
     "connect.redhat.com",
     "sso.redhat.com",
     "registry.redhat.io",
-    "quay.io",  # Red Hat owned
-    "red.ht",  # Red Hat URL shortener
-    "docs.openshift.com",  # OpenShift documentation (Red Hat product)
-    "workspaces.openshift.com",  # Red Hat Dev Spaces hosted service
+    "quay.io",
+    "red.ht",
+    "docs.openshift.com",
+    "workspaces.openshift.com",
 }
 
-# Upstream / community domains (related to the product)
+# Generic upstream / community domains (not product-specific)
 UPSTREAM_DOMAINS = {
     "github.com",
-    "eclipse.org",
-    "www.eclipse.org",
     "kubernetes.io",
-    "devfile.io",
-    "che.eclipse.org",
 }
 
 # Well-known authoritative domains

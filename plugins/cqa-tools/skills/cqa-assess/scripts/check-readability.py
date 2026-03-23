@@ -41,43 +41,80 @@ MIN_GRADE = 12         # Minimum requirement (11th-12th grade)
 # Minimum sentences in a file to include in per-file analysis
 MIN_SENTENCES = 10
 
-# Known AsciiDoc attributes and their resolved text.
-ATTR_RESOLVED = {
-    "prod": "Red Hat OpenShift Dev Spaces",
-    "prod-short": "OpenShift Dev Spaces",
-    "prod-ver": "three",
-    "prod-cli": "dsc",
-    "orch-name": "OpenShift",
-    "orch-cli": "oc",
-    "orch-namespace": "project",
-    "ocp": "OpenShift Container Platform",
-    "kubernetes": "Kubernetes",
-    "prod-namespace": "openshift-devspaces",
-    "devworkspace": "Dev Workspace",
-    "image-puller-name": "Kubernetes Image Puller",
-    "docker-cli": "podman",
-    "prod-id-short": "devspaces",
-    "prod2": "Dev Spaces",
-}
+# Regex for matching AsciiDoc attribute references like {prod-short}
+ATTR_REF_PATTERN = re.compile(r'\{([\w-]+)\}')
 
-# Word counts for attributes (used by scannability-compatible counting)
-ATTR_WORD_COUNTS = {
-    "prod": 5,
-    "prod-short": 3,
-    "prod-ver": 1,
-    "prod-cli": 1,
-    "orch-name": 1,
-    "orch-cli": 1,
-    "orch-namespace": 1,
-    "ocp": 3,
-    "kubernetes": 1,
-    "prod-namespace": 1,
-    "devworkspace": 2,
-    "image-puller-name": 3,
-    "docker-cli": 1,
-    "prod-id-short": 1,
-    "prod2": 2,
-}
+# AsciiDoc attribute resolved text and word counts, populated at runtime
+# from attributes.adoc. Fallback: unresolved attributes use 'word' (1 syllable).
+ATTR_RESOLVED = {}
+ATTR_WORD_COUNTS = {}
+
+
+def parse_attributes(docs_dir):
+    """Parse attributes.adoc files from the common/ directory.
+
+    Discovers any file ending with 'attributes.adoc' under DOCS_DIR/common/.
+    Returns a dict mapping attribute names to raw (unresolved) values.
+    """
+    attr_values = {}
+    common_dir = os.path.join(docs_dir, "common")
+    if not os.path.isdir(common_dir):
+        return attr_values
+    for fname in sorted(os.listdir(common_dir)):
+        if fname.endswith("attributes.adoc"):
+            fpath = os.path.join(common_dir, fname)
+            try:
+                with open(fpath, "r", encoding="utf-8") as f:
+                    for line in f:
+                        m = re.match(r'^:([a-zA-Z][\w-]*):\s+(.+)$',
+                                     line.strip())
+                        if m:
+                            attr_values[m.group(1)] = m.group(2).strip()
+            except (OSError, UnicodeDecodeError):
+                continue
+    return attr_values
+
+
+def resolve_value(raw, all_attrs, _seen=None):
+    """Resolve nested attribute references and {nbsp}.
+
+    Handles patterns like:
+      :prod: Red Hat {prod-short}
+      :RHEL: {RH} Enterprise{nbsp}Linux
+    Uses cycle detection to avoid infinite recursion.
+    """
+    if _seen is None:
+        _seen = set()
+
+    def replacer(m):
+        ref = m.group(1)
+        if ref == "nbsp":
+            return " "
+        if ref in _seen or ref not in all_attrs:
+            return m.group(0)  # leave unresolved
+        return resolve_value(all_attrs[ref], all_attrs, _seen | {ref})
+
+    return ATTR_REF_PATTERN.sub(replacer, raw)
+
+
+def build_attr_dicts(docs_dir):
+    """Build ATTR_RESOLVED and ATTR_WORD_COUNTS from attributes.adoc.
+
+    Returns (attr_resolved, attr_word_counts) dicts.
+    """
+    raw_attrs = parse_attributes(docs_dir)
+    attr_resolved = {}
+    attr_word_counts = {}
+    for attr_name, raw in raw_attrs.items():
+        resolved = resolve_value(raw, raw_attrs)
+        if '{' in resolved:
+            continue  # still has unresolved refs — skip
+        attr_resolved[attr_name] = resolved
+        words = resolved.split()
+        count = len([w for w in words if w])
+        if count > 0:
+            attr_word_counts[attr_name] = count
+    return attr_resolved, attr_word_counts
 
 
 def collect_adoc_files(docs_dir, scan_dirs=None):
@@ -243,7 +280,7 @@ def count_words(text):
         attr_name = m.group(1)
         wc = ATTR_WORD_COUNTS.get(attr_name, 1)
         return ' '.join(['W'] * wc)
-    text = re.sub(r'\{([\w-]+)\}', attr_replacer, text)
+    text = ATTR_REF_PATTERN.sub(attr_replacer, text)
 
     text = re.sub(r'^\s*[\*\.]{1,3}\s+', '', text)
     text = re.sub(r'^(NOTE|TIP|IMPORTANT|WARNING|CAUTION):\s*', '', text)
@@ -291,7 +328,7 @@ def resolve_for_syllables(text):
     def attr_rep(m):
         name = m.group(1)
         return ATTR_RESOLVED.get(name, 'word')
-    text = re.sub(r'\{([\w-]+)\}', attr_rep, text)
+    text = ATTR_REF_PATTERN.sub(attr_rep, text)
     # Remove bold/italic markers
     text = re.sub(r'\*\*([^*]+)\*\*', r'\1', text)
     text = re.sub(r'__([^_]+)__', r'\1', text)
@@ -410,6 +447,14 @@ def main():
     if not os.path.isdir(docs_dir):
         print(f"Error: {docs_dir} is not a directory", file=sys.stderr)
         sys.exit(2)
+
+    # Populate ATTR_RESOLVED and ATTR_WORD_COUNTS from attributes.adoc
+    global ATTR_RESOLVED, ATTR_WORD_COUNTS
+    ATTR_RESOLVED, ATTR_WORD_COUNTS = build_attr_dicts(docs_dir)
+    if not ATTR_RESOLVED:
+        print("Warning: No attributes parsed from attributes.adoc — "
+              "attribute resolution will use fallback values",
+              file=sys.stderr)
 
     print("Readability Check (Flesch-Kincaid Grade Level)")
     print("=" * 60)

@@ -32,16 +32,15 @@ Every cross-reference, include directive, and image reference must resolve to an
 
 ### Check procedure
 
-Run the docs repo's own reference validation script (this is not a plugin script — it lives in the docs repo at `$DOCS_REPO/scripts/validate-refs.py`):
+Run the reference validation script:
 ```bash
-cd "$DOCS_REPO"
-python3 scripts/validate-refs.py
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/cqa-assess/scripts/validate-refs.py "$DOCS_REPO"
 ```
 
 This checks 4 things:
-1. **Broken xrefs** — every `xref:ID_{context}[]` must have a matching `[id="ID_{context}"]` declared in any `.adoc` file
-2. **Missing includes** — every `include::path[]` must resolve to an existing file on disk (paths resolve relative to the file via symlinks in `titles/*/`)
-3. **Missing images** — every `image::path[]` must resolve to a file under `images/` (`:imagesdir:` is set in `common/attributes.adoc`)
+1. **Broken xrefs** — every `xref:TARGET[]` must match a declared `[id="..."]` (supports both `_{context}` and plain IDs, and file-based xrefs like `xref:file.adoc#anchor[]`)
+2. **Missing includes** — every `include::path[]` must resolve to an existing file on disk
+3. **Missing images** — every `image::path[]` must resolve to a file under the `:imagesdir:` directory (auto-discovered from `common/attributes.adoc`, defaults to `images`)
 4. **Duplicate IDs** — no two files should declare the same `[id="..."]` anchor
 
 ### Common causes of broken references
@@ -127,7 +126,7 @@ Content should be interlinked so that users can navigate between related topics.
 
 #### Anchor context verification procedure
 
-Cross-guide anchors are **not validated** by `validate-refs.py` (which only checks within-guide `xref:` targets). These must be checked manually:
+Cross-guide anchors are **not validated** by `validate-refs.py` (cross-guide `link:` macros are external URLs, not `xref:` targets). These must be checked manually:
 
 1. **Find `{context}` in cross-guide anchors** — these are always wrong:
    ```bash
@@ -207,8 +206,7 @@ grep -rn 'container-platform/latest/' topics/ modules/ assemblies/ common/ --inc
 After fixing any violations, re-run the reference validation:
 
 ```bash
-cd "$DOCS_REPO"
-python3 scripts/validate-refs.py
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/cqa-assess/scripts/validate-refs.py "$DOCS_REPO"
 ```
 
 Then run Vale to ensure no new warnings were introduced:

@@ -25,7 +25,7 @@ Some repos use `modules/` instead of `topics/` for content files. All `topics/` 
 
 ### Q6: Persona targeting
 
-Content must be written for and placed in the guide that matches the target persona. The Dev Spaces documentation targets these Red Hat baseline personas:
+Content must be written for and placed in the guide that matches the target persona. Red Hat documentation targets these baseline personas:
 
 **Administration Guide personas:**
 - **Cloud Administrator** — Cloud administration, container management, infrastructure
@@ -40,7 +40,7 @@ Content must be written for and placed in the guide that matches the target pers
 #### What to check
 
 1. **Guide-level separation**: Admin Guide content targets cluster administrators and platform operators. User Guide content targets developers and end users.
-2. **No misplaced content between guides**: Procedures requiring only devfile or repository-level changes (no admin privileges) belong in the User Guide. Procedures requiring cluster-admin access, CheCluster CR modifications, or namespace-wide configuration belong in the Admin Guide.
+2. **No misplaced content between guides**: Procedures requiring only project-level or repository-level changes (no admin privileges) belong in the User Guide. Procedures requiring cluster-admin access, product CR modifications, or namespace-wide configuration belong in the Admin Guide.
 3. **Knowledge assumptions match persona**: Admin Guide assumes OpenShift, Kubernetes, RBAC, and infrastructure knowledge. User Guide assumes Git, IDE, and development workflow knowledge.
 4. **Cross-guide references are appropriate**: User Guide may reference admin-configured features ("Your administrator sets up OAuth..."). Admin Guide may reference developer workflows to explain the purpose of a configuration. These cross-references are expected and not misplacement.
 5. **Content voice and perspective**: Admin content uses imperative voice for cluster operations. User content addresses developers with workspace and development-oriented language.
@@ -48,9 +48,9 @@ Content must be written for and placed in the guide that matches the target pers
 #### Red flags for misplacement
 
 - **Developer content in Admin Guide**: Procedures that modify devfiles, `.code-workspace` files, or repository-level configuration without requiring admin access
-- **Admin content in User Guide**: Procedures that require `cluster-admin` RBAC, CheCluster CR edits, or operator-level configuration
+- **Admin content in User Guide**: Procedures that require `cluster-admin` RBAC, product Custom Resource edits, or operator-level configuration
 - **Mixed persona assemblies**: Assemblies where the majority of included topics target a different persona than the guide
-- **Admin-only tips/notes in user procedures**: Detailed CheCluster field paths or admin commands embedded in user-facing content (should be cross-references instead)
+- **Admin-only tips/notes in user procedures**: Detailed product CR field paths or admin commands embedded in user-facing content (should be cross-references instead)
 
 #### Scoring rubric
 
@@ -77,20 +77,20 @@ Documentation must address the pain points users are likely to encounter when ac
 5. **Known issues and limitations** are documented with workarounds where available
 6. **`.Troubleshooting` block titles** in procedures provide inline troubleshooting for steps that commonly fail
 
-#### Common Dev Spaces pain points to verify
+#### Common pain point categories to verify
 
-| Pain point | Expected coverage |
+| Pain point category | Expected coverage |
 |-----------|-------------------|
-| Workspace fails to start | Error-to-solution mapping, log inspection guidance |
-| Slow workspace performance | Image caching, storage type, resource allocation |
-| Git authentication failures | OAuth setup, token refresh, SSH key configuration |
-| TLS/certificate errors | Certificate import procedures with verification |
-| Storage/persistence issues | Strategy configuration, PV warnings, size limits |
-| IDE extension problems | Installation, trust configuration, log debugging |
-| Network connectivity | Proxy, firewall, WebSocket, DNS troubleshooting |
+| Installation/setup failures | Error-to-solution mapping, prerequisite verification |
+| Authentication/authorization | OAuth, token, certificate, and credential troubleshooting |
+| Performance issues | Resource allocation, caching, storage optimization |
+| Upgrade/migration failures | Upgrade procedures, rollback, breaking changes |
+| Network/connectivity | Proxy, firewall, DNS, TLS troubleshooting |
+| Configuration errors | Validation guidance, common misconfiguration patterns |
+| Storage/persistence | Strategy configuration, capacity warnings, size limits |
 | Resource limits/quotas | Scaling guidance, per-user limits, sizing |
-| Upgrade failures | Upgrade procedures, rollback, breaking changes |
-| Custom devfile issues | Validation errors, version compatibility |
+| Integration issues | Third-party tool compatibility, API errors |
+| Security/compliance | Certificate management, RBAC, policy enforcement |
 
 #### Scoring rubric
 
@@ -118,7 +118,7 @@ Additional resources sections must include links to appropriate and useful conte
 4. **Link text**: All links must have descriptive link text. Empty link text for `link:` macros (`link:https://...[  ]`) is not acceptable. `xref:` with empty `[]` is standard (auto-generates from title).
 5. **Domain quality**: Links should point to authoritative sources:
    - **Red Hat sites**: `docs.redhat.com`, `access.redhat.com`, `docs.openshift.com` — primary
-   - **Upstream/community**: `github.com/eclipse-che`, `github.com/devfile`, `github.com/che-incubator` — expected for open-source references
+   - **Upstream/community**: GitHub repositories for the product's upstream project — expected for open-source references
    - **Authoritative third-party**: `kubernetes.io`, `docs.github.com`, `jetbrains.com`, `code.visualstudio.com` — acceptable for vendor-specific documentation
 6. **Link relevance**: Links must be relevant to the topic. Avoid generic "learn more" links that don't add value. Each link should help the user accomplish a next step, understand a related concept, or find deeper technical detail.
 7. **No broken links**: URLs must point to valid, accessible resources. Version-parameterized URLs (using `{ocp4-ver}`, `{prod-ver}`) must resolve correctly.

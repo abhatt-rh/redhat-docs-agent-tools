@@ -41,25 +41,75 @@ MAX_PARAGRAPH_SENTENCES = 4
 # Minimum sentences in a file to flag for high average
 MIN_SENTENCES_FOR_AVG = 3
 
-# Known AsciiDoc attributes and their resolved word counts.
-# {prod-short} = "OpenShift Dev Spaces" (3 words), etc.
-ATTR_WORD_COUNTS = {
-    "prod": 5,           # Red Hat OpenShift Dev Spaces
-    "prod-short": 3,     # OpenShift Dev Spaces
-    "prod-ver": 1,       # 3.27
-    "prod-cli": 1,       # dsc
-    "orch-name": 1,      # OpenShift
-    "orch-cli": 1,       # oc
-    "orch-namespace": 1,  # project
-    "ocp": 3,            # OpenShift Container Platform
-    "kubernetes": 1,     # Kubernetes
-    "prod-namespace": 1,  # openshift-devspaces
-    "devworkspace": 2,   # Dev Workspace
-    "image-puller-name": 3,  # Kubernetes Image Puller
-    "docker-cli": 1,     # podman
-    "prod-id-short": 1,  # devspaces
-    "prod2": 2,          # Dev Spaces
-}
+# AsciiDoc attribute word counts, populated at runtime from attributes.adoc.
+# Fallback: attributes not in this dict are counted as 1 word.
+ATTR_WORD_COUNTS = {}
+
+
+def parse_attributes(docs_dir):
+    """Parse attributes.adoc files from the common/ directory.
+
+    Discovers any file ending with 'attributes.adoc' under DOCS_DIR/common/.
+    Returns a dict mapping attribute names to raw (unresolved) values.
+    """
+    attr_values = {}
+    common_dir = os.path.join(docs_dir, "common")
+    if not os.path.isdir(common_dir):
+        return attr_values
+    for fname in sorted(os.listdir(common_dir)):
+        if fname.endswith("attributes.adoc"):
+            fpath = os.path.join(common_dir, fname)
+            try:
+                with open(fpath, "r", encoding="utf-8") as f:
+                    for line in f:
+                        m = re.match(r'^:([a-zA-Z][\w-]*):\s+(.+)$', line.strip())
+                        if m:
+                            attr_values[m.group(1)] = m.group(2).strip()
+            except (OSError, UnicodeDecodeError):
+                continue
+    return attr_values
+
+
+def resolve_value(raw, all_attrs, _seen=None):
+    """Resolve nested attribute references and {nbsp}.
+
+    Handles patterns like:
+      :prod: Red Hat {prod-short}
+      :RHEL: {RH} Enterprise{nbsp}Linux
+    Uses cycle detection to avoid infinite recursion.
+    """
+    if _seen is None:
+        _seen = set()
+
+    def replacer(m):
+        ref = m.group(1)
+        if ref == "nbsp":
+            return " "
+        if ref in _seen or ref not in all_attrs:
+            return m.group(0)  # leave unresolved
+        return resolve_value(all_attrs[ref], all_attrs, _seen | {ref})
+
+    return re.sub(r'\{([\w-]+)\}', replacer, raw)
+
+
+def parse_attributes_for_word_counts(docs_dir):
+    """Build ATTR_WORD_COUNTS from attributes.adoc.
+
+    Parses all attribute files, resolves nested references, and counts
+    words in each resolved value. Returns a dict mapping attribute names
+    to word counts.
+    """
+    raw_attrs = parse_attributes(docs_dir)
+    attr_word_counts = {}
+    for attr_name, raw in raw_attrs.items():
+        resolved = resolve_value(raw, raw_attrs)
+        if '{' in resolved:
+            continue  # still has unresolved refs — skip, fallback to 1
+        words = resolved.split()
+        count = len([w for w in words if w])
+        if count > 0:
+            attr_word_counts[attr_name] = count
+    return attr_word_counts
 
 
 def collect_adoc_files(docs_dir, scan_dirs=None):
@@ -403,6 +453,14 @@ def main():
     if not os.path.isdir(docs_dir):
         print(f"Error: {docs_dir} is not a directory", file=sys.stderr)
         sys.exit(2)
+
+    # Populate ATTR_WORD_COUNTS from attributes.adoc at runtime
+    global ATTR_WORD_COUNTS
+    ATTR_WORD_COUNTS = parse_attributes_for_word_counts(docs_dir)
+    if not ATTR_WORD_COUNTS:
+        print("Warning: No attributes parsed from attributes.adoc — "
+              "attribute word counts will default to 1",
+              file=sys.stderr)
 
     print("Content Scannability Check")
     print("=" * 60)

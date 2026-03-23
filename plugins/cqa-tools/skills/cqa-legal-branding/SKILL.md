@@ -54,27 +54,19 @@ Automatically skips code blocks, comments, attribute definitions, and known exce
 
 ### Check procedure
 
-Search active content (exclude `legacy-content-do-not-use/`, `common/attributes.adoc` definition lines, code blocks, and YAML) for hardcoded names:
-
-| Hardcoded string | Replace with | Search command |
-|-----------------|-------------|----------------|
-| `Red Hat OpenShift Dev Spaces` | `{prod}` | `grep -r "Red Hat OpenShift Dev Spaces" assemblies/ topics/ snippets/` |
-| `OpenShift Dev Spaces` (in prose, not UI labels) | `{prod-short}` | `grep -r "OpenShift Dev Spaces" assemblies/ topics/ snippets/` |
-| `Dev Spaces` (in prose, not UI labels) | `{prod-short}` or `{prod2}` | `grep -r "Dev Spaces" assemblies/ topics/ snippets/` |
-| `OpenShift Container Platform` | `{ocp}` | `grep -r "OpenShift Container Platform" assemblies/ topics/ snippets/` |
-| `Openshift` (lowercase S) | `OpenShift` | `grep -r "Openshift" assemblies/ topics/ snippets/` |
+The script auto-discovers product names from the repo's `common/attributes.adoc` file. It parses all attribute definitions, resolves nested references, identifies product name attributes, and searches active content for hardcoded uses that should use the corresponding attribute. It also auto-generates case-sensitivity checks for CamelCase product names (e.g., "OpenShift" → flags "Openshift").
 
 ### Exceptions — do NOT replace
 
-These are legitimate hardcoded uses:
+These are legitimate hardcoded uses (the script auto-detects and marks these):
 
 | Context | Example | Why |
 |---------|---------|-----|
-| **UI button/menu labels** | `Connect to Dev Spaces` | Literal UI text the user must click |
-| **Plugin/extension names** | `Gateway provider for OpenShift Dev Spaces` | Official third-party plugin name |
-| **Link text for external URLs** | `link:https://plugins.jetbrains.com/...[OpenShift Dev Spaces plugin]` | Display text matching the linked resource |
-| **Attribute definitions** | `:prod-short: OpenShift Dev Spaces` in `common/attributes.adoc` | Where attributes are defined |
-| **Code blocks and YAML** | `image: devspaces/server` | Technical identifiers, not prose |
+| **UI button/menu labels** | Literal button or menu text | UI text the user must click |
+| **Plugin/extension names** | Official third-party plugin names | External names, not documentation prose |
+| **Link text for external URLs** | `link:https://...[Product Name plugin]` | Display text matching the linked resource |
+| **Attribute definitions** | `:prod-short: Product Name` in `common/attributes.adoc` | Where attributes are defined |
+| **Code blocks and YAML** | Technical identifiers | Not prose |
 
 ### Additional checks
 
@@ -320,9 +312,10 @@ After fixing any violations, verify:
 
 ```bash
 cd "$DOCS_REPO"
+# Adjust directory names to match your repo structure (topics/ or modules/)
 vale assemblies/ topics/ titles/administration_guide/master.adoc titles/user_guide/master.adoc
-# validate-refs.py is the docs repo's own script, not a plugin script
-python3 scripts/validate-refs.py
+
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/cqa-assess/scripts/validate-refs.py "$DOCS_REPO"
 
 # Run all legal/branding automation scripts
 python3 ${CLAUDE_PLUGIN_ROOT}/skills/cqa-assess/scripts/check-product-names.py .
