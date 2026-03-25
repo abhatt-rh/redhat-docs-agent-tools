@@ -325,7 +325,7 @@ P5 checks that every non-negotiable modular element is present AND meets quality
 
 ### Check 1: Structural elements and abstract formatting
 
-Reference: Ingrid Towey, "Rewrite for Impact: DITA short descriptions" (CCS presentation)
+Reference: "Rewrite for Impact: DITA short descriptions" (CCS presentation)
 
 Every non-snippet module must have:
 
@@ -343,7 +343,7 @@ If P4 Check 1 passed, the above 4 elements are already verified. Additionally, v
 | **Blank line between title and abstract** | There must be at least one blank line between the `= Title` line and `[role="_abstract"]`. Other content (anchors, passthrough comments) may appear between them, but a blank line must exist. |
 | **No blank line between annotation and paragraph** | `[role="_abstract"]` must be followed **immediately** by the abstract paragraph on the next line — no blank lines between them. A blank line after the annotation disconnects the paragraph from the abstract role, making the abstract empty in DITA. |
 | **Single paragraph** | The abstract must be exactly one contiguous paragraph. No blank lines within it, no code blocks, no lists, no admonition blocks. A blank line must terminate the abstract before any subsequent body content. |
-| **Character count 50-300** | The abstract paragraph must be between 50 and 300 characters. Count raw AsciiDoc text (attributes like `{prod-short}` count as their literal text, e.g., 12 characters). "300 characters is between 42 and 75 words" (Ingrid Towey). |
+| **Character count 50-300** | The abstract paragraph must be between 50 and 300 characters. Count raw AsciiDoc text (attributes like `{prod-short}` count as their literal text, e.g., 12 characters). "300 characters is between 42 and 75 words" (CCS presentation). |
 
 **Common structural violations:**
 
