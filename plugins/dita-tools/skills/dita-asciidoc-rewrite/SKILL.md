@@ -23,6 +23,4 @@ For the complete workflow including Vale linting, git branches, commits, and PR/
 
 ## Fixing Instructions
 
-Read and follow the fixing instructions in:
-
-@plugins/dita-tools/reference/dita-rewrite-fixing-instructions.md
+Read and follow the fixing instructions in [dita-rewrite-fixing-instructions.md](../../reference/dita-rewrite-fixing-instructions.md).

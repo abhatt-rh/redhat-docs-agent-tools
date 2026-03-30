@@ -361,7 +361,7 @@ jtbd-tools/
 └── README.md
 ```
 
-Shared files are maintained once in `reference/` and referenced from SKILL.md files using `@plugins/jtbd-tools/reference/<file>.md`.
+Shared files are maintained once in `reference/` and referenced from SKILL.md files using relative markdown links (e.g., `[methodology.md](../../reference/methodology.md)`).
 
 ## JTBD framework
 

@@ -232,7 +232,7 @@ Red Hat modular docs follow naming conventions for module files:
 
 For small combined files:
 1. Read the entire combined AsciiDoc
-2. Apply JTBD extraction methodology (from `@plugins/jtbd-tools/reference/methodology.md`)
+2. Apply JTBD extraction methodology (from [`methodology.md`](../../reference/methodology.md))
 3. Generate all records in one pass
 4. Write to JSONL file
 
@@ -247,8 +247,8 @@ For large combined files:
    ```
    The chunk prompt must include:
    - The chunk content
-   - The full methodology from `@plugins/jtbd-tools/reference/methodology.md`
-   - The schema from `@plugins/jtbd-tools/reference/schema.md`
+   - The full methodology from [`methodology.md`](../../reference/methodology.md)
+   - The schema from [`schema.md`](../../reference/schema.md)
    - The book name and doc identifier
    - Instructions to output ONLY valid JSONL records
    - Context about which part of the book this chunk covers
@@ -280,7 +280,7 @@ Example enriched record:
 
 ### Step 8: Validate Against Source
 
-Unless `--skip-validation` is passed, run the grounding validation described in `@plugins/jtbd-tools/reference/methodology.md` Step 9:
+Unless `--skip-validation` is passed, run the grounding validation described in [`methodology.md`](../../reference/methodology.md) Step 9:
 
 1. For each JTBD record, parse the `evidence` field to extract the source file, section heading, and line range
 2. Re-read the cited lines from the combined file (±20 lines context window)
@@ -338,10 +338,10 @@ You are analyzing a section of the book "<Book Name>" from the <distro> document
 Extract Jobs-To-Be-Done (JTBD) records from the following AsciiDoc content.
 
 ## Methodology
-<contents of @plugins/jtbd-tools/reference/methodology.md>
+<contents of [`methodology.md`](../../reference/methodology.md)>
 
 ## Record Schema
-<contents of @plugins/jtbd-tools/reference/schema.md>
+<contents of [`schema.md`](../../reference/schema.md)>
 
 ## Document Info
 - doc: <book>-combined.adoc
@@ -408,5 +408,5 @@ cat analysis/openshift-gitops/installing_gitops/installing_gitops-include-graph.
 ## Methodology Reference
 
 The complete JTBD extraction methodology is shared with `/jtbd-analyze` and `/jtbd-analyze-adoc`:
-- See `@plugins/jtbd-tools/reference/methodology.md` for extraction rules
-- See `@plugins/jtbd-tools/reference/schema.md` for record schema
+- See [`methodology.md`](../../reference/methodology.md) for extraction rules
+- See [`schema.md`](../../reference/schema.md) for record schema

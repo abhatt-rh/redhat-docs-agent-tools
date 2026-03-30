@@ -10,7 +10,7 @@ Review AsciiDoc source files for Red Hat modular documentation compliance: modul
 
 **Applies to**: `.adoc` files only
 
-For detailed module type guidance, templates, and structural rules, read @plugins/docs-tools/reference/asciidoc-reference.md. It contains full descriptions of each module type, required/optional parts, templates, and examples.
+For detailed module type guidance, templates, and structural rules, read [asciidoc-reference.md](../../reference/asciidoc-reference.md). It contains full descriptions of each module type, required/optional parts, templates, and examples.
 
 ## Concept checklist
 
@@ -94,4 +94,4 @@ For detailed module type guidance, templates, and structural rules, read @plugin
 ## References
 
 - Red Hat Modular Documentation Guide: https://redhat-documentation.github.io/modular-docs/
-- Templates and detailed reference: @plugins/docs-tools/reference/asciidoc-reference.md
+- Templates and detailed reference: [asciidoc-reference.md](../../reference/asciidoc-reference.md)
