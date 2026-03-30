@@ -27,7 +27,7 @@ fi
 3. Install hooks (safe to re-run):
 
 ```bash
-bash scripts/setup-hooks.sh
+bash ${CLAUDE_PLUGIN_ROOT}/skills/docs-orchestrator/scripts/setup-hooks.sh
 ```
 
 ## Parse arguments
