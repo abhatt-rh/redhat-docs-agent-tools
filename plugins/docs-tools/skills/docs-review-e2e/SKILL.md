@@ -154,18 +154,17 @@ Workflow:
    python3 scripts/code_scanner.py extract $(cat /tmp/docs-review-doc-files.txt) --output /tmp/tech-review-refs.json
    ```
 
-3. **Search repos** for evidence:
-   ```bash
-   python3 scripts/code_scanner.py search /tmp/tech-review-refs.json /tmp/tech-review/repo1 [repo2...] --output /tmp/tech-review-search.json
-   ```
+3. **Search repos directly** — Read `/tmp/tech-review-refs.json` and search the cloned repos using native tools (Grep, Glob, Bash, Read). For each reference category:
 
-4. **Synthesize findings**: Read the search JSON and produce actionable issues. For each mismatch:
-   - Read the actual source file to confirm and extract the specific value (e.g., "docs say pool_size=10, code says pool_size=5")
-   - Check for undocumented features: flags, config keys, or subcommands in code but absent from docs
-   - Check for import path or module name mismatches between docs and code
-   - Report concrete discrepancies with exact values, not just "not found in code"
+   - **Commands**: Skip external system commands (sudo, grep, git, oc, kubectl, docker, podman, curl, ssh, systemctl, ansible, make, etc.). For project-specific commands, use Grep to find the binary in the repo. Read the source to check flag names, default values, and subcommands match the docs.
+   - **Code blocks**: Use Grep to find the first meaningful line of each block in the repo. Read surrounding source to check values, function signatures, and import paths match.
+   - **APIs** (functions/classes/endpoints): Use Grep to find definitions. Read the source to verify signatures, parameters, and return types match the docs.
+   - **Configs**: Use Glob to find config files (*.yaml, *.yml, *.json, *.toml). Read them to compare key names, default values, and structure against what the docs show.
+   - **File paths**: Use Glob to check if the documented path exists. If not, search by basename to detect renames.
 
-5. Return issues in the standard format: `file`, `line`, `description`, `reason`, `confidence`, `severity`. Include the code evidence in `reason`.
+   Focus on finding **concrete discrepancies**: wrong default values (e.g., "docs say pool_size=10, code says pool_size=5"), renamed flags, missing parameters, stale import paths, undocumented features. Do not report "not found in code" without evidence of a real problem.
+
+4. Return issues in the standard format: `file`, `line`, `description`, `reason`, `confidence`, `severity`. Include the code evidence in `reason`.
 
 ### Signal quality filter
 
@@ -193,28 +192,16 @@ Do NOT flag (false positives):
 - Potential issues that depend on context outside the changed files
 - Subjective wording suggestions unless they violate a specific style rule
 
-## Step 5: Structured Triage (Agent 5 results only)
+## Step 5: Validate Agent 5 Findings
 
-Process ALL search results from Agent 5 through a deterministic classification pipeline. The goal is actionable findings — not a dump of search misses. A `found: false` for a file path that no code repo would contain (e.g., `/etc/example/config.yaml`) is not an issue. A `found: true` command with wrong default values IS an issue. A command can be `found: true` but still have stale flags.
+Review each issue reported by Agent 5. For each finding:
 
-**Pass 1: Scope filtering (commands only)** — Check `scope` field:
-- `scope: external` → Tag `out-of-scope`, skip. These are system commands that cannot be validated against the code repo.
-- `scope: in-scope` or `unknown` → Continue to Pass 2.
-- Non-command categories always proceed to Pass 2.
+- Confirm the agent read the actual source file (not just grep output) and the discrepancy is real
+- Confirm the issue is not a test fixture, example, or deprecated path that is intentionally different
+- Assign confidence based on evidence quality: direct value mismatch = 90%+, renamed/moved = 70-85%, absent with no code evidence = skip
+- Assign severity: `High` = users will hit errors. `Medium` = misleading but not blocking. `Low` = cosmetic.
 
-**Pass 2: Deterministic validation**:
-- **Commands with `cli_validation`**: If `unknown_flags` is non-empty, flag each. Confidence >=80%.
-- **Configs with `schema_validation`**: If `keys_only_in_doc` exists, flag as potentially stale/renamed. Confidence 70-85% based on `overlap_ratio`.
-- **File paths with `found: false`**: Basename matches → likely moved (70-80%). No matches → low confidence (<50%).
-
-**Pass 3: Evidence-based analysis** — For items not resolved by Pass 2:
-- `git_evidence` of renames/deprecation → 70-90% confidence.
-- Partial matches → 50-64% confidence.
-- No matches, no evidence → <50% confidence.
-
-**Pass 4: Read source files** — For items flagged in passes 2-3 with confidence >=50%, read the actual source file to confirm the issue.
-
-**Severity**: `High` = users will hit errors. `Medium` = misleading but not blocking. `Low` = cosmetic.
+Discard findings where the agent could not confirm the discrepancy by reading source code.
 
 ## Step 6: Validate Issues
 
@@ -238,10 +225,7 @@ Remove issues that:
 
 **Scan scope**: `.adoc` and `.md` files in the parent directories of `--docs` sources.
 
-**8a: Anti-pattern scan** — Use discovered CLI definitions and schemas:
-1. For each `cli_validation.unknown_flags` from Step 5, search for additional occurrences
-2. For each `schema_validation.keys_only_in_doc`, search for additional occurrences
-3. If code repo entry point name differs from docs, scan for old name
+**8a: Anti-pattern scan** — For each confirmed issue from Agent 5, use Grep to search the broader doc tree for additional occurrences of the same error pattern (e.g., same wrong flag name, same stale config key, same renamed path).
 
 **8b: Blast radius scan** — For each issue from Step 5, search the doc tree for additional occurrences. Record every file and line.
 
