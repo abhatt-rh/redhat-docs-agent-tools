@@ -8,9 +8,7 @@
 
 - Install the [Red Hat Docs Agent Tools marketplace](https://redhat-documentation.github.io/redhat-docs-agent-tools/install/)
 
-- Install [software dependencies](https://redhat-documentation.github.io/redhat-docs-agent-tools/install/#software-dependencies) (Vale CLI)
-
-- [Install GitHub CLI (`gh`)](https://cli.github.com/) and authenticate with `gh auth login`
+- Install [software dependencies](https://redhat-documentation.github.io/redhat-docs-agent-tools/install/#software-dependencies) (Vale CLI, GitHub CLI)
 
 ### Vale configuration
 

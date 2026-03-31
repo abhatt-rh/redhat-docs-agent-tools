@@ -10,10 +10,6 @@
 
 - Install [software dependencies](https://redhat-documentation.github.io/redhat-docs-agent-tools/install/#software-dependencies) (Python packages, system tools)
 
-- [Install GitHub CLI (`gh`)](https://cli.github.com/) and authenticate with `gh auth login`
-
-- [Install gcloud CLI](https://cloud.google.com/sdk/docs/install) (required for Google Docs conversion) and authenticate with `gcloud auth login --enable-gdrive-access`
-
 - Create an `~/.env` file with your tokens:
 
     ```bash
