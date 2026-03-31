@@ -1,6 +1,6 @@
 ---
 name: docs-review-e2e
-description: End-to-end multi-agent documentation review with confidence scoring. Supports local branch review, PR/MR review with optional inline comment posting, interactive comment actioning, and code-aware technical validation. Use when asked to review documentation changes, validate docs against code, or action PR comments.
+description: End-to-end multi-agent documentation review with confidence scoring. Supports local branch review, PR/MR review with optional inline comment posting, interactive comment actioning, and code-aware technical validation against source code repos. MUST BE USED whenever the user asks to review documentation, check docs quality, validate docs against code, review a PR/MR containing .adoc or .md files, action or address PR review comments, or run a docs review. Also use when the user mentions style guide compliance, modular docs structure, or technical accuracy of documentation.
 argument-hint: "[--local | --pr <url> [--post-comments] | --action-comments [url]] [--code <url>] [--fix] [--threshold <0-100>]"
 allowed-tools: Read, Write, Glob, Grep, Edit, Bash, Skill, Agent, WebSearch, WebFetch, AskUserQuestion
 ---
@@ -159,7 +159,13 @@ Workflow:
    python3 scripts/code_scanner.py search /tmp/tech-review-refs.json /tmp/tech-review/repo1 [repo2...] --output /tmp/tech-review-search.json
    ```
 
-4. Return the search results JSON for structured triage in Step 5.
+4. **Synthesize findings**: Read the search JSON and produce actionable issues. For each mismatch:
+   - Read the actual source file to confirm and extract the specific value (e.g., "docs say pool_size=10, code says pool_size=5")
+   - Check for undocumented features: flags, config keys, or subcommands in code but absent from docs
+   - Check for import path or module name mismatches between docs and code
+   - Report concrete discrepancies with exact values, not just "not found in code"
+
+5. Return issues in the standard format: `file`, `line`, `description`, `reason`, `confidence`, `severity`. Include the code evidence in `reason`.
 
 ### Signal quality filter
 
@@ -189,7 +195,7 @@ Do NOT flag (false positives):
 
 ## Step 5: Structured Triage (Agent 5 results only)
 
-Process ALL search results from Agent 5 through a deterministic classification pipeline. A command can be `found: true` but still have stale flags.
+Process ALL search results from Agent 5 through a deterministic classification pipeline. The goal is actionable findings — not a dump of search misses. A `found: false` for a file path that no code repo would contain (e.g., `/etc/example/config.yaml`) is not an issue. A `found: true` command with wrong default values IS an issue. A command can be `found: true` but still have stale flags.
 
 **Pass 1: Scope filtering (commands only)** — Check `scope` field:
 - `scope: external` → Tag `out-of-scope`, skip. These are system commands that cannot be validated against the code repo.
@@ -417,6 +423,8 @@ Categorize comments: **Required** (style violations, errors — must fix), **Sug
 
 | Line | Severity | Issue | Evidence |
 |------|----------|-------|----------|
+
+Show specific value mismatches (e.g., "Docs: pool_size=10, Code: pool_size=5"), undocumented features, and import path errors. Do not list every `found: false` result — only report items where there is concrete evidence of a discrepancy or where a documented feature is provably absent from the code.
 
 ---
 

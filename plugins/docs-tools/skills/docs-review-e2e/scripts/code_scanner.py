@@ -3,11 +3,10 @@
 code_scanner.py — Extract technical references from documentation files and
 validate them against cloned code repositories.
 
-Replaces extract_tech_references.rb + search_tech_references.rb with a single
-Python script.  Two subcommands:
+Two subcommands:
 
-    python3 code_scanner.py extract <files...> --output refs.json
-    python3 code_scanner.py search  refs.json <repo_paths...> --output results.json
+python3 code_scanner.py extract <doc files...> --output refs.json
+python3 code_scanner.py search  refs.json <repo_paths...> --output results.json
 """
 
 import argparse
