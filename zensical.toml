@@ -12,9 +12,11 @@ nav = [
     ]},
     {"Plugins" = [
         {"Browse plugins" = "plugins.md"},
+        {"cqa-tools" = "plugins/cqa-tools.md"},
         {"dita-tools" = "plugins/dita-tools.md"},
         {"docs-tools" = "plugins/docs-tools.md"},
         {"hello-world" = "plugins/hello-world.md"},
+        {"jtbd-tools" = "plugins/jtbd-tools.md"},
         {"vale-tools" = "plugins/vale-tools.md"},
     ]},
     {"Install" = [
