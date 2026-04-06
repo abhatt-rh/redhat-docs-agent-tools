@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Glob, Grep, Edit, Bash, Skill, Agent, WebSearch, Web
 
 Multi-agent style guide compliance and modular docs review with confidence-based scoring.
 
-For technical accuracy and code-aware validation, use `docs-tools:docs-review-technical`.
+For technical accuracy and code-aware validation, use `docs-review-technical`.
 
 ## Modes
 
@@ -48,7 +48,7 @@ The `--local` and `--pr` modes share the same pipeline. The difference is how fi
 
 ### For --pr mode
 
-Launch a haiku agent to run pre-flight checks using `docs-tools:git-pr-reader`. Stop if any condition is true (still review Claude-generated PRs):
+Launch a haiku agent to run pre-flight checks using `git-pr-reader`. Stop if any condition is true (still review Claude-generated PRs):
 
 - **PR/MR is closed or draft**: Check the PR/MR state from the platform API.
 - **No documentation files changed**: Run `python3 ${CLAUDE_PLUGIN_ROOT}/skills/git-pr-reader/scripts/git_pr_reader.py files "${PR_URL}" --json` and check if any changed files end with `.adoc` or `.md`.
@@ -88,7 +88,7 @@ DOC_FILES=$(wc -l < /tmp/docs-review-doc-files.txt)
 
 ### For --pr mode
 
-Use `docs-tools:git-pr-reader` to get changed files:
+Use `git-pr-reader` to get changed files:
 
 ```bash
 python3 ${CLAUDE_PLUGIN_ROOT}/skills/git-pr-reader/scripts/git_pr_reader.py files "${PR_URL}" --json | \
@@ -119,21 +119,21 @@ For `--pr` mode, use `python3 ${CLAUDE_PLUGIN_ROOT}/skills/git-pr-reader/scripts
 
 ### Agent 1: Style guide compliance (batch A)
 
-- `subagent_type`: `docs-tools:docs-reviewer`
+- `subagent_type`: `docs-reviewer`
 
-Focus on: `docs-tools:ibm-sg-language-and-grammar`, `docs-tools:ibm-sg-punctuation`, `docs-tools:ibm-sg-structure-and-format`, `docs-tools:ibm-sg-technical-elements`, `docs-tools:rh-ssg-grammar-and-language`, `docs-tools:rh-ssg-formatting`, `docs-tools:rh-ssg-structure`, `docs-tools:rh-ssg-technical-examples`
+Focus on: `ibm-sg-language-and-grammar`, `ibm-sg-punctuation`, `ibm-sg-structure-and-format`, `ibm-sg-technical-elements`, `rh-ssg-grammar-and-language`, `rh-ssg-formatting`, `rh-ssg-structure`, `rh-ssg-technical-examples`
 
 ### Agent 2: Style guide compliance (batch B)
 
-- `subagent_type`: `docs-tools:docs-reviewer`
+- `subagent_type`: `docs-reviewer`
 
-Focus on: `docs-tools:ibm-sg-audience-and-medium`, `docs-tools:ibm-sg-numbers-and-measurement`, `docs-tools:ibm-sg-references`, `docs-tools:ibm-sg-legal-information`, `docs-tools:rh-ssg-gui-and-links`, `docs-tools:rh-ssg-legal-and-support`, `docs-tools:rh-ssg-accessibility`, `docs-tools:rh-ssg-release-notes`
+Focus on: `ibm-sg-audience-and-medium`, `ibm-sg-numbers-and-measurement`, `ibm-sg-references`, `ibm-sg-legal-information`, `rh-ssg-gui-and-links`, `rh-ssg-legal-and-support`, `rh-ssg-accessibility`, `rh-ssg-release-notes`
 
 ### Agent 3: Modular docs structure and content quality
 
-- `subagent_type`: `docs-tools:docs-reviewer`
+- `subagent_type`: `docs-reviewer`
 
-Focus on: `docs-tools:docs-review-modular-docs`, `docs-tools:docs-review-content-quality`. Run Vale once per file if available.
+Focus on: `docs-review-modular-docs`, `docs-review-content-quality`. Run Vale once per file if available.
 
 ### Signal quality filter
 
@@ -377,11 +377,11 @@ Categorize comments: **Required** (style violations, errors — must fix), **Sug
 
 # Notes
 
-- Always use `python3 ${CLAUDE_PLUGIN_ROOT}/skills/git-pr-reader/scripts/git_pr_reader.py` for all Git platform interactions (see `docs-tools:git-pr-reader` for full API reference)
+- Always use `python3 ${CLAUDE_PLUGIN_ROOT}/skills/git-pr-reader/scripts/git_pr_reader.py` for all Git platform interactions (see `git-pr-reader` for full API reference)
 - Always use `git_pr_reader.py extract` for deterministic line numbers — never estimate or guess
 - Use Bash with heredoc/cat for writing /tmp files (not the Write tool)
 - Cite the specific style guide rule or review skill for each issue
 - Comments are posted under YOUR username using tokens from `~/.env`
-- For .adoc files, modular docs compliance uses `docs-tools:docs-review-modular-docs`
+- For .adoc files, modular docs compliance uses `docs-review-modular-docs`
 - Release notes skills only apply to .adoc files that appear to be release notes
 - Vale linting requires Vale to be installed and configured

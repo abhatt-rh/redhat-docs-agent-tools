@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Glob, Grep, Edit, Bash, Skill, Agent, WebSearch, Web
 
 Multi-agent technical accuracy review with confidence-based scoring and optional code-aware validation against source repositories.
 
-For style guide compliance and modular docs review, use `docs-tools:docs-review-style`.
+For style guide compliance and modular docs review, use `docs-review-style`.
 
 ## Modes
 
@@ -28,7 +28,7 @@ For style guide compliance and modular docs review, use `docs-tools:docs-review-
 | `--threshold <0-100>` | Confidence threshold for reporting issues (default: 80) |
 | `--code <url>` | Code repository URL for technical validation (repeatable). Enables Agent 2. |
 | `--fix` | Auto-fix high-confidence issues (>=65%), then interactively walk through remaining |
-| `--jira <TICKET-123>` | Auto-discover code repos from JIRA ticket (uses `docs-tools:jira-reader`). Enables Agent 2. |
+| `--jira <TICKET-123>` | Auto-discover code repos from JIRA ticket (uses `jira-reader`). Enables Agent 2. |
 | `--ref <branch>` | Git ref to check out in `--code` repos (default: default branch). Applies to preceding `--code`. |
 
 If no arguments are provided, display usage and ask the user to specify a mode.
@@ -51,7 +51,7 @@ The `--local` and `--pr` modes share the same pipeline. The difference is how fi
 
 ### For --pr mode
 
-Launch a haiku agent to run pre-flight checks using `docs-tools:git-pr-reader`. Stop if any condition is true (still review Claude-generated PRs):
+Launch a haiku agent to run pre-flight checks using `git-pr-reader`. Stop if any condition is true (still review Claude-generated PRs):
 
 - **PR/MR is closed or draft**: Check the PR/MR state from the platform API.
 - **No documentation files changed**: Run `python3 ${CLAUDE_PLUGIN_ROOT}/skills/git-pr-reader/scripts/git_pr_reader.py files "${PR_URL}" --json` and check if any changed files end with `.adoc` or `.md`.
@@ -91,7 +91,7 @@ DOC_FILES=$(wc -l < /tmp/docs-review-doc-files.txt)
 
 ### For --pr mode
 
-Use `docs-tools:git-pr-reader` to get changed files:
+Use `git-pr-reader` to get changed files:
 
 ```bash
 python3 ${CLAUDE_PLUGIN_ROOT}/skills/git-pr-reader/scripts/git_pr_reader.py files "${PR_URL}" --json | \
@@ -114,10 +114,10 @@ For `--local` mode: `git diff "$BASE_BRANCH"...HEAD -- $(cat /tmp/docs-review-do
 
 ## Step 4: Agent 1 — Technical Accuracy and Consistency
 
-- `subagent_type`: `docs-tools:technical-reviewer`
+- `subagent_type`: `technical-reviewer`
 - `model`: `opus`
 
-Follow the full technical review process: doc type detection, reviewer persona (developer/architect lens), 6 review dimensions, confidence scoring, and output format. Use `docs-tools:jira-reader`, `docs-tools:git-pr-reader`, and `docs-tools:article-extractor` to cross-check technical claims. Do not duplicate style or formatting checks.
+Follow the full technical review process: doc type detection, reviewer persona (developer/architect lens), 6 review dimensions, confidence scoring, and output format. Use `jira-reader`, `git-pr-reader`, and `article-extractor` skills to cross-check technical claims. Do not duplicate style or formatting checks.
 
 Returns issues with: `file`, `line`, `description`, `reason`, `confidence` (0-100), `severity` (error/warning/suggestion).
 
@@ -137,7 +137,7 @@ Workflow:
 
    **Repository discovery priority**: `--code` (explicit) > PR URL linked repos > `--jira` ticket linked repos > `:code-repo-url:` AsciiDoc attributes.
 
-   If `--jira` is provided, fetch the ticket using `docs-tools:jira-reader` and extract linked PR/MR URLs and repository references. Parse repo URLs from PR links and JIRA ticket fields.
+   If `--jira` is provided, fetch the ticket using `jira-reader` and extract linked PR/MR URLs and repository references. Parse repo URLs from PR links and JIRA ticket fields.
 
    If `--ref` was specified for a repo, check out that ref after cloning: `git checkout <ref>`. Otherwise use the default branch.
 
@@ -480,10 +480,10 @@ Show specific value mismatches (e.g., "Docs: pool_size=10, Code: pool_size=5"), 
 
 # Notes
 
-- Always use `python3 ${CLAUDE_PLUGIN_ROOT}/skills/git-pr-reader/scripts/git_pr_reader.py` for all Git platform interactions (see `docs-tools:git-pr-reader` for full API reference)
+- Always use `python3 ${CLAUDE_PLUGIN_ROOT}/skills/git-pr-reader/scripts/git_pr_reader.py` for all Git platform interactions (see `git-pr-reader` for full API reference)
 - Always use `git_pr_reader.py extract` for deterministic line numbers — never estimate or guess
 - Use Bash with heredoc/cat for writing /tmp files (not the Write tool)
 - Include source code evidence in each issue's `reason` field
 - Comments are posted under YOUR username using tokens from `~/.env`
 - The `code_scanner.py` script is co-located in `scripts/` for Agent 2's reference extraction
-- Vale linting is NOT part of the technical review — use `docs-tools:docs-review-style` for that
+- Vale linting is NOT part of the technical review — use `docs-review-style` for that
