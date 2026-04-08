@@ -106,38 +106,54 @@ Additionally, derive 1-2 **pattern-level queries** that ask how the codebase imp
 
 ### 5. Run two-pass evidence retrieval for each topic
 
-For each search query, run code-finder's evidence retrieval **twice** to capture both accurate source code and narrative context:
+For each search query, run code-finder's evidence retrieval **twice** to capture both accurate source code and narrative context. Use **batch mode** to run all queries in a single process invocation — this pays the import and index-load cost once instead of per-query.
 
-**Pass 1 — Source-scoped** (API accuracy):
+#### 5a. Build the queries file
 
-```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/docs-workflow-code-evidence/scripts/find_evidence.py \
-  --repo "$REPO_PATH" \
-  --query "<search_query>" \
-  --limit <LIMIT> \
-  --filter-paths <SOURCE_DIRS>
+Create a JSON file at `${OUTPUT_DIR}/queries.json` containing all queries for both passes. Each entry specifies the query text, result limit, and optional filter paths:
+
+```json
+[
+  {"query": "auth middleware implementation", "limit": 5, "filter_paths": ["src/controllers"]},
+  {"query": "auth middleware implementation", "limit": 5},
+  {"query": "reconciler builder pattern",    "limit": 5, "filter_paths": ["src/controllers"]},
+  {"query": "reconciler builder pattern",    "limit": 5}
+]
 ```
 
-Where `<SOURCE_DIRS>` is the comma-separated list of source directories detected in step 3 (e.g., `src/speculators`). Filter paths are resolved relative to the repo path automatically.
+For each search query derived from the plan, add **two entries**:
 
-This pass returns function signatures, class definitions, and implementation details scoped to actual source code.
+1. **Source-scoped** (Pass 1) — with `filter_paths` set to the source directories detected in step 3. Returns function signatures, class definitions, and implementation details.
+2. **Unfiltered** (Pass 2) — without `filter_paths`. Picks up READMEs, documentation, examples, and configuration files that provide narrative context.
 
-**Pass 2 — Unfiltered** (narrative context):
+#### 5b. Run batch retrieval
 
 ```bash
 python3 ${CLAUDE_PLUGIN_ROOT}/skills/docs-workflow-code-evidence/scripts/find_evidence.py \
   --repo "$REPO_PATH" \
-  --query "<search_query>" \
+  --queries-file "${OUTPUT_DIR}/queries.json" \
   --limit <LIMIT>
 ```
 
-This pass picks up READMEs, documentation, examples, and configuration files that provide the "why", installation steps, quickstart patterns, and architectural context.
+If `--reindex` is specified, add `--reindex` — it is applied to the first query only; subsequent queries reuse the freshly built index.
 
-**Post-retrieval exclude filtering**: If `--scope-exclude` patterns were provided, filter both Pass 1 and Pass 2 results after retrieval. Remove any result whose `file_path` matches an exclude glob (e.g., `**/vendor/**`, `**/*_test.go`). This is necessary because code-finder does not support exclude globs natively.
+The script outputs a JSON array of results, one per query entry:
 
-**Note on indexing**: The index is built once on the first query and cached at `{repo}/.vibe2doc/index.db`. Both passes and all subsequent queries reuse the cached index. The second pass adds ~30-200ms per query, not a full re-index.
+```json
+[
+  {"query": "auth middleware implementation", "filter_paths": ["src/controllers"], "result": { ... }},
+  {"query": "auth middleware implementation", "filter_paths": null, "result": { ... }},
+  ...
+]
+```
 
-If `--reindex` is specified, add `--reindex` to the **first** query only. Subsequent queries reuse the freshly built index.
+#### 5c. Post-retrieval processing
+
+Parse the batch output. For each pair of results (source-scoped + unfiltered) corresponding to the same search query, assign them to `source_results` and `context_results` respectively.
+
+**Post-retrieval exclude filtering**: If `--scope-exclude` patterns were provided, filter both source and context results after retrieval. Remove any result whose `file_path` matches an exclude glob (e.g., `**/vendor/**`, `**/*_test.go`). This is necessary because code-finder does not support exclude globs natively.
+
+**Note on indexing**: The index is built once on the first query and cached at `{repo}/.vibe2doc/index.db`. All queries in the batch reuse the same cached index.
 
 Collect all results into a combined evidence structure:
 
