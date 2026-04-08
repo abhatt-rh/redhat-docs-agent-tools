@@ -33,8 +33,9 @@ Supports four modes:
 
 ## Input
 
-```
+```text
 <base-path>/planning/plan.md
+<base-path>/code-evidence/evidence.json  (optional — present when code-evidence step ran)
 ```
 
 ## Output
@@ -43,7 +44,7 @@ Supports four modes:
 
 Files are written directly to their correct repo locations (or the `--repo-path` directory). A manifest is created at:
 
-```
+```text
 <base-path>/writing/_index.md
 ```
 
@@ -51,7 +52,7 @@ The manifest uses **absolute paths** and includes all intentional changes (creat
 
 **Draft mode (`--draft`):**
 
-```
+```text
 <base-path>/writing/
   _index.md
   assembly_*.adoc        (AsciiDoc mode)
@@ -75,10 +76,15 @@ Set the paths:
 
 ```bash
 INPUT_FILE="${BASE_PATH}/planning/plan.md"
+EVIDENCE_FILE="${BASE_PATH}/code-evidence/evidence.json"
 OUTPUT_DIR="${BASE_PATH}/writing"
 OUTPUT_FILE="${OUTPUT_DIR}/_index.md"
 mkdir -p "$OUTPUT_DIR"
 ```
+
+Check whether code evidence is available:
+- If `$EVIDENCE_FILE` exists, set `HAS_EVIDENCE=true` and include the evidence prompt block (see below) in the agent prompt
+- If not, set `HAS_EVIDENCE=false` and omit it — the writing step proceeds using only the plan
 
 ### 2a. UPDATE-IN-PLACE mode (default — no `--draft`)
 
@@ -95,6 +101,8 @@ When `--repo-path` is set, replace references to "the repository" with the speci
 > Write complete AsciiDoc documentation based on the documentation plan for ticket `<TICKET>`.
 >
 > Read the plan from: `<INPUT_FILE>`
+>
+> **[Include only if HAS_EVIDENCE=true]** Code evidence is available at `<EVIDENCE_FILE>`. Read it and use the `source_results` for accurate function signatures, parameter types, and code examples. Use `context_results` for narrative context, installation steps, and architectural patterns. Prefer evidence over assumptions — if the evidence contradicts the plan, follow the evidence.
 >
 > **IMPORTANT**: Write COMPLETE .adoc files, not summaries or outlines.
 >
@@ -118,6 +126,8 @@ When `--repo-path` is set, replace references to "the repository" with the speci
 > Write complete Material for MkDocs Markdown documentation based on the documentation plan for ticket `<TICKET>`.
 >
 > Read the plan from: `<INPUT_FILE>`
+>
+> **[Include only if HAS_EVIDENCE=true]** Code evidence is available at `<EVIDENCE_FILE>`. Read it and use the `source_results` for accurate function signatures, parameter types, and code examples. Use `context_results` for narrative context, installation steps, and architectural patterns. Prefer evidence over assumptions — if the evidence contradicts the plan, follow the evidence.
 >
 > **IMPORTANT**: Write COMPLETE .md files with YAML frontmatter (title, description). Use Material for MkDocs conventions: admonitions, content tabs, code blocks with titles, heading hierarchy starting at `# h1`.
 >
@@ -150,6 +160,8 @@ When `--repo-path` is set, replace references to "the repository" with the speci
 >
 > Read the plan from: `<INPUT_FILE>`
 >
+> **[Include only if HAS_EVIDENCE=true]** Code evidence is available at `<EVIDENCE_FILE>`. Read it and use the `source_results` for accurate function signatures, parameter types, and code examples. Use `context_results` for narrative context, installation steps, and architectural patterns. Prefer evidence over assumptions — if the evidence contradicts the plan, follow the evidence.
+>
 > **IMPORTANT**: Write COMPLETE .adoc files, not summaries or outlines.
 >
 > **Placement mode: DRAFT (staging area)**
@@ -176,6 +188,8 @@ When `--repo-path` is set, replace references to "the repository" with the speci
 > Write complete Material for MkDocs Markdown documentation based on the documentation plan for ticket `<TICKET>`.
 >
 > Read the plan from: `<INPUT_FILE>`
+>
+> **[Include only if HAS_EVIDENCE=true]** Code evidence is available at `<EVIDENCE_FILE>`. Read it and use the `source_results` for accurate function signatures, parameter types, and code examples. Use `context_results` for narrative context, installation steps, and architectural patterns. Prefer evidence over assumptions — if the evidence contradicts the plan, follow the evidence.
 >
 > **IMPORTANT**: Write COMPLETE .md files with YAML frontmatter (title, description). Use Material for MkDocs conventions: admonitions, content tabs, code blocks with titles, heading hierarchy starting at `# h1`.
 >

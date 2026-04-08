@@ -3,6 +3,7 @@ name: docs-orchestrator
 description: Documentation workflow orchestrator. Reads the step list from .claude/docs-workflow.yaml (or the plugin default). Runs steps sequentially, manages progress state, handles iteration and confirmation gates. Claude is the orchestrator — the YAML is a step list, not a workflow engine.
 
 argument-hint: <ticket> [--workflow <name>] [--pr <url>]... [--repo <url-or-path>] [--mkdocs] [--draft] [--repo-path <path>] [--create-jira <PROJECT>]
+
 allowed-tools: Read, Write, Glob, Grep, Edit, Bash, Skill, AskUserQuestion
 ---
 
@@ -240,10 +241,7 @@ Use this absolute `BASE_PATH` for the progress file's `base_path` field and for 
 ### Folder structure
 
 ```
-<<<<<<< HEAD
 artifacts/proj-123/
-=======
-.claude/docs/proj-123/
   source.yaml                        (per-ticket source config, if applicable)
   code-repo/                         (cloned source repo, if applicable)
 >>>>>>> e4cd7e9 (feat: Add source repo orchestration and post-requirements auto-discovery)
@@ -355,21 +353,13 @@ Build the args string for the step skill:
 
 <<<<<<< HEAD
 1. **Always**: `<ticket> --base-path <base_path>` — the ticket ID and the **absolute** base output path
-2. **Format-aware steps only** (`writing`, `style-review`): append `--format <format>` (`adoc` or `mkdocs`)
-3. **From orchestrator context**: Step-specific args from parsed CLI flags:
-   - `requirements`: `[--pr <url>]...`
-   - `prepare-branch`: `[--draft] [--repo-path <path>]`
-   - `writing`: `[--draft] [--repo-path <path>]`
-=======
-1. **Always**: `<ticket> --base-path <base_path>` — the ticket ID and the base output path
 2. **If source repo is resolved**: `--repo <repo_path>` — passed to steps that can use it
 3. **From orchestrator context**: Step-specific args from parsed CLI flags:
    - `requirements`: `[--pr <url>]... [--repo <repo_path>]`
-   - `prepare-branch`: `[--draft]`
+   - `prepare-branch`: `[--draft] [--repo-path <path>]`
    - `code-evidence`: `--repo <repo_path> [--scope-include <globs>] [--scope-exclude <globs>] [--reindex]` — scope globs come from `source.yaml` or `options.source.scope` in the progress file
-   - `writing`: `--format <adoc|mkdocs> [--draft] [--repo <repo_path>]`
+   - `writing`: `--format <adoc|mkdocs> [--draft] [--repo <repo_path>] [--repo-path <path>]`
    - `style-review`: `--format <adoc|mkdocs>`
->>>>>>> e4cd7e9 (feat: Add source repo orchestration and post-requirements auto-discovery)
    - `create-jira`: `--project <PROJECT>`
 
 Step skills derive their own output folder and input folders from `--base-path` and step name conventions. No per-input flag wiring needed.

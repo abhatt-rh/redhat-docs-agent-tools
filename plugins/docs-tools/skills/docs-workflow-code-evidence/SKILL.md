@@ -129,7 +129,7 @@ For each search query derived from the plan, add **two entries**:
 #### 5b. Run batch retrieval
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/docs-workflow-code-evidence/scripts/find_evidence.py \
+python3 scripts/find_evidence.py \
   --repo "$REPO_PATH" \
   --queries-file "${OUTPUT_DIR}/queries.json" \
   --limit <LIMIT>

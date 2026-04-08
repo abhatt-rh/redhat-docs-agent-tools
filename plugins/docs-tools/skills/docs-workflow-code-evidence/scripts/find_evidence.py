@@ -106,6 +106,7 @@ def main():
             args.limit, filter_paths, args.reindex,
         )
         json.dump(result, sys.stdout, indent=2, default=str)
+        print()
         return
 
     # Batch mode
@@ -125,6 +126,7 @@ def main():
         results.append({"query": query, "filter_paths": filter_paths, "result": result})
 
     json.dump(results, sys.stdout, indent=2, default=str)
+    print()
 
 
 if __name__ == "__main__":

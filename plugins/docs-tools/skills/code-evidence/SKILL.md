@@ -25,7 +25,7 @@ Uses hybrid search: BM25 for exact keyword matches + vector embeddings for seman
 - `--query "<query>"` — Natural language search query (single query mode)
 - `--queries-file <path>` — Path to a JSON file with batch queries (use instead of `--query` for multiple searches in one invocation). Schema: `[{"query": "...", "limit": N, "filter_paths": ["dir1", "dir2"]}, ...]`
 - `--filter-paths <dirs>` — Comma-separated directory prefixes to scope results (e.g., `src/auth,src/config`). Single query mode only. Resolved relative to the repo root.
-- `--limit <N>` — Max results to return (default: 10). In batch mode, acts as default limit per query (overridden by per-entry `limit`).
+- `--limit <N>` — Max results to return (default: 5). In batch mode, acts as default limit per query (overridden by per-entry `limit`).
 - `--reindex` — Force re-indexing even if a cached index exists (in batch mode, applied to first query only)
 
 ## Execution

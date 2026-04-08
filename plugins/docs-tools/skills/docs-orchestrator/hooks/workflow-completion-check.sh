@@ -63,7 +63,7 @@ for pfile in "${PROGRESS_FILES[@]}"; do
   for step in "${STEP_ORDER[@]}"; do
     STEP_STATUS=$(jq -r --arg s "$step" '.steps[$s].status // "missing"' "$pfile")
     case "$STEP_STATUS" in
-      completed|skipped) continue ;;
+      completed|skipped|deferred) continue ;;
       *) NEXT_STEP="$step"; break ;;
     esac
   done
