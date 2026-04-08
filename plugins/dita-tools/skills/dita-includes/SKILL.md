@@ -65,7 +65,7 @@ include::../modules/proc-configure.adoc[leveloffset=+1]
 ## Usage
 
 ```bash
-bash scripts/find_includes.sh <file.adoc> [options]
+bash ${CLAUDE_PLUGIN_ROOT}/skills/dita-includes/scripts/find_includes.sh <file.adoc> [options]
 ```
 
 ### Options
@@ -81,16 +81,16 @@ bash scripts/find_includes.sh <file.adoc> [options]
 
 ```bash
 # List all includes from an assembly (absolute paths by default)
-bash scripts/find_includes.sh master.adoc
+bash ${CLAUDE_PLUGIN_ROOT}/skills/dita-includes/scripts/find_includes.sh master.adoc
 
 # Get relative paths instead
-bash scripts/find_includes.sh docs/guide.adoc --relative
+bash ${CLAUDE_PLUGIN_ROOT}/skills/dita-includes/scripts/find_includes.sh docs/guide.adoc --relative
 
 # Only list files that exist (skip broken includes)
-bash scripts/find_includes.sh master.adoc --existing
+bash ${CLAUDE_PLUGIN_ROOT}/skills/dita-includes/scripts/find_includes.sh master.adoc --existing
 
 # Combine options
-bash scripts/find_includes.sh master.adoc -e
+bash ${CLAUDE_PLUGIN_ROOT}/skills/dita-includes/scripts/find_includes.sh master.adoc -e
 ```
 
 ## Limitations

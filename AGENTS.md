@@ -32,17 +32,17 @@ Use bare skill names for portability. Qualified names (`plugin:skill`) are only 
 
 ### From within a skill (internal calls)
 
-When a skill's own Markdown calls its co-located script, use a relative path from the skill directory:
+The runtime working directory is the **project root**, not the skill directory. Bare relative paths like `scripts/foo.py` will fail with "No such file or directory". Always use an absolute-style path:
+
+In **Claude Code**, use `${CLAUDE_PLUGIN_ROOT}` (resolves to the plugin root at runtime):
 
 ```bash
-python3 scripts/git_pr_reader.py info <url> --json
-ruby scripts/callouts.rb "$file"
-bash scripts/find_includes.sh "$file"
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/git-pr-reader/scripts/git_pr_reader.py info <url> --json
+ruby ${CLAUDE_PLUGIN_ROOT}/skills/dita-callouts/scripts/callouts.rb "$file"
+bash ${CLAUDE_PLUGIN_ROOT}/skills/dita-includes/scripts/find_includes.sh "$file"
 ```
 
-### From other commands and agents (cross-skill calls)
-
-In **Cursor**, use paths relative to the repository root (workspace) so commands work from the project directory:
+In **Cursor**, use paths relative to the repository root (workspace):
 
 ```bash
 python3 plugins/docs-tools/skills/git-pr-reader/scripts/git_pr_reader.py info <url> --json
@@ -50,9 +50,9 @@ ruby plugins/dita-tools/skills/dita-callouts/scripts/callouts.rb "$file"
 bash plugins/dita-tools/skills/dita-includes/scripts/find_includes.sh "$file"
 ```
 
-Adjust the `plugins/<plugin>/skills/<skill>/scripts/...` segment to match the skill that owns the script.
+### From other commands and agents (cross-skill calls)
 
-In **Claude Code**, use `${CLAUDE_PLUGIN_ROOT}` instead of the workspace-relative path. See [CLAUDE.md](CLAUDE.md) for examples.
+The same path conventions apply. Adjust the `skills/<skill>/scripts/...` segment to match the skill that owns the script.
 
 ### Knowledge-only skills
 
@@ -68,9 +68,8 @@ Do not use old slash-command syntax (for example, `/jira-reader --issue PROJ-123
 
 | Approach | When to use | Examples |
 | --- | --- | --- |
-| `python3 scripts/...` | Calling a co-located script from within the same skill | `scripts/git_pr_reader.py`, `scripts/callouts.rb` |
-| Path from repo root under `plugins/.../scripts/` | Cross-skill or cross-command script calls in Cursor | Same scripts as above, with full path from workspace root |
-| `python3 ${CLAUDE_PLUGIN_ROOT}/...` | Cross-skill or cross-command script calls in Claude Code | `${CLAUDE_PLUGIN_ROOT}/skills/git-pr-reader/scripts/git_pr_reader.py` |
+| `${CLAUDE_PLUGIN_ROOT}/skills/<skill>/scripts/...` | All script calls in Claude Code (internal and cross-skill) | `${CLAUDE_PLUGIN_ROOT}/skills/git-pr-reader/scripts/git_pr_reader.py` |
+| `plugins/<plugin>/skills/<skill>/scripts/...` | All script calls in Cursor (internal and cross-skill) | `plugins/docs-tools/skills/git-pr-reader/scripts/git_pr_reader.py` |
 | `Skill: skill-name` | Loading full skill knowledge — rules, checklists, domain expertise the model applies | `rh-ssg-formatting`, `ibm-sg-punctuation` |
 
 ## Contributing rules

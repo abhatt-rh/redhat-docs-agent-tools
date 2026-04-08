@@ -2,12 +2,15 @@
 
 Follow the shared project conventions in @AGENTS.md for repository structure, skill naming, contributing rules, and general script invocation patterns. The instructions below apply only to Claude Code.
 
-## Cross-skill script calls
+## Script calls in skills
 
-When a command or agent calls a script that belongs to a different skill, use `${CLAUDE_PLUGIN_ROOT}`:
+The runtime working directory is the **project root**, not the skill directory. Bare relative paths like `scripts/foo.py` will fail. Always use `${CLAUDE_PLUGIN_ROOT}` for **all** script calls (both internal and cross-skill):
 
 ```bash
+# Internal call (skill invoking its own script)
 python3 ${CLAUDE_PLUGIN_ROOT}/skills/git-pr-reader/scripts/git_pr_reader.py info <url> --json
+
+# Cross-skill call (skill invoking another skill's script)
 ruby ${CLAUDE_PLUGIN_ROOT}/skills/dita-callouts/scripts/callouts.rb "$file"
 bash ${CLAUDE_PLUGIN_ROOT}/skills/dita-includes/scripts/find_includes.sh "$file"
 ```

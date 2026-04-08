@@ -25,17 +25,17 @@ The skill uses a Python script that downloads and parses Red Hat docs pages.
 
 **Extract article URLs from a docs index:**
 ```bash
-python3 scripts/toc_extractor.py --url "https://docs.redhat.com/en/documentation/product/version/html/guide/index"
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/redhat-docs-toc/scripts/toc_extractor.py --url "https://docs.redhat.com/en/documentation/product/version/html/guide/index"
 ```
 
 **Save to file:**
 ```bash
-python3 scripts/toc_extractor.py --url "https://docs.redhat.com/..." --output articles.json
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/redhat-docs-toc/scripts/toc_extractor.py --url "https://docs.redhat.com/..." --output articles.json
 ```
 
 **List format output:**
 ```bash
-python3 scripts/toc_extractor.py --url "https://docs.redhat.com/..." --format list
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/redhat-docs-toc/scripts/toc_extractor.py --url "https://docs.redhat.com/..." --format list
 ```
 
 ### Command Line Options
@@ -71,7 +71,7 @@ https://docs.redhat.com/.../article3
 ### OpenShift Lightspeed Configure Documentation
 ```bash
 # Extract all articles from the Configure guide
-python3 scripts/toc_extractor.py \
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/redhat-docs-toc/scripts/toc_extractor.py \
   --url "https://docs.redhat.com/en/documentation/red_hat_openshift_lightspeed/1.0/html/configure/index"
 ```
 
@@ -94,14 +94,14 @@ Extract TOC URLs then download each article:
 
 ```bash
 # Step 1: Extract article URLs
-python3 scripts/toc_extractor.py \
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/redhat-docs-toc/scripts/toc_extractor.py \
   --url "https://docs.redhat.com/.../configure/index" \
   --format list > /tmp/articles.txt
 
 # Step 2: Download each article
 while read url; do
   filename=$(basename "$url").md
-  python3 scripts/article_extractor.py \
+  python3 ${CLAUDE_PLUGIN_ROOT}/skills/article-extractor/scripts/article_extractor.py \
     --url "$url" \
     --format markdown \
     --output "$filename"

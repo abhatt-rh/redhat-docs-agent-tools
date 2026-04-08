@@ -64,7 +64,7 @@ When the user asks to add document IDs:
 2. Find all `.adoc` files in the target location
 3. Run the Ruby script against each file:
    ```bash
-   ruby scripts/document_id.rb <file>
+   ruby ${CLAUDE_PLUGIN_ROOT}/skills/dita-document-id/scripts/document_id.rb <file>
    ```
 4. Report which files were updated and what IDs were generated
 
@@ -73,7 +73,7 @@ When the user asks to add document IDs:
 To preview changes without modifying files:
 
 ```bash
-ruby scripts/document_id.rb <file> --dry-run
+ruby ${CLAUDE_PLUGIN_ROOT}/skills/dita-document-id/scripts/document_id.rb <file> --dry-run
 ```
 
 ### Without {context} suffix
@@ -81,13 +81,13 @@ ruby scripts/document_id.rb <file> --dry-run
 For files that don't use the context variable:
 
 ```bash
-ruby scripts/document_id.rb <file> --no-context
+ruby ${CLAUDE_PLUGIN_ROOT}/skills/dita-document-id/scripts/document_id.rb <file> --no-context
 ```
 
 ### Output to different file
 
 ```bash
-ruby scripts/document_id.rb <file> -o <output.adoc>
+ruby ${CLAUDE_PLUGIN_ROOT}/skills/dita-document-id/scripts/document_id.rb <file> -o <output.adoc>
 ```
 
 ## Example invocations
@@ -126,4 +126,4 @@ Or:
 
 ## Extension location
 
-The Ruby script is located at: `scripts/document_id.rb`
+The Ruby script is located at: `${CLAUDE_PLUGIN_ROOT}/skills/dita-document-id/scripts/document_id.rb`

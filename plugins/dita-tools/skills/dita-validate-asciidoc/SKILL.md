@@ -16,7 +16,7 @@ This skill runs Vale with the AsciiDocDITA rule set to identify DITA compatibili
 ## Usage
 
 ```bash
-bash scripts/validate_asciidoc.sh <file.adoc> [options]
+bash ${CLAUDE_PLUGIN_ROOT}/skills/dita-validate-asciidoc/scripts/validate_asciidoc.sh <file.adoc> [options]
 ```
 
 ### Options
@@ -30,10 +30,10 @@ bash scripts/validate_asciidoc.sh <file.adoc> [options]
 
 ```bash
 # Validate an assembly and all includes (only existing files are processed)
-bash scripts/validate_asciidoc.sh master.adoc
+bash ${CLAUDE_PLUGIN_ROOT}/skills/dita-validate-asciidoc/scripts/validate_asciidoc.sh master.adoc
 
 # List files that would be validated
-bash scripts/validate_asciidoc.sh master.adoc --list-only
+bash ${CLAUDE_PLUGIN_ROOT}/skills/dita-validate-asciidoc/scripts/validate_asciidoc.sh master.adoc --list-only
 ```
 
 ## Output format
