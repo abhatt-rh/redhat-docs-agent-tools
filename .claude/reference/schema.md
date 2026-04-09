@@ -1,0 +1,1 @@
+../../plugins/jtbd-tools/reference/schema.md
