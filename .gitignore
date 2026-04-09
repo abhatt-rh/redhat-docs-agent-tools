@@ -1,5 +1,11 @@
 .cache/
-.claude/
+.claude/*
+!.claude/skills/
+!.claude/agents/
+!.claude/reference/
+!.claude/settings.json
+!.claude/docs-workflow.yaml
+artifacts/
 site/
 .venv/
 .vale/

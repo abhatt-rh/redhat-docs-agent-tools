@@ -1,0 +1,1 @@
+../../plugins/docs-tools/agents/docs-writer.md
