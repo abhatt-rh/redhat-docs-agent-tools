@@ -5,7 +5,6 @@
 !.claude/skills/
 !.claude/agents/
 !.claude/reference/
-!.claude/settings.json
 !.claude/docs-acp.yaml
 artifacts/
 site/
