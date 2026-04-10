@@ -1,0 +1,1 @@
+../../plugins/docs-tools/reference/jtbd-docs-plan-template.md
