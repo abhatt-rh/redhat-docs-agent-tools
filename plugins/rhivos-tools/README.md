@@ -1,4 +1,4 @@
-# rhivos-content
+# rhivos-tools
 
 RHIVOS 2.0 Core documentation pipeline. Converts upstream CentOS Automotive SIG Markdown content into downstream Red Hat modular AsciiDoc, restructured using Jobs To Be Done (JTBD) principles and validated against Red Hat style governance.
 
