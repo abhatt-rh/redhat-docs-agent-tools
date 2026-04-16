@@ -70,6 +70,33 @@ else:
 "
 }
 
+# --- Helper: ensure required CLI tool is available ---
+ensure_cli() {
+  local tool="$1"
+  if command -v "$tool" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  echo "${tool} CLI not found. Attempting to install..." >&2
+
+  # Try common package managers
+  if command -v dnf >/dev/null 2>&1; then
+    sudo dnf install -y "$tool" 2>/dev/null && return 0
+  elif command -v apt-get >/dev/null 2>&1; then
+    sudo apt-get update -qq && sudo apt-get install -y "$tool" 2>/dev/null && return 0
+  elif command -v brew >/dev/null 2>&1; then
+    brew install "$tool" 2>/dev/null && return 0
+  fi
+
+  echo "ERROR: ${tool} CLI is required but could not be installed. Install it manually:" >&2
+  if [[ "$tool" == "gh" ]]; then
+    echo "  https://cli.github.com/manual/installation" >&2
+  else
+    echo "  https://gitlab.com/gitlab-org/cli#installation" >&2
+  fi
+  exit 1
+}
+
 # --- Draft mode: skip ---
 if [[ "$DRAFT" == true ]]; then
   write_mr_info "null" "skipped" ""
@@ -123,6 +150,13 @@ fi
 echo "Platform: ${PLATFORM}"
 echo "Repo URL: ${REPO_URL}"
 echo "Branch:   ${BRANCH} → ${DEFAULT_BRANCH}"
+
+# --- Pre-flight: ensure CLI tool is available ---
+if [[ "$PLATFORM" == "github" ]]; then
+  ensure_cli gh
+elif [[ "$PLATFORM" == "gitlab" ]]; then
+  ensure_cli glab
+fi
 
 # --- Build MR/PR title ---
 REQUIREMENTS_FILE="${BASE_PATH}/requirements/requirements.md"
