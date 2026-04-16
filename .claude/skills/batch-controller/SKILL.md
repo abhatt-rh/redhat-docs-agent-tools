@@ -110,7 +110,7 @@ REPO_FLAGS="$(bash "${AGENT_ROOT}/adapters/ambient/scripts/resolve-repo-context.
 Then invoke the orchestrator with the resolved flags:
 
 ```
-Skill: docs-tools:docs-orchestrator, args: "<TICKET-KEY> --workflow acp ${REPO_FLAGS}"
+Skill: docs-orchestrator, args: "<TICKET-KEY> --workflow acp ${REPO_FLAGS}"
 ```
 
 The orchestrator runs the full pipeline including commit and MR/PR creation (handled by the `commit` and `create-mr` workflow steps).

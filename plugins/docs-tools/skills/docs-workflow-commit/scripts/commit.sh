@@ -171,6 +171,7 @@ if git push --force-with-lease -u origin "$BRANCH" 2>&1; then
 else
   echo "ERROR: Push failed. Branch committed locally but not pushed." >&2
   write_commit_info false "${STAGED_FILES[@]}"
+  exit 1
 fi
 
 echo "Wrote ${OUTPUT_DIR}/commit-info.json"

@@ -32,7 +32,7 @@ workflow:
     - name: style-review
       skill: docs-tools:docs-workflow-style-review
       description: Style guide compliance review
-      inputs: [writing]
+      inputs: [writing, technical-review]
 
     - name: commit
       skill: docs-tools:docs-workflow-commit

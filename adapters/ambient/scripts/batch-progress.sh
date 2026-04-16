@@ -14,7 +14,7 @@
 # Dependencies: python3
 set -euo pipefail
 
-REPO_ROOT="$(git rev-parse --show-toplevel)"
+REPO_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 PROGRESS_FILE="${REPO_ROOT}/artifacts/batch-progress.json"
 
 cmd="${1:-}"
