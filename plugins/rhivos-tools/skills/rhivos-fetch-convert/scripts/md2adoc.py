@@ -1,24 +1,45 @@
 #!/usr/bin/env python3
-"""Post-process pandoc AsciiDoc output to handle Material for MkDocs extensions.
+"""Pre-process MkDocs Markdown before pandoc conversion to AsciiDoc.
 
-Handles syntactic conversions that pandoc does not support:
-- Tabbed content (=== "Tab title")
+Handles Material for MkDocs extensions that pandoc cannot convert:
+- YAML frontmatter title/description
 - Admonitions (!!! note/warning/tip/important/caution)
-- Snippet inclusions (--8<-- "path")
+- Collapsible admonitions (??? note)
+- Tabbed content (=== "Tab title")
+- Snippet inclusions (--8<-- "path") with code file inlining
 - Figure captions (/// figure-caption)
 - Code block titles (```lang title="Title")
-- Relative Markdown links -> AsciiDoc xrefs
-- YAML frontmatter title/description
+- Relative Markdown links (.md -> .adoc)
 
 Usage:
-    python3 md2adoc.py <file.adoc>
+    python3 md2adoc.py [--base-path <dir>] <file.md>
 
-Modifies the file in place.
+Converts MkDocs extensions in-place. Injected AsciiDoc is wrapped in
+pandoc raw blocks (```{=asciidoc}) so that pandoc passes it through
+verbatim during Markdown-to-AsciiDoc conversion.
 """
 
+import argparse
 import re
 import sys
 from pathlib import Path
+
+EXTENSION_LANGUAGE_MAP = {
+    ".yml": "yaml",
+    ".yaml": "yaml",
+    ".json": "json",
+    ".py": "python",
+    ".sh": "bash",
+    ".toml": "toml",
+}
+
+RAW_OPEN = "```{=asciidoc}"
+RAW_CLOSE = "```"
+
+
+def _raw_block(asciidoc_lines: list[str]) -> list[str]:
+    """Wrap AsciiDoc lines in a pandoc raw block for pass-through."""
+    return [RAW_OPEN] + asciidoc_lines + ["", RAW_CLOSE]
 
 
 def convert_admonitions(lines: list[str]) -> list[str]:
@@ -27,7 +48,8 @@ def convert_admonitions(lines: list[str]) -> list[str]:
     Input:  !!! note "Optional title"
                 Content indented by 4 spaces
 
-    Output: [NOTE]
+    Output (wrapped in raw block):
+            [NOTE]
             .Optional title
             ====
             Content
@@ -57,24 +79,23 @@ def convert_admonitions(lines: list[str]) -> list[str]:
             title = match.group(3)
             asciidoc_type = admonition_map.get(admon_type, "NOTE")
 
-            # Collapsible admonitions (???) map the same way
-            result.append(f"[{asciidoc_type}]")
+            block = [f"[{asciidoc_type}]"]
             if title:
-                result.append(f".{title}")
-            result.append("====")
+                block.append(f".{title}")
+            block.append("====")
 
-            # Collect indented content
             i += 1
             while i < len(lines) and (
                 lines[i].startswith("    ") or lines[i].strip() == ""
             ):
                 if lines[i].strip() == "":
-                    result.append("")
+                    block.append("")
                 else:
-                    result.append(lines[i][4:])  # Remove 4-space indent
+                    block.append(lines[i][4:])
                 i += 1
 
-            result.append("====")
+            block.append("====")
+            result.extend(_raw_block(block))
             result.append("")
         else:
             result.append(lines[i])
@@ -89,7 +110,8 @@ def convert_tabbed_content(lines: list[str]) -> list[str]:
     Input:  === "Tab title"
                 Content indented by 4 spaces
 
-    Output: .Tab title
+    Output (wrapped in raw block):
+            .Tab title
             --
             Content
             --
@@ -101,21 +123,20 @@ def convert_tabbed_content(lines: list[str]) -> list[str]:
         match = re.match(r'^===\s+"([^"]+)"\s*$', lines[i])
         if match:
             title = match.group(1)
-            result.append(f".{title}")
-            result.append("--")
+            block = [f".{title}", "--"]
 
-            # Collect indented content
             i += 1
             while i < len(lines) and (
                 lines[i].startswith("    ") or lines[i].strip() == ""
             ):
                 if lines[i].strip() == "":
-                    result.append("")
+                    block.append("")
                 else:
-                    result.append(lines[i][4:])
+                    block.append(lines[i][4:])
                 i += 1
 
-            result.append("--")
+            block.append("--")
+            result.extend(_raw_block(block))
             result.append("")
         else:
             result.append(lines[i])
@@ -124,57 +145,125 @@ def convert_tabbed_content(lines: list[str]) -> list[str]:
     return result
 
 
-def convert_snippets(lines: list[str]) -> list[str]:
-    """Convert MkDocs snippet inclusions to AsciiDoc includes.
+def _read_snippet_lines(file_path: Path, start: int | None, end: int | None) -> list[str]:
+    """Read lines from a file, optionally extracting a 1-indexed inclusive range."""
+    all_lines = file_path.read_text(encoding="utf-8").splitlines()
+    if start is not None and end is not None:
+        return all_lines[start - 1 : end]
+    return all_lines
 
-    Input:  --8<-- "path/to/file.md"
-    Output: include::path/to/file.adoc[]
+
+def _lang_for_extension(suffix: str) -> str | None:
+    """Return the AsciiDoc source language tag for a file extension, or None."""
+    return EXTENSION_LANGUAGE_MAP.get(suffix)
+
+
+def convert_snippets(lines: list[str], base_path: Path | None = None) -> list[str]:
+    """Convert MkDocs snippet inclusions.
+
+    Prose .md files become include:: directives (extension swapped to .adoc).
+    Code files are inlined as AsciiDoc source blocks when base_path is set
+    and the source file exists. Supports line-range syntax ("file:start:end").
+    All AsciiDoc output is wrapped in raw blocks for pandoc pass-through.
     """
+    snippet_re = re.compile(r'^(?P<indent>\s*)--8<--\s+"(?P<ref>[^"]+)"\s*$')
+    range_re = re.compile(r"^(?P<path>.+):(?P<start>\d+):(?P<end>\d+)$")
     result = []
+
     for line in lines:
-        match = re.match(r'^--8<--\s+"([^"]+)"\s*$', line)
-        if match:
-            path = match.group(1)
-            # Change .md extension to .adoc
-            if path.endswith(".md"):
-                path = path[:-3] + ".adoc"
-            result.append(f"include::{path}[]")
-        else:
+        match = snippet_re.match(line)
+        if not match:
             result.append(line)
+            continue
+
+        ref = match.group("ref")
+
+        range_match = range_re.match(ref)
+        if range_match:
+            file_ref = range_match.group("path")
+            start = int(range_match.group("start"))
+            end = int(range_match.group("end"))
+        else:
+            file_ref = ref
+            start = None
+            end = None
+
+        suffix = Path(file_ref).suffix.lower()
+
+        if suffix == ".md":
+            adoc_path = file_ref[:-3] + ".adoc"
+            result.extend(_raw_block([f"include::{adoc_path}[]"]))
+            continue
+
+        if base_path is None:
+            result.extend(_raw_block([f"include::{file_ref}[]"]))
+            continue
+
+        resolved = base_path / file_ref
+        if not resolved.is_file():
+            result.extend(_raw_block([
+                f"// WARNING: snippet source not found: {file_ref}",
+                f"include::{file_ref}[]",
+            ]))
+            continue
+
+        content_lines = _read_snippet_lines(resolved, start, end)
+        lang = _lang_for_extension(suffix)
+        block = []
+        if lang:
+            block.append(f"[source,{lang}]")
+        else:
+            block.append("[source]")
+        block.append("----")
+        block.extend(content_lines)
+        block.append("----")
+        result.extend(_raw_block(block))
+
     return result
 
 
 def convert_figure_captions(lines: list[str]) -> list[str]:
     """Convert MkDocs figure captions to AsciiDoc image titles.
 
-    Input:  ![alt](image.png)
-            /// figure-caption
-            Caption text
-            ///
-
-    Output: .Caption text
-            image::image.png[alt]
+    Looks for /// figure-caption blocks after Markdown images and converts
+    to AsciiDoc image macros with title.
     """
     result = []
     i = 0
+    md_img_re = re.compile(r"^!\[([^\]]*)\]\(([^)]+)\)\s*$")
 
     while i < len(lines):
-        # Look for figure-caption blocks after images
-        if i + 2 < len(lines) and lines[i].strip() == "/// figure-caption":
-            # Collect caption text
+        img_match = md_img_re.match(lines[i])
+        if img_match:
+            alt = img_match.group(1)
+            src = img_match.group(2)
+            if (
+                i + 1 < len(lines)
+                and lines[i + 1].strip() == "/// figure-caption"
+            ):
+                caption_lines = []
+                i += 2
+                while i < len(lines) and lines[i].strip() != "///":
+                    caption_lines.append(lines[i].strip())
+                    i += 1
+                if i < len(lines):
+                    i += 1
+                caption = " ".join(caption_lines)
+                result.extend(_raw_block([f".{caption}", f"image::{src}[{alt}]"]))
+            else:
+                result.extend(_raw_block([f"image::{src}[{alt}]"]))
+                i += 1
+        elif lines[i].strip() == "/// figure-caption":
             caption_lines = []
             i += 1
             while i < len(lines) and lines[i].strip() != "///":
                 caption_lines.append(lines[i].strip())
                 i += 1
             if i < len(lines):
-                i += 1  # Skip closing ///
-
+                i += 1
             caption = " ".join(caption_lines)
-
-            # Find the preceding image in result and prepend the caption
             for j in range(len(result) - 1, -1, -1):
-                if result[j].startswith("image::"):
+                if "image::" in result[j] or result[j].startswith("image:"):
                     result.insert(j, f".{caption}")
                     break
         else:
@@ -191,7 +280,8 @@ def convert_code_block_titles(lines: list[str]) -> list[str]:
             content
             ```
 
-    Output: .my-manifest.yaml
+    Output (wrapped in raw block):
+            .my-manifest.yaml
             [source,yaml]
             ----
             content
@@ -205,17 +295,18 @@ def convert_code_block_titles(lines: list[str]) -> list[str]:
         if match:
             lang = match.group(1)
             title = match.group(2)
-            result.append(f".{title}")
+            block = [f".{title}"]
             if lang:
-                result.append(f"[source,{lang}]")
-            result.append("----")
+                block.append(f"[source,{lang}]")
+            block.append("----")
             i += 1
             while i < len(lines) and not lines[i].startswith("```"):
-                result.append(lines[i])
+                block.append(lines[i])
                 i += 1
-            result.append("----")
+            block.append("----")
             if i < len(lines):
-                i += 1  # Skip closing ```
+                i += 1
+            result.extend(_raw_block(block))
         else:
             result.append(lines[i])
             i += 1
@@ -229,20 +320,21 @@ def convert_markdown_links(lines: list[str]) -> list[str]:
     Input:  [link text](../path/to/file.md)
     Output: xref:../path/to/file.adoc[link text]
 
-    Leaves external URLs unchanged.
+    Leaves external URLs and raw-block fences unchanged.
     """
     result = []
     link_pattern = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 
     for line in lines:
+        if line.startswith(RAW_OPEN) or line == RAW_CLOSE:
+            result.append(line)
+            continue
 
         def replace_link(m):
             text = m.group(1)
             target = m.group(2)
-            # Skip external URLs
             if target.startswith(("http://", "https://", "mailto:")):
                 return m.group(0)
-            # Convert .md to .adoc
             if target.endswith(".md"):
                 target = target[:-3] + ".adoc"
             return f"xref:{target}[{text}]"
@@ -259,7 +351,8 @@ def convert_frontmatter(lines: list[str]) -> list[str]:
             description: A description.
             ---
 
-    Output: = My Title
+    Output (wrapped in raw block):
+            = My Title
 
             [role="_abstract"]
             A description.
@@ -267,7 +360,6 @@ def convert_frontmatter(lines: list[str]) -> list[str]:
     if not lines or lines[0].strip() != "---":
         return lines
 
-    # Find closing ---
     end = -1
     for i in range(1, len(lines)):
         if lines[i].strip() == "---":
@@ -288,30 +380,37 @@ def convert_frontmatter(lines: list[str]) -> list[str]:
             description = line[len("description:") :].strip().strip("\"'")
 
     result = []
+    block = []
     if title:
-        result.append(f"= {title}")
-        result.append("")
+        block.append(f"= {title}")
+        block.append("")
     if description:
-        result.append('[role="_abstract"]')
-        result.append(description)
-        result.append("")
+        block.append('[role="_abstract"]')
+        block.append(description)
+        block.append("")
 
-    # Append remaining content after frontmatter
+    if block:
+        result.extend(_raw_block(block))
+
     result.extend(lines[end + 1 :])
     return result
 
 
-def process_file(filepath: str) -> None:
-    """Apply all conversions to a file in place."""
+def process_file(filepath: str, base_path: Path | None = None) -> None:
+    """Pre-process a Markdown file to convert MkDocs extensions in-place.
+
+    Must be run on the raw .md file BEFORE pandoc conversion. AsciiDoc
+    content is wrapped in pandoc raw blocks so pandoc passes it through
+    verbatim during the subsequent Markdown-to-AsciiDoc conversion.
+    """
     path = Path(filepath)
     content = path.read_text(encoding="utf-8")
     lines = content.splitlines()
 
-    # Apply conversions in order
     lines = convert_frontmatter(lines)
     lines = convert_admonitions(lines)
     lines = convert_tabbed_content(lines)
-    lines = convert_snippets(lines)
+    lines = convert_snippets(lines, base_path=base_path)
     lines = convert_code_block_titles(lines)
     lines = convert_figure_captions(lines)
     lines = convert_markdown_links(lines)
@@ -320,17 +419,24 @@ def process_file(filepath: str) -> None:
 
 
 def main() -> None:
-    if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <file.adoc>", file=sys.stderr)
+    parser = argparse.ArgumentParser(
+        description="Pre-process MkDocs Markdown for pandoc conversion to AsciiDoc"
+    )
+    parser.add_argument("file", help="Markdown file to process in place")
+    parser.add_argument(
+        "--base-path",
+        type=Path,
+        default=None,
+        help="Root directory for resolving snippet source files",
+    )
+    args = parser.parse_args()
+
+    if not Path(args.file).exists():
+        print(f"Error: file not found: {args.file}", file=sys.stderr)
         sys.exit(1)
 
-    filepath = sys.argv[1]
-    if not Path(filepath).exists():
-        print(f"Error: file not found: {filepath}", file=sys.stderr)
-        sys.exit(1)
-
-    process_file(filepath)
-    print(f"Post-processed: {filepath}")
+    process_file(args.file, base_path=args.base_path)
+    print(f"Pre-processed: {args.file}")
 
 
 if __name__ == "__main__":

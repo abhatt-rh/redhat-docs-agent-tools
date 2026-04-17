@@ -53,21 +53,24 @@ Extract `doc_title` and compute the `<doc-title-slug>` (kebab-case lowercase).
 
 For each mapping entry with upstream sources marked `usage: adapt`:
 
-#### a. Run pandoc base conversion
+#### a. Run md2adoc.py pre-processor
+
+The pre-processing script converts Material for MkDocs extensions that pandoc would mangle (admonitions, tabs, snippets, figure captions, code block titles, links, frontmatter). It must run on the raw `.md` file **before** pandoc:
 
 ```bash
-pandoc -f markdown -t asciidoc -o "<output-path>" "<sig-docs-path>/<upstream-path>"
+cp "<sig-docs-path>/<upstream-path>" "<working-copy>.md"
+python3 ${CLAUDE_SKILL_DIR}/scripts/md2adoc.py --base-path "${sig_docs_path}" "<working-copy>.md"
 ```
 
-#### b. Run md2adoc.py post-processor
+The `--base-path` flag points to the sig-docs repo root so that code file snippets (`.yml`, `.container`, `.conf`, `.sh`, etc.) are read from disk and inlined as AsciiDoc source blocks. Prose `.md` snippets remain as `include::` directives. See [md2adoc.py conversions](#md2adoc-conversions) for what it handles.
 
-The post-processing script handles Material for MkDocs extensions that pandoc does not convert correctly:
+#### b. Run pandoc conversion
+
+Convert the pre-processed Markdown to AsciiDoc:
 
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/scripts/md2adoc.py "<output-path>"
+pandoc -f markdown -t asciidoc -o "<output-path>" "<working-copy>.md"
 ```
-
-The script modifies the file in place. See [md2adoc.py conversions](#md2adoc-conversions) for what it handles.
 
 #### c. Apply modular docs conventions
 
