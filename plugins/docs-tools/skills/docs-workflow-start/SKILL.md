@@ -269,11 +269,11 @@ Skill: <step.skill>, args: "<ticket> --base-path <BASE_PATH> <step-specific-flag
 
 | Step | Additional flags from collected config |
 |------|---------------------------------------|
-| requirements | `[--pr <url>]...` |
+| requirements | `[--pr <url>]... [--repo <repo_path>]` |
 | planning | _(none)_ |
 | code-evidence | `--repo <repo_path> [--scope-include <globs>] [--scope-exclude <globs>]` |
 | prepare-branch | `[--draft] [--repo-path <path>]` |
-| writing | `--format <adoc\|mkdocs> [--draft] [--repo-path <path>]` |
+| writing | `--format <adoc\|mkdocs> [--draft] [--repo <repo_path>] [--repo-path <path>]` |
 | style-review | `--format <adoc\|mkdocs>` |
 | technical-review | _(none)_ |
 | commit | `[--draft] [--repo-path <path>]` |
