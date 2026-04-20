@@ -126,28 +126,44 @@ If any questions are relevant, call AskUserQuestion with those questions (same t
 
 ### Step 4: Free-text follow-ups
 
-Based on answers from step 3, collect any needed free-text inputs conversationally (not via AskUserQuestion). Only ask questions that apply:
+Based on answers from step 3, collect any needed free-text inputs. Use AskUserQuestion with `textInput: true` for each value, so the user has a clear input prompt. Only ask questions that apply:
 
 **If "Yes — I have a PR URL" was selected**:
-> Enter PR/MR URL(s), one per line (press Enter twice when done):
 
-Multiple URLs are supported. Each becomes a `--pr <url>` flag.
+Ask via AskUserQuestion (textInput): "Enter the first PR/MR URL:"
+
+Then ask: "Enter another PR/MR URL, or select Done:"
+
+| Option | Description |
+|--------|-------------|
+| Done | No more PR URLs |
+
+Repeat until the user selects Done. Each URL becomes a `--pr <url>` flag.
 
 **If "Yes — I have a repo URL or path" was selected**:
-> Enter the source repo URL or local path:
 
-Single value. Then follow up:
-> Do you also have PR URL(s) for this repo? If so, enter them one per line (press Enter twice when done). Otherwise, press Enter to skip:
+Ask via AskUserQuestion (textInput): "Enter the source repo URL or local path:"
 
-This is because `--source-code-repo` and `--pr` can coexist — the PR branch gets checked out within the repo.
+Then ask via AskUserQuestion:
+
+**Do you also have PR URL(s) for this repo?**
+
+| Option | Description |
+|--------|-------------|
+| No (Recommended) | Proceed without PR URLs |
+| Yes | Enter PR URL(s) |
+
+`--source-code-repo` and `--pr` can coexist — the PR branch gets checked out within the repo. If the user selects Yes, collect PR URLs using the same loop as above.
 
 **If "A different repo" was selected for placement**:
-> Enter the target docs repository path:
+
+Ask via AskUserQuestion (textInput): "Enter the target docs repository path:"
 
 Maps to `--docs-repo-path <path>`.
 
 **If "Yes" was selected for Create JIRA**:
-> Enter the target JIRA project key (e.g., DOCS):
+
+Ask via AskUserQuestion (textInput): "Enter the target JIRA project key (e.g., DOCS):"
 
 Maps to `--create-jira <PROJECT>`.
 
