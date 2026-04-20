@@ -88,11 +88,11 @@ RUBY_STDLIB = {
 }
 
 # System tools detected by command name in shell scripts.
-KNOWN_SYSTEM_TOOLS = {"vale", "jq", "curl", "gcloud", "gh", "glab"}
+KNOWN_SYSTEM_TOOLS = {"vale", "jq", "curl", "gcloud", "gh", "glab", "uv"}
 
 # System tools that are always included even if not detected in scripts.
 # These are user-facing prerequisites used via Python libraries or CLI.
-ALWAYS_INCLUDE_SYSTEM = {"gcloud", "gh", "glab"}
+ALWAYS_INCLUDE_SYSTEM = {"gcloud", "gh", "glab", "uv"}
 
 
 
