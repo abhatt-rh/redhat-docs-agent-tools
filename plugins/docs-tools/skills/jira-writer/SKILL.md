@@ -32,6 +32,8 @@ JIRA_EMAIL=you@redhat.com           # required for Atlassian Cloud
 JIRA_URL=https://redhat.atlassian.net  # optional, defaults to redhat.atlassian.net
 ```
 
+The script loads `~/.env` automatically — do **not** prepend `source ~/.env` to bash commands.
+
 ### Examples
 
 **Push a release note:**

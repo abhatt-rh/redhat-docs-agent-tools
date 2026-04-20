@@ -102,6 +102,8 @@ GITHUB_TOKEN=your-github-pat    # required scope: "repo" for private, "public_re
 GITLAB_TOKEN=your-gitlab-pat    # required scope: "api"
 ```
 
+The script loads `~/.env` automatically — do **not** prepend `source ~/.env` to bash commands.
+
 ### Python Library Usage
 
 ```python
