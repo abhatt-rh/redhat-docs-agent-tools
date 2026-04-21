@@ -171,7 +171,7 @@ Scan the source repo's top-level markdown files (README.md, CONTRIBUTING.md, doc
 Read `requirements.md` and extract each requirement's ID, title, and summary using the existing `REQ-NNN: [title]` + `**Summary**:` pattern that the requirements-analyst produces.
 
 **Step 4: Build queries and run batch retrieval.**
-Generate one natural-language query per requirement (e.g., REQ "Python SDK support" becomes query "Python SDK client library implementation"). Write the queries to `queries.json` and call `find_evidence.py --queries-file` — single-pass, unfiltered. This creates the code-finder index on the first query (cached for the later code-evidence step).
+Generate one natural-language query per requirement (e.g., REQ "Python SDK support" becomes query "Python SDK client library implementation"). Write the queries to `${OUTPUT_DIR}/queries.json` and call `find_evidence.py` from the code-evidence skill directory (`plugins/docs-tools/skills/docs-workflow-code-evidence/scripts/find_evidence.py`) with `--queries-file` — single-pass, unfiltered. Follow the same code-finder install detection pattern as the code-evidence step (check for `claude_context` module, fall back to `uv run --with code-finder`). This creates the code-finder index on the first query (cached for the later code-evidence step).
 
 **Step 5: Classify results.**
 For each requirement, apply threshold-based classification:
