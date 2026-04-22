@@ -9,10 +9,16 @@ workflow:
       skill: docs-tools:docs-workflow-requirements
       description: Analyze documentation requirements
 
+    - name: scope-req-audit
+      skill: docs-tools:docs-workflow-scope-req-audit
+      description: Classify requirements by code evidence status
+      when: has_source_repo
+      inputs: [requirements]
+
     - name: planning
       skill: docs-tools:docs-workflow-planning
       description: Create documentation plan
-      inputs: [requirements]
+      inputs: [requirements, scope-req-audit]
 
     - name: code-evidence
       skill: docs-tools:docs-workflow-code-evidence

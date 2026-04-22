@@ -214,6 +214,9 @@ Use this absolute `BASE_PATH` for the progress file's `base_path` field and for 
   requirements/
     requirements.md
     step-result.json                 (sidecar: title)
+  scope-req-audit/                     (if source repo is available)
+    evidence-status.json
+    summary.md
   planning/
     plan.md
     step-result.json                 (sidecar: module_count)
@@ -277,7 +280,7 @@ The `workflow_type` field and filename prefix match the YAML's `workflow.name`. 
     "source": null,
     "additional_sources": []
   },
-  "step_order": ["requirements", "planning", "writing", ...],
+  "step_order": ["requirements", "scope-req-audit", "planning", "writing", ...],
   "steps": {
     "<step-name>": {
       "status": "pending",
@@ -342,6 +345,7 @@ Build the args string for the step skill. The orchestrator maps its user-facing 
 2. **If source repo is resolved**: `--repo <repo_path>` — passed to steps that can use it
 3. **From orchestrator context**: Step-specific args from parsed CLI flags:
    - `requirements`: `[--pr <url>]... [--repo <repo_path>]`
+   - `scope-req-audit`: `--repo <repo_path> [--grounded-threshold <float>] [--absent-threshold <float>]`
    - `prepare-branch`: `[--draft] [--repo-path <path>]`
    - `code-evidence`: `--repo <repo_path> [--scope-include <globs>] [--scope-exclude <globs>] [--reindex]` — scope globs come from `source.yaml` or `options.source.scope` in the progress file
    - `writing`: `--format <adoc|mkdocs> [--draft] [--repo <repo_path>] [--repo-path <path>]`
@@ -365,6 +369,7 @@ Skill: <step.skill>, args: "<constructed args>"
 3. Update the step's status to `"completed"` with the output folder path in the progress file
 4. Update the progress file's `updated_at` timestamp
 5. **If the just-completed step is `requirements` AND `options.source` is `null`** → run [Post-requirements source resolution](#post-requirements-source-resolution) before continuing to the next step. This may change `deferred` steps to `pending` or `skipped`
+6. **If the just-completed step is `scope-req-audit`** → read `evidence-status.json`, extract the `summary` counts, and log: `"scope-req-audit completed: N grounded, N partial, N absent"`. If `discovered_repos` is non-empty, also log the count: `"(N discovered repos not indexed)"`
 
 ## Post-requirements source resolution
 

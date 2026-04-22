@@ -64,6 +64,16 @@ mkdir -p "$OUTPUT_DIR"
 >
 > Save the complete plan to: `<OUTPUT_FILE>`
 
+**[Include only if `<BASE_PATH>/scope-req-audit/evidence-status.json` exists]** Append the following paragraph to the prompt:
+
+> Code evidence status is available at `<BASE_PATH>/scope-req-audit/evidence-status.json`. Read it and use the evidence status when making scoping decisions:
+>
+> - **Grounded** requirements: create full module specifications as normal
+> - **Partial** requirements: create module specifications but note what evidence was found and what is missing — flag for SME review
+> - **Absent** requirements: do NOT create module specifications. Instead, list them in a "Deferred requirements (no code evidence)" section at the end of the plan, including the recommended action from the evidence status. These may be unimplemented features — documenting them risks fabrication
+>
+> If `discovered_repos` lists repos that weren't indexed, note them in the deferred section as potential sources for resolving absent requirements.
+
 ### 3. Verify output
 
 After the agent completes, verify the output file exists at `<OUTPUT_FILE>`.
