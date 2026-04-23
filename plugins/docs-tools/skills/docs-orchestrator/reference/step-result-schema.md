@@ -1,6 +1,6 @@
 # Step Result Sidecar Schema
 
-Every workflow step writes a `step-result.json` file alongside its primary output. The orchestrator and downstream scripts use this sidecar to read structured metadata without parsing markdown.
+Workflow steps write a `step-result.json` file alongside their primary output. The orchestrator and downstream scripts use this sidecar to read structured metadata without parsing markdown.
 
 ## Common fields
 

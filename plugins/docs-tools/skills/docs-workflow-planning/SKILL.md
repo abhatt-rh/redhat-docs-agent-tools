@@ -72,7 +72,12 @@ If no output file is found, report an error.
 
 ### 4. Write step-result.json
 
-Read `<OUTPUT_FILE>` and count the number of module specifications (headings or list items that define individual documentation modules). This becomes the `module_count` field.
+Read `<OUTPUT_FILE>` and count the number of module specifications. Count each occurrence of:
+
+- Level-3 headings (`###`) whose text begins with `Module:`
+- Numbered or bulleted list items within the "Module Specifications" section that start with `Module:`
+
+Ignore headings or list items outside the "Module Specifications" section, and skip items inside code blocks or blockquotes. Treat duplicate module titles as separate modules (no deduplication). This count becomes the `module_count` field.
 
 Write the sidecar to `<OUTPUT_DIR>/step-result.json`:
 

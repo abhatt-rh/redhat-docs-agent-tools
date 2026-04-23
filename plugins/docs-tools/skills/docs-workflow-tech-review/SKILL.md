@@ -85,10 +85,10 @@ Write the sidecar to `${BASE_PATH}/technical-review/step-result.json`:
   "completed_at": "<current ISO 8601 timestamp>",
   "confidence": "<HIGH|MEDIUM|LOW>",
   "severity_counts": {
-    "critical": 0,
-    "significant": 0,
-    "minor": 0,
-    "sme": 0
+    "critical": "<N>",
+    "significant": "<N>",
+    "minor": "<N>",
+    "sme": "<N>"
   },
   "iteration": 1
 }

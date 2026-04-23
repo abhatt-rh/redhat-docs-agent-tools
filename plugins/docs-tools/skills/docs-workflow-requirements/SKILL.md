@@ -65,7 +65,7 @@ If no output file is found, report an error.
 
 ### 4. Write step-result.json
 
-Read `<OUTPUT_FILE>` and extract the first markdown heading (strip any leading `#` characters and the ticket ID prefix if present). Truncate to 80 characters. This becomes the `title` field.
+Read `<OUTPUT_FILE>` and extract the first level-1 markdown heading (a line starting with a single `#` followed by a space). Strip all leading `#` characters and surrounding whitespace. If the heading starts with a ticket ID prefix matching patterns like `PROJ-123:`, `PROJ-123 -`, `[PROJ-123]`, or `[PROJ-123]:`, remove the entire prefix. Truncate the result to 80 characters (hard cut). This becomes the `title` field. If no heading is found, use `"Requirements Analysis"` as the default title.
 
 Write the sidecar to `<OUTPUT_DIR>/step-result.json`:
 
