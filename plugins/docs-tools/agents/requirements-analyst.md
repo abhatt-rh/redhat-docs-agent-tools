@@ -17,7 +17,7 @@ Before running any scripts below, set the base path if not already set:
 export CLAUDE_PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(git rev-parse --show-toplevel)/.claude}"
 ```
 
-This resolves automatically: in CLI, `CLAUDE_PLUGIN_ROOT` is set by the plugin system. In ACP or standalone contexts, it falls back to `.claude/` at the repository root (where `setup.sh` copies skills and reference files).
+This resolves automatically: in CLI, `CLAUDE_PLUGIN_ROOT` is set by the plugin system. In standalone contexts, it falls back to `.claude/` at the repository root.
 
 ## CRITICAL: Mandatory access verification
 
@@ -29,7 +29,7 @@ If access to JIRA or Git fails during requirements analysis, **STOP IMMEDIATELY*
 
 **Do not** prepend `source ~/.env` to bash commands — all Python scripts (`jira_reader.py`, `git_pr_reader.py`, etc.) load `~/.env` automatically.
 
-**Note:** The jira-reader script requires `jira` and `ratelimit` Python packages. If these are not installed, you will see `ModuleNotFoundError`. In ACP environments, `setup.sh` installs these automatically. In other environments, run: `python3 -m pip install jira ratelimit`
+**Note:** The jira-reader script requires `jira` and `ratelimit` Python packages. If these are not installed, you will see `ModuleNotFoundError`. Run: `python3 -m pip install jira ratelimit`
 
 ### Why this matters
 

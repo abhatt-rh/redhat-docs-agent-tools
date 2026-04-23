@@ -63,17 +63,17 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/jira_writer.py --issue INFERENG-5233 --relea
 
 **Add a label:**
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/scripts/jira_writer.py --issue PROJ-123 --labels-add ambient-docs-processing
+python3 ${CLAUDE_SKILL_DIR}/scripts/jira_writer.py --issue PROJ-123 --labels-add docs-in-progress
 ```
 
 **Swap labels (remove + add in one API call):**
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/scripts/jira_writer.py --issue PROJ-123 --labels-remove ambient-docs-ready --labels-add ambient-docs-processing
+python3 ${CLAUDE_SKILL_DIR}/scripts/jira_writer.py --issue PROJ-123 --labels-remove docs-ready --labels-add docs-in-progress
 ```
 
 **Batch label update:**
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/scripts/jira_writer.py --issue PROJ-123 --issue PROJ-456 --labels-add ambient-docs-generated
+python3 ${CLAUDE_SKILL_DIR}/scripts/jira_writer.py --issue PROJ-123 --issue PROJ-456 --labels-add docs-complete
 ```
 
 ## Output Format

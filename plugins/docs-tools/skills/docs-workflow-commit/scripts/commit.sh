@@ -97,11 +97,6 @@ if [[ "$BRANCH" == "main" || "$BRANCH" == "master" ]]; then
   exit 1
 fi
 
-if [[ -d "${REPO_DIR}/adapters/ambient" ]]; then
-  echo "ERROR: Refusing to commit from the agent-tools repository. Target a docs repository instead." >&2
-  exit 1
-fi
-
 # --- Read manifest ---
 MANIFEST="${BASE_PATH}/writing/_index.md"
 

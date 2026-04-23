@@ -17,7 +17,7 @@ Before running any scripts or reading reference files below, set the base path i
 export CLAUDE_PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(git rev-parse --show-toplevel)/.claude}"
 ```
 
-This resolves automatically: in CLI, `CLAUDE_PLUGIN_ROOT` is set by the plugin system. In ACP or standalone contexts, it falls back to `.claude/` at the repository root (where `setup.sh` copies skills and reference files).
+This resolves automatically: in CLI, `CLAUDE_PLUGIN_ROOT` is set by the plugin system. In standalone contexts, it falls back to `.claude/` at the repository root.
 
 ## CRITICAL: Mandatory source verification
 

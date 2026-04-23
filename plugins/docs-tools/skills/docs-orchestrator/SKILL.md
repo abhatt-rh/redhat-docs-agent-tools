@@ -21,8 +21,6 @@ Install the workflow completion Stop hook (safe to re-run, skips if already inst
 bash ${CLAUDE_SKILL_DIR}/scripts/setup-hooks.sh
 ```
 
-Skip this step if `artifacts/.setup-complete` exists (ACP's `setup.sh` handles it).
-
 **Do not** source `~/.env` or check for tokens/CLIs here — Python scripts (`jira_reader.py`, `resolve_source.py`, etc.) load `~/.env` and validate prerequisites themselves, producing clear errors on failure.
 
 ## Parse arguments
@@ -404,10 +402,7 @@ The technical review step runs in a loop until confidence is acceptable or three
 
 ## Commit confirmation gate
 
-Before running the `commit` step, check whether this is an interactive session:
-
-- If `artifacts/.setup-complete` exists (ACP/headless mode): proceed without confirmation
-- Otherwise (interactive/local mode): **ask the user to confirm** before committing. Show:
+Before running the `commit` step, **ask the user to confirm** before committing. Show:
   - The target branch name
   - The repository being committed to (current directory or `--docs-repo-path`)
   - The number of files in the writing manifest
