@@ -22,10 +22,61 @@ GITHUB_TOKEN=${GITHUB_TOKEN:-}
 GITLAB_TOKEN=${GITLAB_TOKEN:-}
 ENVEOF
 
+# Fallback: fetch JIRA credentials from ACP session endpoint when not injected
+# via CREDENTIAL_IDS. Requires BACKEND_API_URL, PROJECT_NAME, SESSION_ID env vars
+# and the bot token file.
+BOT_TOKEN_FILE="/var/run/secrets/ambient/bot-token"
+if [[ -z "${JIRA_API_TOKEN:-}" ]] \
+   && [[ -n "${BACKEND_API_URL:-}" ]] \
+   && [[ -n "${PROJECT_NAME:-}" ]] \
+   && [[ -n "${SESSION_ID:-}" ]] \
+   && [[ -f "$BOT_TOKEN_FILE" ]]; then
+  echo "JIRA token not injected, trying session credentials endpoint..."
+  JIRA_CREDS=$(python3 -c "
+import json, urllib.request, sys
+
+bot_token_path = sys.argv[1]
+url = sys.argv[2]
+
+with open(bot_token_path) as f:
+    token = f.read().strip()
+
+req = urllib.request.Request(url, headers={
+    'Authorization': 'Bearer ' + token,
+    'Accept': 'application/json',
+})
+try:
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        data = json.loads(resp.read())
+    if data.get('apiToken'):
+        print(json.dumps(data))
+    else:
+        sys.exit(1)
+except Exception:
+    sys.exit(1)
+" "$BOT_TOKEN_FILE" "${BACKEND_API_URL}/projects/${PROJECT_NAME}/agentic-sessions/${SESSION_ID}/credentials/jira" 2>/dev/null) && {
+    _token=$(echo "$JIRA_CREDS" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['apiToken'])")
+    _email=$(echo "$JIRA_CREDS" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('email',''))")
+    _url=$(echo "$JIRA_CREDS" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('url','https://redhat.atlassian.net'))")
+    cat > ~/.env <<ENVEOF
+JIRA_API_TOKEN=${_token}
+JIRA_EMAIL=${_email}
+JIRA_URL=${_url}
+GITHUB_TOKEN=${GITHUB_TOKEN:-}
+GITLAB_TOKEN=${GITLAB_TOKEN:-}
+ENVEOF
+    echo "  JIRA credentials fetched from session endpoint"
+  } || echo "  JIRA session endpoint fallback: unavailable"
+fi
+
+# Read final credential state from ~/.env for status reporting
+_final_jira=$(grep -oP '(?<=^JIRA_API_TOKEN=).+' ~/.env 2>/dev/null || true)
+_final_github=$(grep -oP '(?<=^GITHUB_TOKEN=).+' ~/.env 2>/dev/null || true)
+_final_gitlab=$(grep -oP '(?<=^GITLAB_TOKEN=).+' ~/.env 2>/dev/null || true)
 echo "Credentials mapped to ~/.env:"
-[[ -n "${JIRA_API_TOKEN:-}" ]] && echo "  JIRA: available" || echo "  JIRA: not available"
-[[ -n "${GITHUB_TOKEN:-}" ]]   && echo "  GitHub: available" || echo "  GitHub: not available"
-[[ -n "${GITLAB_TOKEN:-}" ]]   && echo "  GitLab: available" || echo "  GitLab: not available"
+[[ -n "$_final_jira" ]]   && echo "  JIRA: available" || echo "  JIRA: not available"
+[[ -n "$_final_github" ]] && echo "  GitHub: available" || echo "  GitHub: not available"
+[[ -n "$_final_gitlab" ]] && echo "  GitLab: available" || echo "  GitLab: not available"
 
 # Install Python dependencies required by pipeline scripts
 echo "Installing Python dependencies..."
