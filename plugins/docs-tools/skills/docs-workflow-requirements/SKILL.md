@@ -62,3 +62,19 @@ The PR URL bullet list is conditional — include those bullets only if PR URLs 
 After the agent completes, verify the output file exists at `<OUTPUT_FILE>`.
 
 If no output file is found, report an error.
+
+### 4. Write step-result.json
+
+Read `<OUTPUT_FILE>` and extract the first markdown heading (strip any leading `#` characters and the ticket ID prefix if present). Truncate to 80 characters. This becomes the `title` field.
+
+Write the sidecar to `<OUTPUT_DIR>/step-result.json`:
+
+```json
+{
+  "schema_version": 1,
+  "step": "requirements",
+  "ticket": "<TICKET>",
+  "completed_at": "<current ISO 8601 timestamp>",
+  "title": "<first heading, max 80 chars>"
+}
+```
