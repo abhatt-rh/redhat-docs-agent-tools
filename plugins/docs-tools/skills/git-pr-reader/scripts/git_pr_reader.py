@@ -1324,7 +1324,7 @@ def cmd_info(args) -> int:
             value = info.get(args.field)
             if value is None:
                 print(
-                    f"Error: unknown field '{args.field}'. " f"Available: {', '.join(info.keys())}",
+                    f"Error: unknown field '{args.field}'. Available: {', '.join(info.keys())}",
                     file=sys.stderr,
                 )
                 return 1

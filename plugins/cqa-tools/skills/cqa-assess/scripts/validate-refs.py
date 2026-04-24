@@ -268,7 +268,7 @@ def check_images(files, docs_dir, imagesdir):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Validate AsciiDoc cross-references, includes, " "and images."
+        description="Validate AsciiDoc cross-references, includes, and images."
     )
     parser.add_argument(
         "docs_dir",

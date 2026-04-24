@@ -418,7 +418,7 @@ def check_file(filepath):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Check readability (Flesch-Kincaid Grade Level) " "in AsciiDoc docs."
+        description="Check readability (Flesch-Kincaid Grade Level) in AsciiDoc docs."
     )
     parser.add_argument(
         "docs_dir",
@@ -462,7 +462,7 @@ def main():
     print("=" * 60)
     print(f"Scanning: {docs_dir}")
     print(f"Directories: {', '.join(args.scan_dirs)}")
-    print(f"Thresholds: ideal <={IDEAL_GRADE}, " f"minimum <={MIN_GRADE}")
+    print(f"Thresholds: ideal <={IDEAL_GRADE}, minimum <={MIN_GRADE}")
     print()
 
     if args.file_list:
@@ -519,7 +519,7 @@ def main():
     print(f"FILES ABOVE GRADE {MIN_GRADE}: {len(above_min)}")
     if above_min:
         for rel_path, grade, sents, words in above_min:
-            print(f"  {rel_path}  " f"(grade {grade:.1f}, {sents} sentences, {words} words)")
+            print(f"  {rel_path}  (grade {grade:.1f}, {sents} sentences, {words} words)")
     else:
         print("  (none)")
     print()
@@ -535,7 +535,7 @@ def main():
                 marker = ""
             else:
                 marker = " [IDEAL]"
-            print(f"  {rel_path}  " f"(grade {grade:.1f}, {sents} sents){marker}")
+            print(f"  {rel_path}  (grade {grade:.1f}, {sents} sents){marker}")
         print()
 
     # Metrics
@@ -546,7 +546,7 @@ def main():
 
     print("-" * 60)
     print("METRICS:")
-    print(f"  Files analyzed (>={MIN_SENTENCES} sentences): " f"{len(file_grades)}")
+    print(f"  Files analyzed (>={MIN_SENTENCES} sentences): {len(file_grades)}")
     print(f"  Total sentences:            {all_sentences}")
     print(f"  Total words:                {total_words}")
     print(f"  Avg words/sentence:         {avg_wps:.1f}")
@@ -555,21 +555,21 @@ def main():
     print(
         f"  Files at ideal (<=10):      "
         f"{meets_ideal}/{len(file_grades)} "
-        f"({meets_ideal/len(file_grades)*100:.1f}%)"
+        f"({meets_ideal / len(file_grades) * 100:.1f}%)"
         if file_grades
         else ""
     )
     print(
         f"  Files meeting min (<=12):   "
         f"{meets_min}/{len(file_grades)} "
-        f"({meets_min/len(file_grades)*100:.1f}%)"
+        f"({meets_min / len(file_grades) * 100:.1f}%)"
         if file_grades
         else ""
     )
     print(f"  Files above min (>12):      {len(above_min)}")
 
     if overall_grade > MIN_GRADE:
-        print(f"\nResult: FAIL (overall grade {overall_grade:.2f} " f"exceeds {MIN_GRADE})")
+        print(f"\nResult: FAIL (overall grade {overall_grade:.2f} exceeds {MIN_GRADE})")
         sys.exit(1)
     else:
         print(f"\nResult: PASS (overall grade {overall_grade:.2f})")

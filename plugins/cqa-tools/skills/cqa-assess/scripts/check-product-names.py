@@ -550,7 +550,7 @@ def verify_with_opl(product_names):
 
     search_term = product_names[0][0]  # longest = most specific
     try:
-        url = f"{OPL_BASE}/products" f"?q={urllib.parse.quote(search_term)}"
+        url = f"{OPL_BASE}/products?q={urllib.parse.quote(search_term)}"
         req = urllib.request.Request(url, headers={"Authorization": f"Bearer {OPL_KEY}"})
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read())
@@ -598,7 +598,7 @@ def verify_with_opl(product_names):
         aname = alias["alias_name"]
         if aname in attr_values:
             if alias.get("previous_name"):
-                print(f"  WARNING: '{aname}' is a deprecated/previous " f"name in OPL")
+                print(f"  WARNING: '{aname}' is a deprecated/previous name in OPL")
                 issues += 1
             if not alias.get("alias_approved"):
                 print(
@@ -609,8 +609,7 @@ def verify_with_opl(product_names):
     for alias in aliases:
         if alias.get("alias_approved") and alias["alias_name"] not in attr_values:
             print(
-                f"  NOTE: OPL approved alias '{alias['alias_name']}' "
-                f"not found in attributes.adoc"
+                f"  NOTE: OPL approved alias '{alias['alias_name']}' not found in attributes.adoc"
             )
 
     if issues == 0:
@@ -629,15 +628,13 @@ def main():
     )
     parser.add_argument(
         "docs_dir",
-        help="Path to the documentation repository root " "(must have common/*attributes.adoc)",
+        help="Path to the documentation repository root (must have common/*attributes.adoc)",
     )
     parser.add_argument(
         "--scan-dirs",
         nargs="+",
         default=DEFAULT_SCAN_DIRS,
-        help=(
-            "Directories to scan relative to docs_dir " f"(default: {' '.join(DEFAULT_SCAN_DIRS)})"
-        ),
+        help=(f"Directories to scan relative to docs_dir (default: {' '.join(DEFAULT_SCAN_DIRS)})"),
     )
     parser.add_argument(
         "--file-list",
@@ -677,10 +674,10 @@ def main():
 
     if not product_names:
         print(
-            "Error: no product name attributes found in " f"{docs_dir}/common/*attributes.adoc",
+            f"Error: no product name attributes found in {docs_dir}/common/*attributes.adoc",
             file=sys.stderr,
         )
-        print("Expected attribute files with product name definitions " "like:", file=sys.stderr)
+        print("Expected attribute files with product name definitions like:", file=sys.stderr)
         print("  :prod: Red Hat Product Name", file=sys.stderr)
         print("  :prod-short: Product Name", file=sys.stderr)
         sys.exit(2)
@@ -726,7 +723,7 @@ def main():
     else:
         files = collect_adoc_files(docs_dir, scan_dirs=args.scan_dirs, skip_files=skip_files)
     if not files:
-        print("Error: no .adoc files found under " f"{', '.join(args.scan_dirs)}", file=sys.stderr)
+        print(f"Error: no .adoc files found under {', '.join(args.scan_dirs)}", file=sys.stderr)
         sys.exit(2)
 
     # ── Check all files ──
@@ -760,7 +757,7 @@ def main():
     if violations:
         for f in violations:
             print(f"  {f['file']}:{f['line_num']}")
-            print(f"    Found: \"{f['match']}\" -> use {f['replacement']}")
+            print(f'    Found: "{f["match"]}" -> use {f["replacement"]}')
             print(f"    Line:  {f['line']}")
             print()
     else:
@@ -772,7 +769,7 @@ def main():
     if image_alt:
         for f in image_alt:
             print(f"  {f['file']}:{f['line_num']}")
-            print(f"    Found: \"{f['match']}\" -> use {f['replacement']}")
+            print(f'    Found: "{f["match"]}" -> use {f["replacement"]}')
             print(f"    Line:  {f['line']}")
             print()
     else:
@@ -784,7 +781,7 @@ def main():
     if exceptions:
         for f in exceptions:
             print(f"  {f['file']}:{f['line_num']}  [{f['classification']}]")
-            print(f"    \"{f['match']}\" in: {f['line'].strip()}")
+            print(f'    "{f["match"]}" in: {f["line"].strip()}')
         print()
     else:
         print("  (none)")

@@ -281,7 +281,7 @@ def main():
     if all_violations:
         for rel_path, violations in all_violations:
             for v in violations:
-                print(f"  {rel_path}:{v['line']}  " f"\"{v['matched']}\"")
+                print(f'  {rel_path}:{v["line"]}  "{v["matched"]}"')
                 print(f"    Fix: {v['fix']}")
                 print(f"    {v['context']}")
                 print()

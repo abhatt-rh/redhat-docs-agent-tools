@@ -74,10 +74,10 @@ def run_batch(repo: str, books: list[str], distro: str | None, output: str | Non
 
         cmd_parts.append(skill_args)
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"Running batch: {', '.join(books)}")
         print(f"Command: {' '.join(cmd_parts)}")
-        print(f"{'='*60}\n")
+        print(f"{'=' * 60}\n")
 
         result = subprocess.run(
             cmd_parts,
@@ -154,7 +154,7 @@ def main():
     print()
 
     for i, batch in enumerate(batches):
-        print(f"  Batch {i+1}: {', '.join(batch)}")
+        print(f"  Batch {i + 1}: {', '.join(batch)}")
 
     if args.dry_run:
         print("\n[Dry run — no batches executed]")
@@ -168,18 +168,18 @@ def main():
 
     # Execute batches
     for i, batch in enumerate(batches):
-        print(f"\n>>> Batch {i+1}/{len(batches)} ({len(batch)} books)")
+        print(f"\n>>> Batch {i + 1}/{len(batches)} ({len(batch)} books)")
 
         success = run_batch(str(repo), batch, args.distro, args.output)
 
         if success:
             state["completed"].extend(batch)
             state["remaining"] = [b for b in state["remaining"] if b not in batch]
-            print(f"Batch {i+1} completed successfully")
+            print(f"Batch {i + 1} completed successfully")
         else:
             state["failed"].extend(batch)
             state["remaining"] = [b for b in state["remaining"] if b not in batch]
-            print(f"Batch {i+1} FAILED for: {', '.join(batch)}")
+            print(f"Batch {i + 1} FAILED for: {', '.join(batch)}")
 
         save_state(state_path, state)
         print(
@@ -187,9 +187,9 @@ def main():
         )
 
     # Final report
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("FINAL REPORT")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"Completed: {len(state['completed'])}/{len(all_books)}")
     if state["completed"]:
         print(f"  Books: {', '.join(state['completed'])}")

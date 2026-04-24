@@ -39,15 +39,14 @@ EXTENSIONS = {"doc": ".md", "slides": ".md", "sheets": ".csv"}
 
 def parse_and_validate_args():
     if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} " "<google-doc-or-slides-or-sheets-url> [output]")
+        print(f"Usage: {sys.argv[0]} <google-doc-or-slides-or-sheets-url> [output]")
         sys.exit(1)
 
     url = sys.argv[1]
     match = VALID_URL_RE.match(url)
     if not match:
         print(
-            "Error: URL must be a Google Docs, Slides, or Sheets URL "
-            "(https://docs.google.com/...)",
+            "Error: URL must be a Google Docs, Slides, or Sheets URL (https://docs.google.com/...)",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -71,7 +70,7 @@ def check_dependencies():
     if result.returncode != 0:
         print("Error: gcloud CLI is not installed.", file=sys.stderr)
         print(
-            "  Install: " "https://cloud.google.com/sdk/docs/install",
+            "  Install: https://cloud.google.com/sdk/docs/install",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -143,12 +142,8 @@ def download(url: str, token: str, retries: int = 3) -> bytes:
                 time.sleep(wait)
                 continue
             messages = {
-                401: (
-                    "Authentication failed (401). "
-                    "Try: gcloud auth login "
-                    "--enable-gdrive-access"
-                ),
-                403: ("Access denied (403). Check you have " "permission to access this file."),
+                401: ("Authentication failed (401). Try: gcloud auth login --enable-gdrive-access"),
+                403: ("Access denied (403). Check you have permission to access this file."),
                 404: "Not found (404). Check the URL is correct.",
             }
             print(
@@ -231,7 +226,7 @@ def pptx_to_markdown(data: bytes) -> str:
 
 def get_sheet_metadata(file_id: str, token: str):
     """Return list of (gid, title) for each sheet."""
-    api_url = "https://sheets.googleapis.com/v4/spreadsheets/" f"{file_id}?fields=sheets.properties"
+    api_url = f"https://sheets.googleapis.com/v4/spreadsheets/{file_id}?fields=sheets.properties"
     data = download(api_url, token)
     info = json.loads(data)
     return [
@@ -262,8 +257,8 @@ def fetch(file_id: str, output: str, mode: str):
         return
 
     export_urls = {
-        "slides": (f"{base}/presentation/d/{file_id}" "/export?format=pptx"),
-        "doc": (f"{base}/document/d/{file_id}" "/export?format=md"),
+        "slides": (f"{base}/presentation/d/{file_id}/export?format=pptx"),
+        "doc": (f"{base}/document/d/{file_id}/export?format=md"),
     }
 
     data = download(export_urls[mode], token)
@@ -302,11 +297,11 @@ def _fetch_sheets(file_id: str, output: str, token: str, base: str):
 
     if len(sheets) == 1:
         gid, title = sheets[0]
-        url = f"{base}/spreadsheets/d/{file_id}" f"/export?format=csv&gid={gid}"
+        url = f"{base}/spreadsheets/d/{file_id}/export?format=csv&gid={gid}"
         data = download(url, token)
         if out_path.exists():
             print(
-                "Warning: overwriting existing " f"file '{out_path}'",
+                f"Warning: overwriting existing file '{out_path}'",
                 file=sys.stderr,
             )
         out_path.write_bytes(data)
@@ -316,11 +311,11 @@ def _fetch_sheets(file_id: str, output: str, token: str, base: str):
     for gid, title in sheets:
         safe_title = _sanitize_filename(title)
         csv_path = parent / f"{stem}_{safe_title}.csv"
-        url = f"{base}/spreadsheets/d/{file_id}" f"/export?format=csv&gid={gid}"
+        url = f"{base}/spreadsheets/d/{file_id}/export?format=csv&gid={gid}"
         data = download(url, token)
         if csv_path.exists():
             print(
-                "Warning: overwriting existing " f"file '{csv_path}'",
+                f"Warning: overwriting existing file '{csv_path}'",
                 file=sys.stderr,
             )
         csv_path.write_bytes(data)

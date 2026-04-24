@@ -78,12 +78,12 @@ def run_batch(
 
         cmd_parts.append(skill_args)
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"Running batch: {len(docs)} documents")
         for doc in docs:
             print(f"  - {doc}")
         print(f"Command: {' '.join(cmd_parts)}")
-        print(f"{'='*60}\n")
+        print(f"{'=' * 60}\n")
 
         result = subprocess.run(
             cmd_parts,
@@ -155,7 +155,7 @@ def main():
     print()
 
     for i, batch in enumerate(batches):
-        print(f"  Batch {i+1}:")
+        print(f"  Batch {i + 1}:")
         for doc in batch:
             print(f"    - {doc}")
 
@@ -171,18 +171,18 @@ def main():
 
     # Execute batches
     for i, batch in enumerate(batches):
-        print(f"\n>>> Batch {i+1}/{len(batches)} ({len(batch)} docs)")
+        print(f"\n>>> Batch {i + 1}/{len(batches)} ({len(batch)} docs)")
 
         success = run_batch(batch, args.variant, args.research, args.output)
 
         if success:
             state["completed"].extend(batch)
             state["remaining"] = [d for d in state["remaining"] if d not in batch]
-            print(f"Batch {i+1} completed successfully")
+            print(f"Batch {i + 1} completed successfully")
         else:
             state["failed"].extend(batch)
             state["remaining"] = [d for d in state["remaining"] if d not in batch]
-            print(f"Batch {i+1} FAILED")
+            print(f"Batch {i + 1} FAILED")
 
         save_state(state_path, state)
         print(
@@ -190,9 +190,9 @@ def main():
         )
 
     # Final report
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("FINAL REPORT")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"Completed: {len(state['completed'])}/{len(all_docs)}")
     if state["completed"]:
         for doc in state["completed"]:

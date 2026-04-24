@@ -235,9 +235,7 @@ def main():
         "--scan-dirs",
         nargs="+",
         default=DEFAULT_SCAN_DIRS,
-        help=(
-            "Directories to scan relative to docs_dir " f"(default: {' '.join(DEFAULT_SCAN_DIRS)})"
-        ),
+        help=(f"Directories to scan relative to docs_dir (default: {' '.join(DEFAULT_SCAN_DIRS)})"),
     )
     parser.add_argument(
         "--file-list",

@@ -266,9 +266,7 @@ def main():
         "--scan-dirs",
         nargs="+",
         default=DEFAULT_SCAN_DIRS,
-        help=(
-            "Directories to scan relative to docs_dir " f"(default: {' '.join(DEFAULT_SCAN_DIRS)})"
-        ),
+        help=(f"Directories to scan relative to docs_dir (default: {' '.join(DEFAULT_SCAN_DIRS)})"),
     )
     parser.add_argument(
         "--file-list",
@@ -307,7 +305,7 @@ def main():
         for f in violations:
             replacements = ", ".join(f["replacements"])
             print(f"  {f['file']}:{f['line_num']}")
-            print(f"    Found: \"{f['term']}\" -> use: {replacements}")
+            print(f'    Found: "{f["term"]}" -> use: {replacements}')
             print(f"    Line:  {f['line'].strip()}")
             print()
     else:
@@ -324,7 +322,7 @@ def main():
         for cls, items in sorted(by_type.items()):
             print(f"  [{cls}] ({len(items)} occurrences):")
             for f in items:
-                print(f"    {f['file']}:{f['line_num']}  \"{f['term']}\"")
+                print(f'    {f["file"]}:{f["line_num"]}  "{f["term"]}"')
             print()
     else:
         print("  (none)")
@@ -332,7 +330,7 @@ def main():
 
     # Summary
     print("-" * 60)
-    print(f"Summary: {len(violations)} violations, " f"{len(exceptions)} exceptions")
+    print(f"Summary: {len(violations)} violations, {len(exceptions)} exceptions")
     print(f"Files scanned: {len(files)}")
 
     if violations:

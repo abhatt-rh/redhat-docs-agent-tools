@@ -528,11 +528,11 @@ def main():
 
     # Report: Long paragraphs (informational)
     total_long_paras = sum(len(p) for _, p in long_para_files)
-    print(f"LONG PARAGRAPHS (>{MAX_PARAGRAPH_SENTENCES} sentences): " f"{total_long_paras}")
+    print(f"LONG PARAGRAPHS (>{MAX_PARAGRAPH_SENTENCES} sentences): {total_long_paras}")
     if args.verbose and long_para_files:
         for rel_path, paragraphs in long_para_files:
             for p in paragraphs:
-                print(f"  {rel_path}:{p['line']}  " f"({p['sentences']} sentences)")
+                print(f"  {rel_path}:{p['line']}  ({p['sentences']} sentences)")
     print()
 
     # Metrics
@@ -547,15 +547,14 @@ def main():
     print(f"  Total sentences:            {total_sentences}")
     print(f"  Overall avg words/sentence: {overall_avg:.1f}")
     print(
-        f"  Sentences <={AVG_LIMIT} words:      "
-        f"{under_target}/{total_sentences} ({pct_under:.1f}%)"
+        f"  Sentences <={AVG_LIMIT} words:      {under_target}/{total_sentences} ({pct_under:.1f}%)"
     )
     print(f"  Sentences >{HARD_LIMIT} words:       {total_violations}")
     print(f"  Files with high avg:        {len(high_avg_files)}")
     print(f"  Long paragraphs:            {total_long_paras}")
 
     if total_violations > 0:
-        print(f"\nResult: FAIL ({total_violations} sentences exceed " f"{HARD_LIMIT}-word limit)")
+        print(f"\nResult: FAIL ({total_violations} sentences exceed {HARD_LIMIT}-word limit)")
         sys.exit(1)
     else:
         print("\nResult: PASS")
