@@ -80,7 +80,7 @@ scope-req-audit is purely additive. It does not modify, filter, or interfere wit
 
 ### Skill location
 
-`plugins/docs-tools/skills/docs-workflow-scope-req-audit/skill.md`
+`plugins/docs-tools/skills/docs-workflow-scope-req-audit/SKILL.md`
 
 ### Arguments
 
@@ -209,7 +209,7 @@ steps:
 
 ## Planning step changes
 
-A conditional paragraph is added to the planner dispatch prompt in `docs-workflow-planning/skill.md`. It is only included when `evidence-status.json` exists:
+A conditional paragraph is added to the planner dispatch prompt in `docs-workflow-planning/SKILL.md`. It is only included when `evidence-status.json` exists:
 
 > Code evidence status is available at `<base-path>/scope-req-audit/evidence-status.json`. Read it and use the evidence status when making scoping decisions:
 >
@@ -235,12 +235,12 @@ No interactive gate, no new conditions, no iteration loop.
 ## Files to create and modify
 
 **New:**
-- `plugins/docs-tools/skills/docs-workflow-scope-req-audit/skill.md`
+- `plugins/docs-tools/skills/docs-workflow-scope-req-audit/SKILL.md`
 
 **Modified:**
 - `plugins/docs-tools/skills/docs-orchestrator/defaults/docs-workflow.yaml`
-- `plugins/docs-tools/skills/docs-workflow-planning/skill.md`
-- `plugins/docs-tools/skills/docs-orchestrator/skill.md`
+- `plugins/docs-tools/skills/docs-workflow-planning/SKILL.md`
+- `plugins/docs-tools/skills/docs-orchestrator/SKILL.md`
 
 **Renamed:**
 - `plugins/docs-tools/skills/docs-workflow-scope-audit/` → `plugins/docs-tools/skills/docs-workflow-scope-req-audit/`

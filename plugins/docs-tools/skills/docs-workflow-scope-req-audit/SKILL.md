@@ -99,8 +99,8 @@ For each file, extract URLs matching:
 - `https://gitlab.<host>/<path>` (GitLab)
 
 Filter out:
-- The current repo URL (discover the remote via `git remote -v` in the repo directory and use the first available remote's URL)
-- Duplicate URLs
+- The current repo URL (discover the remote via `git remote -v` in the repo directory and use the first available remote's URL). Normalize before comparing: strip trailing `.git`, convert `git@<host>:<org>/<repo>` SSH URLs to `https://<host>/<org>/<repo>` form
+- Duplicate URLs (after normalization)
 - URLs that are clearly not repos (e.g., GitHub issue links, badge URLs)
 
 Store the results as a list of `discovered_repos` entries, each with:
