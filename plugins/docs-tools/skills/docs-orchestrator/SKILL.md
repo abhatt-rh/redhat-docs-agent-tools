@@ -217,6 +217,7 @@ Use this absolute `BASE_PATH` for the progress file's `base_path` field and for 
   scope-req-audit/                     (if source repo is available)
     evidence-status.json
     summary.md
+    step-result.json                 (sidecar: recommendation, grounded, partial, absent, total, discovered_repos_count)
   planning/
     plan.md
     step-result.json                 (sidecar: module_count)
@@ -369,7 +370,7 @@ Skill: <step.skill>, args: "<constructed args>"
 3. Update the step's status to `"completed"` with the output folder path in the progress file
 4. Update the progress file's `updated_at` timestamp
 5. **If the just-completed step is `requirements` AND `options.source` is `null`** → run [Post-requirements source resolution](#post-requirements-source-resolution) before continuing to the next step. This may change `deferred` steps to `pending` or `skipped`
-6. **If the just-completed step is `scope-req-audit`** → read `evidence-status.json`, extract the `recommendation` and `summary` counts, and log: `"scope-req-audit completed: N grounded, N partial, N absent — recommendation: proceed|gather-more|review-needed"`. If `discovered_repos` is non-empty, also log the count: `"(N discovered repos not indexed)"`
+6. **If the just-completed step is `scope-req-audit`** → read `step-result.json` from the output folder and log: `"scope-req-audit completed: N grounded, N partial, N absent — recommendation: proceed|gather-more|review-needed"`. If `discovered_repos_count` > 0, also log: `"(N discovered repos not indexed)"`. Fall back to reading `evidence-status.json` if the sidecar is missing
 
 ## Post-requirements source resolution
 

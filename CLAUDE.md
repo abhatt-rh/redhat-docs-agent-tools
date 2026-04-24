@@ -105,6 +105,16 @@ Skills that contain procedural logic — argument parsing, mode determination, i
 
 Do NOT embed procedural logic (conditionals, path construction, validation) inline in SKILL.md. If a skill needs to make decisions before dispatching an agent, those decisions belong in a script that emits structured output (typically JSON on stdout, errors on stderr).
 
+## Workflow step skills must write step-result.json
+
+All `docs-workflow-*` step skills must write a `step-result.json` sidecar alongside their primary output. This lightweight metadata file lets the orchestrator read structured results without parsing markdown.
+
+- Follow the common schema defined in `plugins/docs-tools/skills/docs-orchestrator/schema/step-result-schema.md`
+- Every sidecar must include `schema_version`, `step`, `ticket`, and `completed_at`
+- Add step-specific fields as per-step extensions in the schema doc
+- Do NOT inline the JSON structure only in the SKILL.md — add the schema entry first, then reference it from the skill's write step
+- Verify the sidecar exists in the skill's final verification step
+
 ## Authoring skills, agents, and plugins — Anthropic documentation compliance
 
 When creating or modifying skills, agents, hooks, or plugin components, follow the official Anthropic documentation. Do NOT rely on training data for schemas, frontmatter fields, or best practices — use WebFetch to consult the canonical docs listed below before generating any component.

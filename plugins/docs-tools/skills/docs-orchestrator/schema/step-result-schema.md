@@ -40,6 +40,32 @@ All sidecars share these fields:
 |---|---|---|---|
 | `title` | string | First heading from requirements.md (max 80 chars, ticket prefix stripped) | `create_mr.sh` — PR/MR title |
 
+### scope-req-audit
+
+```json
+{
+  "schema_version": 1,
+  "step": "scope-req-audit",
+  "ticket": "PROJ-123",
+  "completed_at": "2026-04-23T14:35:00Z",
+  "recommendation": "proceed",
+  "grounded": 6,
+  "partial": 2,
+  "absent": 1,
+  "total": 9,
+  "discovered_repos_count": 2
+}
+```
+
+| Field | Type | Description | Consumed by |
+|---|---|---|---|
+| `recommendation` | string | `"proceed"`, `"gather-more"`, or `"review-needed"` | Orchestrator — post-step logging |
+| `grounded` | integer | Requirements with strong code evidence | Orchestrator — post-step logging |
+| `partial` | integer | Requirements with weak or ambiguous evidence | Orchestrator — post-step logging |
+| `absent` | integer | Requirements with no code evidence | Orchestrator — post-step logging |
+| `total` | integer | Total requirements classified | Orchestrator — post-step logging |
+| `discovered_repos_count` | integer | Number of related repos found but not indexed | Orchestrator — post-step logging |
+
 ### planning
 
 ```json
