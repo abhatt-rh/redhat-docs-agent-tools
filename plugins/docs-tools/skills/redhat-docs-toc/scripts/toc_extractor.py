@@ -30,7 +30,10 @@ except ImportError:
     print(
         json.dumps(
             {
-                "error": "beautifulsoup4 package not installed. Run: python3 -m pip install beautifulsoup4"
+                "error": (
+                    "beautifulsoup4 package not installed. "
+                    "Run: python3 -m pip install beautifulsoup4"
+                )
             }
         )
     )
@@ -56,7 +59,11 @@ class RedHatDocsTOCExtractor:
         """Download HTML content from URL."""
         try:
             headers = {
-                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                "User-Agent": (
+                    "Mozilla/5.0 (X11; Linux x86_64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/91.0.4472.124 Safari/537.36"
+                )
             }
             response = requests.get(self.url, headers=headers, timeout=30)
             response.raise_for_status()

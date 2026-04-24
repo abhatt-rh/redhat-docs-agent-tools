@@ -522,8 +522,8 @@ def classify_command_scope(cmd: str, repo_paths: list[str]) -> str:
 def git_log_search(term: str, repo_path: str, max_results: int = 5) -> list[str]:
     """Search git log for mentions of a term (renames, deprecations)."""
     try:
-        result = subprocess.run(
-            ["git", "log", "--all", "--oneline", f"--grep={term}", f"-{max_results}"],
+        result = subprocess.run(  # noqa: S603
+            ["git", "log", "--all", "--oneline", f"--grep={term}", f"-{max_results}"],  # noqa: S607
             capture_output=True,
             text=True,
             cwd=repo_path,
@@ -568,7 +568,7 @@ def discover_cli_definitions(binary: str, repo_paths: list[str]) -> dict | None:
         for cand in candidates[:10]:
             try:
                 src = cand.read_text(encoding="utf-8", errors="replace")
-            except Exception:
+            except Exception:  # noqa: S112
                 continue
             for framework, pattern in patterns_by_framework.items():
                 flags = re.findall(pattern, src)
@@ -624,7 +624,7 @@ def discover_schemas(repo_paths: list[str]) -> list[dict]:
                                     "keys": keys,
                                 }
                             )
-                    except Exception:
+                    except Exception:  # noqa: S112
                         continue
     return schemas
 
@@ -721,8 +721,8 @@ def search_code_blocks(code_blocks: list[dict], repo_paths: list[str]) -> list[d
         matches = []
         for rp in repo_paths:
             try:
-                result = subprocess.run(
-                    [
+                result = subprocess.run(  # noqa: S603
+                    [  # noqa: S607
                         "grep",
                         "-rl",
                         "--include=*.py",
@@ -789,8 +789,8 @@ def search_apis(apis: list[dict], repo_paths: list[str]) -> list[dict]:
 
             for pattern in patterns:
                 try:
-                    result = subprocess.run(
-                        [
+                    result = subprocess.run(  # noqa: S603
+                        [  # noqa: S607
                             "grep",
                             "-rn",
                             "--include=*.py",
@@ -1011,7 +1011,7 @@ def discover_env_vars(repo_paths: list[str]) -> list[dict]:
                         continue
                     try:
                         content = fpath.read_text(encoding="utf-8", errors="replace")
-                    except Exception:
+                    except Exception:  # noqa: S112
                         continue
                     for line_idx, line in enumerate(content.splitlines()):
                         if line.lstrip().startswith(("#", "//", "*", "/*")):
@@ -1049,7 +1049,7 @@ def discover_all_cli_args(repo_paths: list[str]) -> list[dict]:
                         continue
                     try:
                         src = fpath.read_text(encoding="utf-8", errors="replace")
-                    except Exception:
+                    except Exception:  # noqa: S112
                         continue
                     for m in pattern.finditer(src):
                         name = m.group(1)
@@ -1099,7 +1099,7 @@ def discover_config_keys(repo_paths: list[str]) -> list[dict]:
                         continue
                     try:
                         src = fpath.read_text(encoding="utf-8", errors="replace")
-                    except Exception:
+                    except Exception:  # noqa: S112
                         continue
                     for m in pattern.finditer(src):
                         key_path = m.group(1)
@@ -1131,7 +1131,7 @@ def discover_api_endpoints(repo_paths: list[str]) -> list[dict]:
                         continue
                     try:
                         content = fpath.read_text(encoding="utf-8", errors="replace")
-                    except Exception:
+                    except Exception:  # noqa: S112
                         continue
                     for line_idx, line in enumerate(content.splitlines()):
                         m = pattern.search(line)
@@ -1178,7 +1178,7 @@ def discover_data_models(repo_paths: list[str]) -> list[dict]:
                         continue
                     try:
                         src = fpath.read_text(encoding="utf-8", errors="replace")
-                    except Exception:
+                    except Exception:  # noqa: S112
                         continue
                     for m in pattern.finditer(src):
                         name = m.group(1)

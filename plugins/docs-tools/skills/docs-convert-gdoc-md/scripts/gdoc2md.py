@@ -66,7 +66,7 @@ def parse_and_validate_args():
 
 
 def check_dependencies():
-    result = subprocess.run(["gcloud", "version"], capture_output=True)
+    result = subprocess.run(["gcloud", "version"], capture_output=True)  # noqa: S607
     if result.returncode != 0:
         print("Error: gcloud CLI is not installed.", file=sys.stderr)
         print(
@@ -87,7 +87,7 @@ def get_token() -> str:
     Raises SystemExit on unrecoverable failure.
     """
     result = subprocess.run(
-        ["gcloud", "auth", "print-access-token"],
+        ["gcloud", "auth", "print-access-token"],  # noqa: S607
         capture_output=True,
         text=True,
     )
@@ -96,7 +96,7 @@ def get_token() -> str:
 
     print("No active credentials found. Authenticating with Google...")
     login = subprocess.run(
-        ["gcloud", "auth", "login", "--enable-gdrive-access"],
+        ["gcloud", "auth", "login", "--enable-gdrive-access"],  # noqa: S607
     )
     if login.returncode != 0:
         print(
@@ -107,7 +107,7 @@ def get_token() -> str:
 
     # Re-fetch after successful login
     result = subprocess.run(
-        ["gcloud", "auth", "print-access-token"],
+        ["gcloud", "auth", "print-access-token"],  # noqa: S607
         capture_output=True,
         text=True,
     )
@@ -127,10 +127,10 @@ def get_token() -> str:
 
 
 def download(url: str, token: str, retries: int = 3) -> bytes:
-    req = Request(url, headers={"Authorization": f"Bearer {token}"})
+    req = Request(url, headers={"Authorization": f"Bearer {token}"})  # noqa: S310
     for attempt in range(retries + 1):
         try:
-            with urlopen(req) as resp:
+            with urlopen(req) as resp:  # noqa: S310
                 return resp.read()
         except HTTPError as e:
             if e.code == 429 and attempt < retries:

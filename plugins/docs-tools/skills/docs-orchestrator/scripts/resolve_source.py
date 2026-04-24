@@ -48,7 +48,7 @@ def _is_remote_url(value):
 
 def _run_git(args, cwd=None, check=True):
     """Run a git command and return stdout."""
-    result = subprocess.run(
+    result = subprocess.run(  # noqa: S603
         ["git"] + args,
         cwd=cwd,
         capture_output=True,
@@ -63,7 +63,7 @@ def _run_git(args, cwd=None, check=True):
 
 def _run_gh(args, check=True):
     """Run a gh CLI command and return stdout."""
-    result = subprocess.run(
+    result = subprocess.run(  # noqa: S603
         ["gh"] + args,
         capture_output=True,
         text=True,
@@ -77,7 +77,7 @@ def _run_gh(args, check=True):
 
 def _run_glab(args, check=True):
     """Run a glab CLI command and return stdout."""
-    result = subprocess.run(
+    result = subprocess.run(  # noqa: S603
         ["glab"] + args,
         capture_output=True,
         text=True,
@@ -513,13 +513,19 @@ def resolve(args):
                 if not _verify_existing_clone(clone_dir, ref, expected_repo_url=repo_value):
                     return {
                         "status": "error",
-                        "message": f"Existing clone at {clone_dir} is invalid or points to a different repo.",
+                        "message": (
+                            f"Existing clone at {clone_dir} is invalid "
+                            "or points to a different repo."
+                        ),
                     }
             else:
                 if not _clone_repo(repo_value, clone_dir, ref):
                     return {
                         "status": "error",
-                        "message": f"Cannot clone {repo_value}. For private repos, ensure gh is authenticated.",
+                        "message": (
+                            f"Cannot clone {repo_value}. "
+                            "For private repos, ensure gh is authenticated."
+                        ),
                     }
 
             _write_source_yaml(base_path, repo_value, ref)
@@ -554,7 +560,10 @@ def resolve(args):
                 if not _verify_existing_clone(clone_dir, ref, expected_repo_url=repo_value):
                     return {
                         "status": "error",
-                        "message": f"Existing clone at {clone_dir} is invalid or points to a different repo.",
+                        "message": (
+                            f"Existing clone at {clone_dir} is invalid "
+                            "or points to a different repo."
+                        ),
                     }
             else:
                 if not _clone_repo(repo_value, clone_dir, ref):

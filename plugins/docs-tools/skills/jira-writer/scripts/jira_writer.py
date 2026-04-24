@@ -60,7 +60,8 @@ class JiraWriter:
             email = os.environ.get("JIRA_EMAIL")
             if not email:
                 raise ValueError(
-                    "JIRA_EMAIL environment variable not set. Required for Atlassian Cloud. Add it to ~/.env"
+                    "JIRA_EMAIL environment variable not set. "
+                    "Required for Atlassian Cloud. Add it to ~/.env"
                 )
             self.jira = JIRA(server=server, basic_auth=(email, token))
         else:
@@ -248,7 +249,9 @@ def main():
 
     if not (has_release_note or has_status or has_custom_field or has_label_update):
         parser.error(
-            "Must specify one of: --release-note, --release-note-file, --status, --custom-field with --value, or --labels-add/--labels-remove"
+            "Must specify one of: --release-note, --release-note-file, "
+            "--status, --custom-field with --value, "
+            "or --labels-add/--labels-remove"
         )
 
     if args.custom_field and not args.value:

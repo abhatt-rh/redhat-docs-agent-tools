@@ -168,7 +168,9 @@ def check_file(filepath, rel_path, filename, skip_prefix_check=False):
                 {
                     "file": rel_path,
                     "check": "PREFIX",
-                    "message": f"No recognized prefix. Expected one of: {', '.join(PREFIX_TO_TYPE.keys())}",
+                    "message": (
+                        f"No recognized prefix. Expected one of: {', '.join(PREFIX_TO_TYPE.keys())}"
+                    ),
                 }
             )
             # Cannot do further checks without knowing expected type
@@ -193,7 +195,9 @@ def check_file(filepath, rel_path, filename, skip_prefix_check=False):
                 {
                     "file": rel_path,
                     "check": "CONTENT_TYPE_MISSING",
-                    "message": f"Missing :_mod-docs-content-type: attribute. Expected: {expected_type}",
+                    "message": (
+                        f"Missing :_mod-docs-content-type: attribute. Expected: {expected_type}"
+                    ),
                 }
             )
         elif declared_type != expected_type:
@@ -201,7 +205,9 @@ def check_file(filepath, rel_path, filename, skip_prefix_check=False):
                 {
                     "file": rel_path,
                     "check": "CONTENT_TYPE_MISMATCH",
-                    "message": f"Prefix '{prefix}' expects {expected_type} but declared {declared_type}",
+                    "message": (
+                        f"Prefix '{prefix}' expects {expected_type} but declared {declared_type}"
+                    ),
                 }
             )
 
@@ -251,7 +257,9 @@ def check_file(filepath, rel_path, filename, skip_prefix_check=False):
                         {
                             "file": rel_path,
                             "check": "INVALID_BLOCK_TITLE",
-                            "message": f"Line {i + 1}: '{title}' is only allowed in PROCEDURE files",
+                            "message": (
+                                f"Line {i + 1}: '{title}' is only allowed in PROCEDURE files"
+                            ),
                             "line_num": i + 1,
                         }
                     )
@@ -267,7 +275,9 @@ def check_file(filepath, rel_path, filename, skip_prefix_check=False):
                     {
                         "file": rel_path,
                         "check": "PROC_SUBSECTION",
-                        "message": f"Line {i + 1}: '== ' subsections are not allowed in PROCEDURE files",
+                        "message": (
+                            f"Line {i + 1}: '== ' subsections are not allowed in PROCEDURE files"
+                        ),
                         "line_num": i + 1,
                     }
                 )
@@ -300,7 +310,10 @@ def check_file(filepath, rel_path, filename, skip_prefix_check=False):
                         {
                             "file": rel_path,
                             "check": "PROC_NOT_ORDERED",
-                            "message": f"Line {i + 1}: Content after .Procedure should use ordered list ('. ')",
+                            "message": (
+                                f"Line {i + 1}: Content after .Procedure "
+                                "should use ordered list ('. ')"
+                            ),
                             "line_num": i + 1,
                         }
                     )
@@ -334,7 +347,10 @@ def main():
     parser.add_argument(
         "--file-list",
         default=None,
-        help="File with paths to check (one per line, relative to docs_dir). Use '-' for stdin. Overrides --scan-dirs.",
+        help=(
+            "File with paths to check (one per line, relative to docs_dir). "
+            "Use '-' for stdin. Overrides --scan-dirs."
+        ),
     )
     args = parser.parse_args()
 

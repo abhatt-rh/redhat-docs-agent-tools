@@ -85,7 +85,7 @@ def run_batch(
         print(f"Command: {' '.join(cmd_parts)}")
         print(f"{'=' * 60}\n")
 
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603
             cmd_parts,
             capture_output=False,
             text=True,
@@ -137,7 +137,8 @@ def main():
         completed = set(state["completed"])
         remaining = [d for d in all_docs if d not in completed]
         print(
-            f"Resuming: {len(state['completed'])} completed, {len(state['failed'])} failed, {len(remaining)} remaining"
+            f"Resuming: {len(state['completed'])} completed, "
+            f"{len(state['failed'])} failed, {len(remaining)} remaining"
         )
     else:
         state = {"completed": [], "failed": [], "remaining": list(all_docs)}
@@ -186,7 +187,8 @@ def main():
 
         save_state(state_path, state)
         print(
-            f"Progress: {len(state['completed'])}/{len(all_docs)} completed, {len(state['failed'])} failed"
+            f"Progress: {len(state['completed'])}/{len(all_docs)} "
+            f"completed, {len(state['failed'])} failed"
         )
 
     # Final report

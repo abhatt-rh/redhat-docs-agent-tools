@@ -59,7 +59,8 @@ class JiraReader:
             email = os.environ.get("JIRA_EMAIL")
             if not email:
                 raise ValueError(
-                    "JIRA_EMAIL environment variable not set. Required for Atlassian Cloud. Add it to ~/.env"
+                    "JIRA_EMAIL environment variable not set. "
+                    "Required for Atlassian Cloud. Add it to ~/.env"
                 )
             self.jira = JIRA(server=server, basic_auth=(email, token))
         else:
@@ -147,7 +148,7 @@ class JiraReader:
                 host = urllib3.util.parse_url(link.object.url).host
                 if host and host.startswith(prefix):
                     links_list.append(link.object.url)
-            except Exception:
+            except Exception:  # noqa: S112
                 continue
 
         return links_list
@@ -259,10 +260,12 @@ class JiraReader:
         Args:
             jql: JQL query string
             max_results: Maximum number of results to return
-            fetch_details: If True, return issue keys for detailed fetching; if False, return summary info
+            fetch_details: If True, return issue keys for detailed
+                fetching; if False, return summary info
 
         Returns:
-            List of issue keys (if fetch_details=True) or list of issue summaries (if fetch_details=False)
+            List of issue keys (if fetch_details=True) or list of
+            issue summaries (if fetch_details=False)
         """
         try:
             issues = self.jira.search_issues(jql, maxResults=max_results)
@@ -323,7 +326,7 @@ class JiraReader:
                     self._epic_link_field = field["id"]
                 elif name == "Parent Link":
                     self._parent_link_field = field["id"]
-        except Exception:
+        except Exception:  # noqa: S110
             pass
 
         self._custom_fields_discovered = True
@@ -584,7 +587,7 @@ class JiraReader:
                     pull_requests.append(link_url)
                 elif link_type == "google_doc":
                     google_docs.append(link_url)
-            except Exception:
+            except Exception:  # noqa: S112
                 continue
 
         web_links = {"total": len(links), "links": links}
@@ -693,7 +696,10 @@ def main():
     parser.add_argument(
         "--fetch-details",
         action="store_true",
-        help="Fetch full details for each issue (slow). By default, JQL searches return fast summaries only.",
+        help=(
+            "Fetch full details for each issue (slow). "
+            "By default, JQL searches return fast summaries only."
+        ),
     )
     parser.add_argument(
         "--max-children",

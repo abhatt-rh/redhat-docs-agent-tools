@@ -66,7 +66,10 @@ def run_batch(repo: str, books: list[str], distro: str | None, output: str | Non
             "-p",
         ]
 
-        skill_args = f"/jtbd-workflow-topicmap {repo} --books-file {tmp_path} --batch --batch-size {len(books)}"
+        skill_args = (
+            f"/jtbd-workflow-topicmap {repo} --books-file {tmp_path} "
+            f"--batch --batch-size {len(books)}"
+        )
         if distro:
             skill_args += f" --distro {distro}"
         if output:
@@ -79,7 +82,7 @@ def run_batch(repo: str, books: list[str], distro: str | None, output: str | Non
         print(f"Command: {' '.join(cmd_parts)}")
         print(f"{'=' * 60}\n")
 
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603
             cmd_parts,
             capture_output=False,
             text=True,
@@ -136,7 +139,8 @@ def main():
         completed = set(state["completed"])
         remaining = [b for b in all_books if b not in completed]
         print(
-            f"Resuming: {len(state['completed'])} completed, {len(state['failed'])} failed, {len(remaining)} remaining"
+            f"Resuming: {len(state['completed'])} completed, "
+            f"{len(state['failed'])} failed, {len(remaining)} remaining"
         )
     else:
         state = {"completed": [], "failed": [], "remaining": list(all_books)}
@@ -183,7 +187,8 @@ def main():
 
         save_state(state_path, state)
         print(
-            f"Progress: {len(state['completed'])}/{len(all_books)} completed, {len(state['failed'])} failed"
+            f"Progress: {len(state['completed'])}/{len(all_books)} "
+            f"completed, {len(state['failed'])} failed"
         )
 
     # Final report
@@ -197,7 +202,8 @@ def main():
         print(f"Failed: {len(state['failed'])}")
         print(f"  Books: {', '.join(state['failed'])}")
         print(
-            "\nTo retry failed books, create a new books file with the failed entries and run again."
+            "\nTo retry failed books, create a new books file "
+            "with the failed entries and run again."
         )
 
     # Clean up state file on full completion

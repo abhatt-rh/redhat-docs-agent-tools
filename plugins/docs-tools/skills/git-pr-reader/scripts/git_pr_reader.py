@@ -679,8 +679,8 @@ class GitHubReviewAPI(GitReviewAPI):
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
 
-        req = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(req) as response:
+        req = urllib.request.Request(url, headers=headers)  # noqa: S310
+        with urllib.request.urlopen(req) as response:  # noqa: S310
             diff = response.read().decode()
 
         self._diff_cache[cache_key] = diff
@@ -745,7 +745,7 @@ class GitHubReviewAPI(GitReviewAPI):
                 method="POST",
             )
             try:
-                with urllib.request.urlopen(req) as resp:
+                with urllib.request.urlopen(req) as resp:  # noqa: S310
                     data = json.loads(resp.read().decode())
             except Exception:
                 break
@@ -978,8 +978,8 @@ class GitLabReviewAPI(GitReviewAPI):
             headers = {"User-Agent": "git-pr-reader"}
             if self.token:
                 headers["PRIVATE-TOKEN"] = self.token
-            req = _ur.Request(ver_url, headers=headers)
-            with _ur.urlopen(req) as resp:
+            req = _ur.Request(ver_url, headers=headers)  # noqa: S310
+            with _ur.urlopen(req) as resp:  # noqa: S310
                 ver_data = json.loads(resp.read().decode())
             if ver_data and isinstance(ver_data, list):
                 self._pr_info = {
@@ -992,7 +992,7 @@ class GitLabReviewAPI(GitReviewAPI):
                     "base_ref": self._mr.target_branch,
                 }
                 return self._pr_info
-        except Exception:
+        except Exception:  # noqa: S110
             pass
 
         # Fallback: use MR attributes directly
@@ -1553,7 +1553,7 @@ def cmd_detect(args) -> int:
     """
     try:
         result = subprocess.run(
-            ["git", "branch", "--show-current"],
+            ["git", "branch", "--show-current"],  # noqa: S607
             capture_output=True,
             text=True,
             check=True,
@@ -1564,7 +1564,7 @@ def cmd_detect(args) -> int:
             return 1
 
         result = subprocess.run(
-            ["git", "remote", "-v"],
+            ["git", "remote", "-v"],  # noqa: S607
             capture_output=True,
             text=True,
             check=True,
@@ -1586,7 +1586,7 @@ def cmd_detect(args) -> int:
             if "github.com" in remote_url:
                 try:
                     result = subprocess.run(
-                        ["gh", "pr", "view", "--json", "url", "--jq", ".url"],
+                        ["gh", "pr", "view", "--json", "url", "--jq", ".url"],  # noqa: S607
                         capture_output=True,
                         text=True,
                         check=True,
@@ -1628,7 +1628,7 @@ def cmd_detect(args) -> int:
                 f"https://{host}/api/v4/projects/{project_encoded}"
                 f"/merge_requests?source_branch={branch}&state=opened"
             )
-            req = urllib.request.Request(
+            req = urllib.request.Request(  # noqa: S310
                 url,
                 headers={
                     "PRIVATE-TOKEN": gitlab_token,
@@ -1637,7 +1637,7 @@ def cmd_detect(args) -> int:
             )
 
             try:
-                with urllib.request.urlopen(req) as response:
+                with urllib.request.urlopen(req) as response:  # noqa: S310
                     mrs = json.loads(response.read().decode())
                     if mrs and isinstance(mrs, list) and len(mrs) > 0:
                         mr_url = mrs[0].get("web_url", "")
@@ -1667,7 +1667,7 @@ def cmd_detect(args) -> int:
                 if host and project_path:
                     project_encoded = project_path.replace("/", "%2F")
                     lookup_url = f"https://{host}/api/v4/projects/{project_encoded}"
-                    req = urllib.request.Request(
+                    req = urllib.request.Request(  # noqa: S310
                         lookup_url,
                         headers={
                             "PRIVATE-TOKEN": gitlab_token,
@@ -1676,7 +1676,7 @@ def cmd_detect(args) -> int:
                     )
 
                     try:
-                        with urllib.request.urlopen(req) as response:
+                        with urllib.request.urlopen(req) as response:  # noqa: S310
                             project_data = json.loads(response.read().decode())
                             project_id = project_data.get("id")
                             if project_id:
@@ -1684,14 +1684,14 @@ def cmd_detect(args) -> int:
                                     f"https://{host}/api/v4/projects/{project_id}"
                                     f"/merge_requests?source_branch={branch}&state=opened"
                                 )
-                                req2 = urllib.request.Request(
+                                req2 = urllib.request.Request(  # noqa: S310
                                     mr_api_url,
                                     headers={
                                         "PRIVATE-TOKEN": gitlab_token,
                                         "User-Agent": "git-pr-reader",
                                     },
                                 )
-                                with urllib.request.urlopen(req2) as resp2:
+                                with urllib.request.urlopen(req2) as resp2:  # noqa: S310
                                     mrs = json.loads(resp2.read().decode())
                                     if mrs and isinstance(mrs, list) and len(mrs) > 0:
                                         mr_url = mrs[0].get("web_url", "")

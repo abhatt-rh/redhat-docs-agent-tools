@@ -551,8 +551,8 @@ def verify_with_opl(product_names):
     search_term = product_names[0][0]  # longest = most specific
     try:
         url = f"{OPL_BASE}/products?q={urllib.parse.quote(search_term)}"
-        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {OPL_KEY}"})
-        with urllib.request.urlopen(req, timeout=15) as resp:
+        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {OPL_KEY}"})  # noqa: S310
+        with urllib.request.urlopen(req, timeout=15) as resp:  # noqa: S310
             data = json.loads(resp.read())
     except Exception as e:
         print(f"  OPL verification skipped: {e}", file=sys.stderr)
@@ -581,8 +581,8 @@ def verify_with_opl(product_names):
     # Get aliases
     try:
         url = f"{OPL_BASE}/products/{best['product_id']}/aliases"
-        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {OPL_KEY}"})
-        with urllib.request.urlopen(req, timeout=15) as resp:
+        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {OPL_KEY}"})  # noqa: S310
+        with urllib.request.urlopen(req, timeout=15) as resp:  # noqa: S310
             aliases = json.loads(resp.read())
     except Exception as e:
         print(f"  OPL: Failed to fetch aliases: {e}", file=sys.stderr)

@@ -271,7 +271,10 @@ def main():
     parser.add_argument(
         "--file-list",
         default=None,
-        help="File with paths to check (one per line, relative to docs_dir). Use '-' for stdin. Overrides --scan-dirs.",
+        help=(
+            "File with paths to check (one per line, relative to docs_dir). "
+            "Use '-' for stdin. Overrides --scan-dirs."
+        ),
     )
     args = parser.parse_args()
 

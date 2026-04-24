@@ -1,5 +1,6 @@
 """Data processing module."""
 
+
 class DataProcessor:
     """Processes incoming data streams."""
 

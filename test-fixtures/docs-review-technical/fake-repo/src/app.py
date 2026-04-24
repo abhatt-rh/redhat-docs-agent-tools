@@ -1,10 +1,12 @@
 """Flask application with env vars and API endpoints for testing."""
+
 import os
+
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-API_HOST = os.environ.get("API_HOST", "0.0.0.0")
+API_HOST = os.environ.get("API_HOST", "0.0.0.0")  # noqa: S104
 API_PORT = os.environ.get("API_PORT", "8080")
 DATABASE_URL = os.environ["DATABASE_URL"]
 

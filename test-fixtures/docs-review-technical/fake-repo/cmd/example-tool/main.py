@@ -1,5 +1,7 @@
 """Fake CLI tool for testing CLI flag discovery."""
+
 import argparse
+
 
 def main():
     parser = argparse.ArgumentParser(description="Example tool")
@@ -16,6 +18,7 @@ def main():
 
     status = sub.add_parser("status")
     status.add_argument("--format", default="table")
+
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,6 @@
 """Example client library."""
 
+
 class ExampleClient:
     """Client for the Example API."""
 

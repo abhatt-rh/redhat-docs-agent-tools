@@ -46,8 +46,8 @@ requires_asciidoctor = pytest.mark.skipif(
 
 def pandoc_convert(md_path: Path, output_path: Path) -> Path:
     """Run pandoc to convert Markdown to AsciiDoc."""
-    subprocess.run(
-        ["pandoc", "-f", "markdown", "-t", "asciidoc", "-o", str(output_path), str(md_path)],
+    subprocess.run(  # noqa: S603
+        ["pandoc", "-f", "markdown", "-t", "asciidoc", "-o", str(output_path), str(md_path)],  # noqa: S607
         check=True,
         capture_output=True,
     )
@@ -56,8 +56,8 @@ def pandoc_convert(md_path: Path, output_path: Path) -> Path:
 
 def asciidoctor_validate(adoc_path: Path) -> list[str]:
     """Run asciidoctor and return any warning/error lines."""
-    result = subprocess.run(
-        ["asciidoctor", "-o", "/dev/null", str(adoc_path)],
+    result = subprocess.run(  # noqa: S603
+        ["asciidoctor", "-o", "/dev/null", str(adoc_path)],  # noqa: S607
         capture_output=True,
         text=True,
     )
@@ -70,8 +70,8 @@ def asciidoctor_validate(adoc_path: Path) -> list[str]:
 
 def asciidoctor_render(adoc_path: Path, output_path: Path) -> str:
     """Render AsciiDoc to HTML and return the HTML content."""
-    subprocess.run(
-        ["asciidoctor", "-o", str(output_path), str(adoc_path)],
+    subprocess.run(  # noqa: S603
+        ["asciidoctor", "-o", str(output_path), str(adoc_path)],  # noqa: S607
         check=True,
         capture_output=True,
     )

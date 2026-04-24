@@ -240,7 +240,10 @@ def main():
     parser.add_argument(
         "--file-list",
         default=None,
-        help="File with paths to check (one per line, relative to docs_dir). Use '-' for stdin. Overrides --scan-dirs.",
+        help=(
+            "File with paths to check (one per line, relative to docs_dir). "
+            "Use '-' for stdin. Overrides --scan-dirs."
+        ),
     )
     parser.add_argument(
         "--details",
@@ -333,7 +336,8 @@ def main():
     print(f"Total domains: {len(by_domain)}")
     print(f"  Red Hat: {len(set(u['domain'] for u in by_category.get('Red Hat', [])))}")
     print(
-        f"  Upstream/Community: {len(set(u['domain'] for u in by_category.get('Upstream/Community', [])))}"
+        "  Upstream/Community: "
+        f"{len(set(u['domain'] for u in by_category.get('Upstream/Community', [])))}"
     )
     print(f"  Authoritative: {len(set(u['domain'] for u in by_category.get('Authoritative', [])))}")
     tp_count = len(set(u["domain"] for u in by_category.get("Third-party", [])))

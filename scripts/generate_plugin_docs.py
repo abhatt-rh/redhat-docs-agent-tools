@@ -80,12 +80,14 @@ def load_plugins() -> list[dict]:
             for cmd_file in sorted(commands_dir.glob("*.md")):
                 cmd_text = cmd_file.read_text()
                 fm = parse_frontmatter(cmd_text)
-                commands.append({
-                    "name": cmd_file.stem,
-                    "description": fm.get("description", ""),
-                    "argument_hint": fm.get("argument-hint", ""),
-                    "source": str(cmd_file.relative_to(REPO_ROOT)),
-                })
+                commands.append(
+                    {
+                        "name": cmd_file.stem,
+                        "description": fm.get("description", ""),
+                        "argument_hint": fm.get("argument-hint", ""),
+                        "source": str(cmd_file.relative_to(REPO_ROOT)),
+                    }
+                )
 
         skills = []
         skills_dir = plugin_dir / "skills"
@@ -94,19 +96,23 @@ def load_plugins() -> list[dict]:
             for skill_file in sorted(skills_dir.glob("*.md")):
                 skill_text = skill_file.read_text()
                 fm = parse_frontmatter(skill_text)
-                skills.append({
-                    "name": skill_file.stem,
-                    "description": fm.get("description", ""),
-                    "source": str(skill_file.relative_to(REPO_ROOT)),
-                })
+                skills.append(
+                    {
+                        "name": skill_file.stem,
+                        "description": fm.get("description", ""),
+                        "source": str(skill_file.relative_to(REPO_ROOT)),
+                    }
+                )
             for skill_file in sorted(skills_dir.glob("*/SKILL.md")):
                 skill_text = skill_file.read_text()
                 fm = parse_frontmatter(skill_text)
-                skills.append({
-                    "name": skill_file.parent.name,
-                    "description": fm.get("description", fm.get("name", "")),
-                    "source": str(skill_file.relative_to(REPO_ROOT)),
-                })
+                skills.append(
+                    {
+                        "name": skill_file.parent.name,
+                        "description": fm.get("description", fm.get("name", "")),
+                        "source": str(skill_file.relative_to(REPO_ROOT)),
+                    }
+                )
 
         agents = []
         agents_dir = plugin_dir / "agents"
@@ -114,29 +120,32 @@ def load_plugins() -> list[dict]:
             for agent_file in sorted(agents_dir.glob("*.md")):
                 agent_text = agent_file.read_text()
                 fm = parse_frontmatter(agent_text)
-                agents.append({
-                    "name": fm.get("name", agent_file.stem),
-                    "description": fm.get("description", ""),
-                    "source": str(agent_file.relative_to(REPO_ROOT)),
-                })
+                agents.append(
+                    {
+                        "name": fm.get("name", agent_file.stem),
+                        "description": fm.get("description", ""),
+                        "source": str(agent_file.relative_to(REPO_ROOT)),
+                    }
+                )
 
         readme_content = ""
         readme_path = plugin_dir / "README.md"
         if readme_path.is_file():
             readme_content = readme_path.read_text().strip()
 
-        plugins.append({
-            "name": meta.get("name", plugin_dir.name),
-            "version": meta.get("version", "0.0.0"),
-            "description": meta.get("description", ""),
-            "commands": commands,
-            "skills": skills,
-            "agents": agents,
-            "readme": readme_content,
-        })
+        plugins.append(
+            {
+                "name": meta.get("name", plugin_dir.name),
+                "version": meta.get("version", "0.0.0"),
+                "description": meta.get("description", ""),
+                "commands": commands,
+                "skills": skills,
+                "agents": agents,
+                "readme": readme_content,
+            }
+        )
 
     return plugins
-
 
 
 def _process_readme(readme: str) -> str:
@@ -248,8 +257,8 @@ def generate_docs_plugins_index(plugins: list[dict]) -> str:
         "",
         "Browse available plugins. Click a card to view installation and usage details.",
         "",
-        '!!! note',
-        '    This page is auto-generated.',
+        "!!! note",
+        "    This page is auto-generated.",
         "",
         '<div class="grid cards" markdown>',
         "",
@@ -298,8 +307,8 @@ def generate_installation_page(plugins: list[dict], deps: dict) -> str:
     lines = [
         "# Install Claude Code and plugins",
         "",
-        '!!! note',
-        '    This page is auto-generated.',
+        "!!! note",
+        "    This page is auto-generated.",
         "",
         "## Prerequisites",
         "",
@@ -418,7 +427,6 @@ def update_zensical_config(plugins: list[dict]) -> None:
     config_path.write_text(content)
 
 
-
 def _update_nav_plugins(content: str, plugins: list[dict]) -> str:
     """Update the Plugins nav section to include plugin detail pages."""
     # Match the Plugins nav block and replace it with updated entries
@@ -433,8 +441,8 @@ def _update_nav_plugins(content: str, plugins: list[dict]) -> str:
     for p in plugins:
         nav_lines.append(f'{indent}{{"{p["name"]}" = "plugins/{p["name"]}.md"}},')
 
-    replacement = f'{match.group(1)}\n' + "\n".join(nav_lines) + f'\n{match.group(3)}'
-    result = content[:match.start()] + replacement + content[match.end():]
+    replacement = f"{match.group(1)}\n" + "\n".join(nav_lines) + f"\n{match.group(3)}"
+    result = content[: match.start()] + replacement + content[match.end() :]
     print(f"Updated zensical.toml nav with {len(plugins)} plugin page(s)")
     return result
 

@@ -1,16 +1,26 @@
 """Tests for code_scanner.py extract and search features."""
+
 import json
 import sys
-import pytest
 from pathlib import Path
 
+import pytest
+
 # Add code_scanner's directory to sys.path so we can import it
-_SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "plugins" / "docs-tools" / "skills" / "docs-review-technical" / "scripts"
+_SCRIPTS_DIR = (
+    Path(__file__).resolve().parents[2]
+    / "plugins"
+    / "docs-tools"
+    / "skills"
+    / "docs-review-technical"
+    / "scripts"
+)
 sys.path.insert(0, str(_SCRIPTS_DIR))
 
 from code_scanner import (  # noqa: E402
     Extractor,
     classify_command_scope,
+    compare_inventory_to_refs,
     detect_languages,
     discover_all_cli_args,
     discover_api_endpoints,
@@ -19,10 +29,9 @@ from code_scanner import (  # noqa: E402
     discover_data_models,
     discover_env_vars,
     discover_schemas,
-    compare_inventory_to_refs,
-    search_commands,
-    search_code_blocks,
     search_apis,
+    search_code_blocks,
+    search_commands,
     search_configs,
     search_file_paths,
 )
@@ -140,14 +149,17 @@ class TestExtract:
 class TestScopeClassification:
     """Test classify_command_scope."""
 
-    @pytest.mark.parametrize("cmd,expected", [
-        ("oc get pods", "external"),
-        ("kubectl apply -f manifest.yaml", "external"),
-        ("sudo systemctl restart example", "external"),
-        ("docker run nginx", "external"),
-        ("git commit -m test", "external"),
-        ("curl https://example.com", "external"),
-    ])
+    @pytest.mark.parametrize(
+        "cmd,expected",
+        [
+            ("oc get pods", "external"),
+            ("kubectl apply -f manifest.yaml", "external"),
+            ("sudo systemctl restart example", "external"),
+            ("docker run nginx", "external"),
+            ("git commit -m test", "external"),
+            ("curl https://example.com", "external"),
+        ],
+    )
     def test_external_commands(self, cmd, expected):
         assert classify_command_scope(cmd, [FAKE_REPO]) == expected
 
@@ -187,8 +199,13 @@ class TestCLIValidation:
         assert discover_cli_definitions("nonexistent-tool", [str(tmp_path)]) is None
 
     def test_search_commands_valid_flags(self):
-        commands = [{"command": "example-tool deploy --env staging --replicas 2",
-                     "file": "test.adoc", "line": 1}]
+        commands = [
+            {
+                "command": "example-tool deploy --env staging --replicas 2",
+                "file": "test.adoc",
+                "line": 1,
+            }
+        ]
         results, _ = search_commands(commands, [FAKE_REPO])
         assert len(results) == 1
         r = results[0]
@@ -200,8 +217,13 @@ class TestCLIValidation:
         assert "replicas" in r["cli_validation"]["valid_flags"]
 
     def test_search_commands_stale_flags(self):
-        commands = [{"command": "example-tool deploy --environment production --count 5",
-                     "file": "test.adoc", "line": 1}]
+        commands = [
+            {
+                "command": "example-tool deploy --environment production --count 5",
+                "file": "test.adoc",
+                "line": 1,
+            }
+        ]
         results, _ = search_commands(commands, [FAKE_REPO])
         assert len(results) == 1
         r = results[0]
@@ -210,8 +232,7 @@ class TestCLIValidation:
         assert "count" in r["cli_validation"]["unknown_flags"]
 
     def test_search_commands_external_skips_validation(self):
-        commands = [{"command": "oc get pods -n example",
-                     "file": "test.adoc", "line": 1}]
+        commands = [{"command": "oc get pods -n example", "file": "test.adoc", "line": 1}]
         results, _ = search_commands(commands, [FAKE_REPO])
         assert len(results) == 1
         r = results[0]
@@ -252,8 +273,14 @@ class TestSchemaValidation:
         assert "pool_size" in keys
 
     def test_search_configs_matching_keys(self):
-        configs = [{"keys": ["host", "port", "pool_size", "workers"],
-                    "file": "test.adoc", "line": 1, "format": "json"}]
+        configs = [
+            {
+                "keys": ["host", "port", "pool_size", "workers"],
+                "file": "test.adoc",
+                "line": 1,
+                "format": "json",
+            }
+        ]
         results, _ = search_configs(configs, [FAKE_REPO])
         assert len(results) == 1
         r = results[0]
@@ -262,8 +289,14 @@ class TestSchemaValidation:
         assert r["schema_validation"]["overlap_ratio"] > 0.5
 
     def test_search_configs_stale_keys(self):
-        configs = [{"keys": ["replicas", "logLevel", "maxRetries", "connectionTimeout"],
-                    "file": "test.adoc", "line": 1, "format": "yaml"}]
+        configs = [
+            {
+                "keys": ["replicas", "logLevel", "maxRetries", "connectionTimeout"],
+                "file": "test.adoc",
+                "line": 1,
+                "format": "yaml",
+            }
+        ]
         results, _ = search_configs(configs, [FAKE_REPO])
         assert len(results) == 1
         r = results[0]
@@ -273,8 +306,14 @@ class TestSchemaValidation:
         assert "connectionTimeout" in sv["keys_only_in_doc"]
 
     def test_search_configs_no_match(self):
-        configs = [{"keys": ["totallyFakeKey", "anotherFakeKey"],
-                    "file": "test.adoc", "line": 1, "format": "yaml"}]
+        configs = [
+            {
+                "keys": ["totallyFakeKey", "anotherFakeKey"],
+                "file": "test.adoc",
+                "line": 1,
+                "format": "yaml",
+            }
+        ]
         results, _ = search_configs(configs, [FAKE_REPO])
         assert len(results) == 1
         assert results[0]["found"] is False
@@ -289,8 +328,7 @@ class TestAPISearch:
     """Test search_apis."""
 
     def test_find_class_definition(self):
-        apis = [{"name": "ExampleClient", "type": "class",
-                 "file": "test.adoc", "line": 1}]
+        apis = [{"name": "ExampleClient", "type": "class", "file": "test.adoc", "line": 1}]
         results = search_apis(apis, [FAKE_REPO])
         assert len(results) == 1
         r = results[0]
@@ -298,22 +336,19 @@ class TestAPISearch:
         assert any(m["type"] == "definition" for m in r["matches"])
 
     def test_find_function_definition(self):
-        apis = [{"name": "list_resources", "type": "function",
-                 "file": "test.adoc", "line": 1}]
+        apis = [{"name": "list_resources", "type": "function", "file": "test.adoc", "line": 1}]
         results = search_apis(apis, [FAKE_REPO])
         assert len(results) == 1
         assert results[0]["found"] is True
 
     def test_missing_api_not_found(self):
-        apis = [{"name": "MissingWidget", "type": "class",
-                 "file": "test.adoc", "line": 1}]
+        apis = [{"name": "MissingWidget", "type": "class", "file": "test.adoc", "line": 1}]
         results = search_apis(apis, [FAKE_REPO])
         assert len(results) == 1
         assert results[0]["found"] is False
 
     def test_missing_function_not_found(self):
-        apis = [{"name": "deprecatedFunction", "type": "function",
-                 "file": "test.adoc", "line": 1}]
+        apis = [{"name": "deprecatedFunction", "type": "function", "file": "test.adoc", "line": 1}]
         results = search_apis(apis, [FAKE_REPO])
         assert len(results) == 1
         assert results[0]["found"] is False
@@ -366,11 +401,18 @@ class TestCodeBlockSearch:
     """Test search_code_blocks."""
 
     def test_matching_code_block(self):
-        blocks = [{
-            "content": "class ExampleClient:\n    def __init__(self, endpoint, api_key):\n        self.endpoint = endpoint",
-            "language": "python",
-            "file": "test.adoc", "line": 1,
-        }]
+        blocks = [
+            {
+                "content": (
+                    "class ExampleClient:\n"
+                    "    def __init__(self, endpoint, api_key):\n"
+                    "        self.endpoint = endpoint"
+                ),
+                "language": "python",
+                "file": "test.adoc",
+                "line": 1,
+            }
+        ]
         results = search_code_blocks(blocks, [FAKE_REPO])
         assert len(results) == 1
         r = results[0]
@@ -379,28 +421,35 @@ class TestCodeBlockSearch:
         assert "identifiers" in r
 
     def test_non_matching_code_block(self):
-        blocks = [{
-            "content": "class CompletelyFakeClass:\n    def nonexistent_method(self):\n        pass",
-            "language": "python",
-            "file": "test.adoc", "line": 1,
-        }]
+        blocks = [
+            {
+                "content": (
+                    "class CompletelyFakeClass:\n    def nonexistent_method(self):\n        pass"
+                ),
+                "language": "python",
+                "file": "test.adoc",
+                "line": 1,
+            }
+        ]
         results = search_code_blocks(blocks, [FAKE_REPO])
         assert len(results) == 1
         assert results[0]["found"] is False
 
     def test_empty_code_block(self):
-        blocks = [{"content": "", "language": "python",
-                   "file": "test.adoc", "line": 1}]
+        blocks = [{"content": "", "language": "python", "file": "test.adoc", "line": 1}]
         results = search_code_blocks(blocks, [FAKE_REPO])
         assert len(results) == 1
         assert results[0]["found"] is False
 
     def test_identifiers_extracted(self):
-        blocks = [{
-            "content": "client = ExampleClient(endpoint=url, api_key=key)",
-            "language": "python",
-            "file": "test.adoc", "line": 1,
-        }]
+        blocks = [
+            {
+                "content": "client = ExampleClient(endpoint=url, api_key=key)",
+                "language": "python",
+                "file": "test.adoc",
+                "line": 1,
+            }
+        ]
         results = search_code_blocks(blocks, [FAKE_REPO])
         assert len(results) == 1
         assert "ExampleClient" in results[0]["identifiers"]
@@ -429,31 +478,42 @@ class TestEndToEnd:
         assert len(external_cmds) >= 3  # oc, kubectl, sudo
 
         # In-scope commands with valid flags
-        valid_cmds = [r for r in cmd_results
-                      if r["scope"] == "in-scope"
-                      and r.get("cli_validation")
-                      and r["cli_validation"]["unknown_flags"] == []]
+        valid_cmds = [
+            r
+            for r in cmd_results
+            if r["scope"] == "in-scope"
+            and r.get("cli_validation")
+            and r["cli_validation"]["unknown_flags"] == []
+        ]
         assert len(valid_cmds) >= 1
 
         # In-scope commands with stale flags
-        stale_cmds = [r for r in cmd_results
-                      if r.get("cli_validation")
-                      and len(r["cli_validation"]["unknown_flags"]) > 0]
+        stale_cmds = [
+            r
+            for r in cmd_results
+            if r.get("cli_validation") and len(r["cli_validation"]["unknown_flags"]) > 0
+        ]
         assert len(stale_cmds) >= 1
         stale_flags = stale_cmds[0]["cli_validation"]["unknown_flags"]
         assert "environment" in stale_flags or "count" in stale_flags
 
         # Config with stale keys
-        stale_cfgs = [r for r in cfg_results
-                      if r.get("schema_validation")
-                      and len(r["schema_validation"]["keys_only_in_doc"]) > 0]
+        stale_cfgs = [
+            r
+            for r in cfg_results
+            if r.get("schema_validation") and len(r["schema_validation"]["keys_only_in_doc"]) > 0
+        ]
         assert len(stale_cfgs) >= 1
 
         # File paths: exact, basename, missing
-        exact_fps = [r for r in fp_results
-                     if r["found"] and any(m["type"] == "exact" for m in r["matches"])]
-        basename_fps = [r for r in fp_results
-                        if r["found"] and any(m["type"] == "basename" for m in r["matches"])]
+        exact_fps = [
+            r for r in fp_results if r["found"] and any(m["type"] == "exact" for m in r["matches"])
+        ]
+        basename_fps = [
+            r
+            for r in fp_results
+            if r["found"] and any(m["type"] == "basename" for m in r["matches"])
+        ]
         missing_fps = [r for r in fp_results if not r["found"]]
         assert len(exact_fps) >= 1
         assert len(basename_fps) >= 1
@@ -487,8 +547,10 @@ class TestEndToEnd:
         output = {
             "repos": [FAKE_REPO],
             "discovered_cli_definitions": cli_defs,
-            "discovered_schemas": [{"file": s["file"], "format": s["format"],
-                                    "key_count": len(s["keys"])} for s in schemas],
+            "discovered_schemas": [
+                {"file": s["file"], "format": s["format"], "key_count": len(s["keys"])}
+                for s in schemas
+            ],
             "results": {
                 "commands": cmd_results,
                 "code_blocks": search_code_blocks(refs["code_blocks"], [FAKE_REPO]),
@@ -628,9 +690,11 @@ class TestDiscover:
             "data_models": [],
         }
         refs = {
-            "code_blocks": [{
-                "content": 'DATABASE_URL = os.environ["DATABASE_URL"]',
-            }],
+            "code_blocks": [
+                {
+                    "content": 'DATABASE_URL = os.environ["DATABASE_URL"]',
+                }
+            ],
             "commands": [{"command": "example-tool --verbose --debug"}],
             "configs": [{"keys": ["timeout", "retries"]}],
             "apis": [{"name": "/api/health", "type": "endpoint"}],
@@ -645,6 +709,7 @@ class TestDiscover:
     def test_discover_e2e_output_schema(self, tmp_path):
         """Verify discover output JSON schema via cmd_discover."""
         import argparse
+
         from code_scanner import cmd_discover
 
         out_file = tmp_path / "inventory.json"
