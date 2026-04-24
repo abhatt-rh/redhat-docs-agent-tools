@@ -25,7 +25,7 @@ jobs:
           python-version: "3.x"
 
       - name: Install ruff
-        run: pip install ruff
+        run: python3 -m pip install ruff
 
       - name: Ruff check
         run: ruff check plugins/
