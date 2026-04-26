@@ -22,6 +22,7 @@ For detailed module type guidance, templates, and structural rules, read [asciid
 - [ ] If subheadings used, first tried splitting into separate modules
 - [ ] Only valid admonition types used: NOTE, IMPORTANT, WARNING, TIP (CAUTION is not supported by the Red Hat Customer Portal)
 - [ ] Additional resources focused on relevant items only
+- [ ] All attribute references (e.g., `{product-name}`) are defined in the project
 
 ## Procedure checklist
 
@@ -37,6 +38,7 @@ For detailed module type guidance, templates, and structural rules, read [asciid
 - [ ] Prerequisites written as conditions, not instructions
 - [ ] Only valid admonition types used: NOTE, IMPORTANT, WARNING, TIP (CAUTION is not supported by the Red Hat Customer Portal)
 - [ ] Optional sections in correct order: Limitations, Prerequisites, Verification, Troubleshooting, Next steps, Additional resources
+- [ ] All attribute references (e.g., `{product-name}`) are defined in the project
 
 ## Reference checklist
 
@@ -47,6 +49,7 @@ For detailed module type guidance, templates, and structural rules, read [asciid
 - [ ] Data logically organized (alphabetical, categorical)
 - [ ] Consistent structure for similar data
 - [ ] Additional resources focused on relevant items only
+- [ ] All attribute references (e.g., `{product-name}`) are defined in the project
 
 ## Assembly checklist
 
@@ -56,6 +59,7 @@ For detailed module type guidance, templates, and structural rules, read [asciid
 - [ ] Introduction explains what user accomplishes
 - [ ] Modules included with `leveloffset=` and appropriate level
 - [ ] Next steps and Additional resources in correct order
+- [ ] All attribute references (e.g., `{product-name}`) are defined in the project
 
 ## Common violations
 
@@ -70,6 +74,48 @@ For detailed module type guidance, templates, and structural rules, read [asciid
 | Prerequisite as step | `* Install JDK 11` | `* JDK 11 is installed.` |
 | Deep assembly nesting | Many levels of nested assemblies | Link to assemblies instead |
 | Writers defining user stories | Writer creates user story | Product management defines user stories |
+| Undefined attribute | `{my-product}` without `:my-product:` defined | Define in attributes file or document header |
+
+## Attribute validation
+
+### Finding attribute references
+
+Attribute references use the format `{attribute-name}`. Common patterns:
+- `{product-name}` — product name
+- `{product-version}` — version number  
+- `{kebab-case-attr}` — multi-word attributes
+- `{context}` — built-in context variable (always valid)
+
+### Finding attribute definitions
+
+Attributes are defined with the format `:attribute-name: value`. Check these locations in order:
+
+1. **Shared attributes files** — typically:
+   - `common-attributes.adoc`
+   - `attributes.adoc`
+   - `_attributes.adoc`  
+   - `attributes/common-attributes.adoc`
+   - Files included with `:includedir:` or `include::` at the top
+2. **Master/assembly files** — parent files that include this module
+3. **Build configuration** — attributes passed via command line (check build scripts)
+
+### Built-in attributes (always valid)
+
+These AsciiDoc built-ins don't need definition checking:
+- `{doctype}`, `{backend}`, `{docname}`, `{docfile}`, `{docdir}` — document metadata
+- `{author}`, `{email}`, `{revdate}`, `{revnumber}` — revision info
+
+### Example check
+
+File contains: `Install {product-name} version {product-version}`
+
+✅ Valid if attributes file has:
+```asciidoc
+:product-name: OpenShift sandboxed containers
+:product-version: 1.12
+```
+
+❌ Invalid if no definition found — report: "Undefined attributes: `{product-name}`, `{product-version}`"
 
 ## How to use
 
@@ -78,7 +124,8 @@ For detailed module type guidance, templates, and structural rules, read [asciid
 3. Check required parts are present using the checklists above
 4. Verify anchor ID includes `_{context}` (except assemblies)
 5. Check for common violations
-6. Mark issues as **required** (modular violations) or **[SUGGESTION]**
+6. Check for undefined attributes (see "Attribute validation" section)
+7. Mark issues as **required** (modular violations) or **[SUGGESTION]**
 
 ## Example invocations
 
