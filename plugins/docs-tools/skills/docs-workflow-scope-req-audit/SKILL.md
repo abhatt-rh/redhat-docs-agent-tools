@@ -38,6 +38,7 @@ This is a tool-only step (no agent dispatch). Claude executes the steps directly
 ```text
 <base-path>/scope-req-audit/evidence-status.json
 <base-path>/scope-req-audit/summary.md
+<base-path>/scope-req-audit/step-result.json
 ```
 
 ## Execution
@@ -320,9 +321,32 @@ Write a human-readable summary to `$SUMMARY_FILE`:
 - [https://github.com/org/companion-sdk](https://github.com/org/companion-sdk) — referenced in README.md
 ```
 
-### 8. Verify output
+### 8. Write step-result.json
 
-Verify that both `$EVIDENCE_STATUS_FILE` and `$SUMMARY_FILE` exist.
+Write the sidecar to `${OUTPUT_DIR}/step-result.json`:
+
+```json
+{
+  "schema_version": 1,
+  "step": "scope-req-audit",
+  "ticket": "<TICKET>",
+  "completed_at": "<current ISO 8601 timestamp>",
+  "recommendation": "<recommendation from evidence-status.json>",
+  "grounded": <grounded count>,
+  "partial": <partial count>,
+  "absent": <absent count>,
+  "total": <total count>,
+  "discovered_repos_count": <length of discovered_repos list>
+}
+```
+
+- `recommendation`: the `recommendation` field from `evidence-status.json`
+- `grounded`, `partial`, `absent`, `total`: the counts from `evidence-status.json`'s `summary` object
+- `discovered_repos_count`: length of the `discovered_repos` array
+
+### 9. Verify output
+
+Verify that `$EVIDENCE_STATUS_FILE`, `$SUMMARY_FILE`, and `${OUTPUT_DIR}/step-result.json` exist.
 
 ## How downstream steps use the output
 

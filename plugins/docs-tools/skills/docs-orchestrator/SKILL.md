@@ -217,6 +217,7 @@ Use this absolute `BASE_PATH` for the progress file's `base_path` field and for 
   scope-req-audit/                     (if source repo is available)
     evidence-status.json
     summary.md
+    step-result.json                 (sidecar: recommendation, grounded, partial, absent, total, discovered_repos_count)
   planning/
     plan.md
     step-result.json                 (sidecar: module_count)
@@ -284,13 +285,16 @@ The `workflow_type` field and filename prefix match the YAML's `workflow.name`. 
   "steps": {
     "<step-name>": {
       "status": "pending",
-      "output": null
+      "output": null,
+      "result": null
     }
   }
 }
 ```
 
 The `output` field records the step's output folder path (e.g., `.claude/docs/proj-123/writing/`) once completed.
+
+The `result` field stores selected sidecar data after each step completes. This lets the orchestrator make downstream decisions and display summaries without re-reading sidecar files from disk — especially important on resume. Set to `null` until the step completes; then populated from `step-result.json` (see [Step-specific post-processing](#step-specific-post-processing)).
 
 ### Status values
 
@@ -365,11 +369,46 @@ Skill: <step.skill>, args: "<constructed args>"
 ### After the step
 
 1. Verify the output folder exists (for steps that produce files). If the expected output folder is missing, mark the step as `failed` in the progress file and **STOP**
-2. Read the step's `step-result.json` sidecar if it exists in the output folder. Log a warning if it is missing (the step still counts as completed — sidecars are expected but not required for backward compatibility)
+2. Read the step's `step-result.json` sidecar if it exists in the output folder. If present, store the step-specific fields in `steps.<step-name>.result` in the progress file (see [Step-specific post-processing](#step-specific-post-processing) for which fields to record per step). Log a warning if the sidecar is missing (the step still counts as completed — sidecars are expected but not required for backward compatibility)
 3. Update the step's status to `"completed"` with the output folder path in the progress file
 4. Update the progress file's `updated_at` timestamp
-5. **If the just-completed step is `requirements` AND `options.source` is `null`** → run [Post-requirements source resolution](#post-requirements-source-resolution) before continuing to the next step. This may change `deferred` steps to `pending` or `skipped`
-6. **If the just-completed step is `scope-req-audit`** → read `evidence-status.json`, extract the `recommendation` and `summary` counts, and log: `"scope-req-audit completed: N grounded, N partial, N absent — recommendation: proceed|gather-more|review-needed"`. If `discovered_repos` is non-empty, also log the count: `"(N discovered repos not indexed)"`
+5. Run [step-specific post-processing](#step-specific-post-processing) for the just-completed step
+
+### Step-specific post-processing
+
+After each step completes, apply the rules below. When rules reference sidecar fields, read from `steps.<step-name>.result` in the progress file (already recorded in the after-step logic above). If the sidecar was missing, fall back to parsing the step's primary output file where noted.
+
+**requirements**
+- Log the `title` field: `"Requirements extracted: <title>"`
+- If `options.source` is `null` → run [Post-requirements source resolution](#post-requirements-source-resolution). This may change `deferred` steps to `pending` or `skipped`
+
+**scope-req-audit**
+- Log: `"scope-req-audit completed: N grounded, N partial, N absent — recommendation: <recommendation>"`
+- If `discovered_repos_count` > 0, also log: `"(N discovered repos not indexed)"`
+- Fall back to reading `evidence-status.json` if sidecar result is missing
+
+**planning**
+- Log: `"Planning completed: N modules"`
+- If `module_count` is 0, **warn**: `"Planning produced 0 modules — the plan may be empty. Review plan.md before continuing."` Ask the user whether to proceed or stop. If the user chooses to stop: mark the planning step as `failed` in the progress file, set the workflow status to `"failed"`, log `"Planning stopped by user after 0 modules — workflow cancelled."`, and halt without running subsequent steps
+
+**code-evidence**
+- Log: `"Code evidence retrieved: N topics, N snippets"`
+- If `snippet_count` is 0, **warn**: `"No code snippets found — the writing step will have no code evidence to ground documentation in."`
+
+**prepare-branch**
+- Record `result.branch` and `result.skipped` — these are used by the [Commit confirmation gate](#commit-confirmation-gate)
+
+**writing**
+- If `result.files` is empty or missing, **warn**: `"Writing step produced no files."` Mark the `commit` step as `skipped` with `skip_reason: "no_files"` and record `result.skipped: true`, `result.pushed: false`, `result.commit_sha: null`. Also mark `create-mr` as `skipped` with `result.skipped: true`, `result.url: null`, `result.skip_reason: "no_files"`. Log: `"Skipping commit and create-mr: no files to commit."`
+
+**commit**
+- If `result.skipped` is true or `result.pushed` is false, mark `create-mr` as `skipped` in the progress file with `result.skipped: true`, `result.url: null`, `result.skip_reason: "not_pushed"`. Log: `"Skipping create-mr: commit was not pushed (pushed=<value>, skipped=<value>)."`
+
+**create-mr**
+- Record `result.url` for the [Completion](#completion) summary
+
+**create-jira**
+- Record `result.jira_url` and `result.jira_key` for the [Completion](#completion) summary
 
 ## Post-requirements source resolution
 
@@ -422,11 +461,11 @@ The technical review step runs in a loop until confidence is acceptable or three
 ## Commit confirmation gate
 
 Before running the `commit` step, **ask the user to confirm** before committing. Show:
-  - The target branch name
+  - The target branch name — from `steps.prepare-branch.result.branch` in the progress file. If prepare-branch was skipped, show the current branch name (from `git branch --show-current`)
   - The repository being committed to (current directory or `--docs-repo-path`)
-  - The number of files in the writing manifest
+  - The number of files — from `steps.writing.result.files` array length in the progress file. If unavailable, count files in the writing output folder
 
-If the user declines, mark the `commit` step as `skipped` and also skip the `create-mr` step (its input dependency is unsatisfied).
+If the user declines, mark the `commit` step as `skipped` (with `skip_reason: "user_declined"`) and also skip the `create-mr` step. Record `result.skipped: true` and `result.pushed: false` for commit.
 
 ## Completion
 
@@ -435,9 +474,10 @@ After all steps complete (or are skipped):
 1. Update the progress file: `status → "completed"`
 2. Display a summary:
    - List all output folders with paths
-   - Note any warnings (tech review didn't reach `HIGH`, etc.)
-   - Show MR/PR URL if one was created
-   - Show JIRA URL if a ticket was created
+   - Note any warnings (tech review didn't reach `HIGH`, planning had 0 modules, code-evidence had 0 snippets, etc.)
+   - Show MR/PR URL from `steps.create-mr.result.url` if present
+   - Show JIRA URL from `steps.create-jira.result.jira_url` (with key `result.jira_key`) if present
+   - Show module count from `steps.planning.result.module_count` and file count from `steps.writing.result.files` length
 
 ## Resume behavior
 
