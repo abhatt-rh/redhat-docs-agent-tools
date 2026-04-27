@@ -10,10 +10,11 @@
     },
     {
       "package": "code-finder",
-      "import_name": "code-finder",
+      "import_name": "claude_context",
       "found_in": [
         "plugins/docs-tools/skills/code-evidence/SKILL.md",
-        "plugins/docs-tools/skills/docs-workflow-code-evidence/SKILL.md"
+        "plugins/docs-tools/skills/docs-workflow-code-evidence/SKILL.md",
+        "plugins/docs-tools/skills/docs-workflow-code-evidence/scripts/find_evidence.py"
       ]
     },
     {

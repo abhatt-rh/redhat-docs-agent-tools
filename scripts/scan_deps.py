@@ -229,6 +229,7 @@ STDLIB_MODULES = {
 # Maps Python import names to pip package names where they differ.
 IMPORT_TO_PACKAGE = {
     "bs4": "beautifulsoup4",
+    "claude_context": "code-finder",
     "html2text": "html2text",
     "jira": "jira",
     "github": "PyGithub",
