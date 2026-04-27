@@ -40,7 +40,10 @@ def load_env_file():
             line = line.strip()
             if line and not line.startswith("#") and "=" in line:
                 key, value = line.split("=", 1)
-                os.environ.setdefault(key.strip(), value.strip())
+                value = value.strip()
+                if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+                    value = value[1:-1]
+                os.environ.setdefault(key.strip(), value)
 
 
 # ---------------------------------------------------------------------------
@@ -208,8 +211,9 @@ class GitHubBackend:
     def find_existing_pr(self, owner_repo, branch):
         """Find an open PR from the given branch."""
         try:
+            owner = owner_repo.split("/")[0]
             repo = self.gh.get_repo(owner_repo)
-            prs = repo.get_pulls(head=branch, state="open")
+            prs = repo.get_pulls(head=f"{owner}:{branch}", state="open")
             for pr in prs:
                 return pr.html_url
         except Exception as e:
@@ -275,9 +279,9 @@ def main():
         return
 
     # --- Resolve context ---
-    branch = commit_info["branch"]
-    platform = commit_info["platform"]
-    repo_url = commit_info["repo_url"]
+    branch = commit_info.get("branch", "")
+    platform = commit_info.get("platform", "unknown")
+    repo_url = commit_info.get("repo_url", "")
     default_branch = "main"
 
     repo_info_path = base_path / "repo-info.json"
