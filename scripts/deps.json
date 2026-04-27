@@ -13,8 +13,11 @@
       "import_name": "claude_context",
       "found_in": [
         "plugins/docs-tools/skills/code-evidence/SKILL.md",
+        "plugins/docs-tools/skills/docs-review-technical/SKILL.md",
         "plugins/docs-tools/skills/docs-workflow-code-evidence/SKILL.md",
-        "plugins/docs-tools/skills/code-evidence/scripts/find_evidence.py"
+        "plugins/docs-tools/skills/code-evidence/scripts/api_surface.py",
+        "plugins/docs-tools/skills/code-evidence/scripts/find_evidence.py",
+        "plugins/docs-tools/skills/code-evidence/scripts/grounded_review.py"
       ]
     },
     {
