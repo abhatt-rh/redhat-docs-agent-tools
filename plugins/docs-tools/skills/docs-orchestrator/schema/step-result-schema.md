@@ -139,7 +139,7 @@ When skipped:
 
 | Field | Type | Description | Consumed by |
 |---|---|---|---|
-| `files` | string[] | Absolute paths of all files written or modified | `commit.sh` — file staging |
+| `files` | string[] | Absolute paths of all files written or modified | `commit.py` — file staging |
 | `mode` | string | `"update-in-place"`, `"draft"`, or `"fix"` | Informational |
 | `format` | string | `"adoc"` or `"mkdocs"` | Informational |
 

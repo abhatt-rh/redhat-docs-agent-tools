@@ -41,7 +41,7 @@ The writing manifest listing all files written or modified.
 Run the commit script, passing through all arguments:
 
 ```bash
-bash ${CLAUDE_SKILL_DIR}/scripts/commit.sh <ticket> --base-path <base-path> [--repo-path <path>] [--draft]
+python3 ${CLAUDE_SKILL_DIR}/scripts/commit.py <ticket> --base-path <base-path> [--repo-path <path>] [--draft]
 ```
 
 The script handles:
