@@ -108,7 +108,7 @@ def main():
     branch_name = ticket.lower()
     based_on = f"{default_remote}/{default_branch}"
 
-    rc, _, _ = git("rev-parse", "--verify", branch_name, cwd=cwd)
+    rc, _, _ = git("rev-parse", "--verify", f"refs/heads/{branch_name}", cwd=cwd)
     if rc == 0:
         print(f"Branch '{branch_name}' already exists — switching to it.")
         rc, _, err = git("checkout", branch_name, cwd=cwd)
