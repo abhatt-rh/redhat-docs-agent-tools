@@ -3,6 +3,9 @@ name: docs-review-technical
 description: Technical accuracy review and code-aware validation with confidence scoring. Supports local branch review, PR/MR review with optional inline comment posting, interactive comment actioning, and code-aware technical validation against source code repos. MUST BE USED when the user asks to validate documentation against code, check technical accuracy, verify commands/APIs/configs in docs match source code, or run a technical review. Also use when the user provides a --code URL or mentions code-aware review.
 argument-hint: "[--local | --pr <url> [--post-comments] | --action-comments [url]] [--code <url>] [--fix] [--threshold <0-100>]"
 allowed-tools: Read, Write, Glob, Grep, Edit, Bash, Skill, Agent, WebSearch, WebFetch, AskUserQuestion
+dependencies:
+  python:
+    - code-finder
 ---
 
 # Technical Accuracy and Code-Aware Review
@@ -263,63 +266,92 @@ Workflow:
 
 2. **Extract references** from doc files:
    ```bash
-   python3 ${CLAUDE_SKILL_DIR}/scripts/code_scanner.py extract $(cat /tmp/docs-review-doc-files.txt) --output /tmp/tech-review-refs.json
+   mapfile -t DOC_FILES < /tmp/docs-review-doc-files.txt
+   python3 ${CLAUDE_SKILL_DIR}/scripts/extract_refs.py "${DOC_FILES[@]}" --output /tmp/tech-review-refs.json
    ```
 
-3. **Search repos for references** — Run the search subcommand to validate extracted references against cloned repos:
+3. **Validate claims against code** — Run grounded review on each doc file against the cloned repos. First check if code-finder is installed:
    ```bash
-   python3 ${CLAUDE_SKILL_DIR}/scripts/code_scanner.py search /tmp/tech-review-refs.json \
-     /tmp/tech-review/repo1 [/tmp/tech-review/repo2 ...] \
-     --output /tmp/tech-review-search.json
+   python3 -c "import claude_context" 2>/dev/null && echo "INSTALLED" || echo "NOT_INSTALLED"
    ```
 
-   The search output includes per-reference structured data:
-   - **Commands**: `scope` (external/in-scope/unknown), `cli_validation` (unknown_flags, valid_flags, known_flags, framework), `git_evidence`
-   - **Configs**: `schema_validation` (matched_schema, keys_only_in_doc, keys_only_in_schema, overlap_ratio), `git_evidence`
-   - **APIs**: `matches` (with type: definition/usage/endpoint), `git_evidence`
-   - **Code blocks**: `matches` (with type: first_line), `identifiers`
-   - **File paths**: `matches` (with type: exact/basename), `git_evidence`
-   - **Top-level**: `discovered_cli_definitions`, `discovered_schemas`
+   Build a drafts JSON file listing all doc files:
+   ```json
+   [{"draft": "/path/to/file1.adoc"}, {"draft": "/path/to/file2.md"}]
+   ```
 
-4. **Discover undocumented features** — Run the discover subcommand to build a code-first feature inventory and compare it against the extracted doc references:
+   If **INSTALLED**, run directly:
    ```bash
-   python3 ${CLAUDE_SKILL_DIR}/scripts/code_scanner.py discover \
-     /tmp/tech-review/repo1 [/tmp/tech-review/repo2 ...] \
-     --refs-json /tmp/tech-review-refs.json \
-     --output /tmp/tech-review-discover.json
+   python3 ${CLAUDE_PLUGIN_ROOT}/skills/code-evidence/scripts/grounded_review.py \
+     --repo /tmp/tech-review/repo-name \
+     --drafts-file /tmp/tech-review-drafts.json \
+     --reindex > /tmp/tech-review-grounded.json
    ```
 
-   The discover output includes:
-   - **inventory**: env_vars, cli_args, config_keys, api_endpoints, data_models found in code
-   - **comparison**: `undocumented` (in code but not in docs) and `doc_only` (in docs but not in code)
+   If **NOT_INSTALLED**, prefix with uv:
+   ```bash
+   uv run --with code-finder python3 ${CLAUDE_PLUGIN_ROOT}/skills/code-evidence/scripts/grounded_review.py \
+     --repo /tmp/tech-review/repo-name \
+     --drafts-file /tmp/tech-review-drafts.json \
+     --reindex > /tmp/tech-review-grounded.json
+   ```
 
-5. **Validate search results** — Read `/tmp/tech-review-search.json` and `/tmp/tech-review-discover.json`. For each category, apply the structured triage pipeline from Step 6 (below). Use native tools (Grep, Glob, Read) only to verify ambiguous results — do not re-search everything the script already checked.
+   The grounded review output includes per-claim structured data:
+   - **claim_id**, **text**: the extracted claim from the document
+   - **verdict**: `supported`, `partially_supported`, `unsupported`, or `no_evidence_found`
+   - **confidence**: 0.0–1.0 relevance score
+   - **evidence**: array of `{file_path, start_line, end_line, chunk_type, chunk_name, relevance_score, content_snippet}`
 
-5. Return issues in the standard format: `file`, `line`, `description`, `reason`, `confidence`, `severity`. Include the code evidence in `reason`.
+4. **Extract API surface** — Run api_surface extraction to discover public classes, functions, and methods in the code:
+   ```bash
+   python3 ${CLAUDE_PLUGIN_ROOT}/skills/code-evidence/scripts/api_surface.py \
+     --target /tmp/tech-review/repo-name > /tmp/tech-review-api-surface.json
+   ```
+   (Prefix with `uv run --with code-finder` if NOT_INSTALLED.)
 
-## Step 6: Structured Triage (Deterministic Classification)
+   The API surface output includes:
+   - **api_surface**: per-file map of entities (classes, functions, methods with signatures and line ranges)
+   - **total_entities**, **files_processed**, **files_with_api**: summary counts
 
-Process ALL search results from `/tmp/tech-review-search.json` through a deterministic classification pipeline — not just not-found items. A command can be `found: true` (binary exists) but still have stale flags (`cli_validation.unknown_flags`). Do NOT skip this step or use ad-hoc exploration.
+   Optionally, run supplemental evidence queries for categories api_surface does not cover (env vars, config keys):
+   ```json
+   [
+     {"query": "environment variable access os.environ getenv", "limit": 10},
+     {"query": "configuration key config.get viper.Get settings", "limit": 10}
+   ]
+   ```
+   ```bash
+   python3 ${CLAUDE_PLUGIN_ROOT}/skills/code-evidence/scripts/find_evidence.py \
+     --repo /tmp/tech-review/repo-name \
+     --queries-file /tmp/tech-review-supplemental-queries.json > /tmp/tech-review-supplemental.json
+   ```
 
-**Pass 1: Scope filtering (commands only)** — For each command result, check the `scope` field. Non-command categories (code blocks, APIs, configs, file paths) do not have scope and always proceed to Pass 2.
-- `scope: external` → Tag as `out-of-scope`, skip further analysis. These are system commands (sudo, dnf, oc, kubectl, etc.) that cannot be validated against the code repo.
-- `scope: in-scope` or `scope: unknown` → Continue to Pass 2.
+5. **Triage results** — Read `/tmp/tech-review-grounded.json`, `/tmp/tech-review-api-surface.json`, and `/tmp/tech-review-refs.json`. Apply the structured triage pipeline from Step 6 (below). Use native tools (Grep, Glob, Read) only to verify ambiguous results.
 
-**Pass 2: Deterministic validation** — For items that passed scope filtering:
-- **Commands with `cli_validation`**: If `cli_validation.unknown_flags` is non-empty, flag each unknown flag as an issue. The `cli_validation.known_flags` list shows what flags actually exist in the code. Confidence is high (>=80%) because this is source-code-derived ground truth.
-- **Configs with `schema_validation`**: If `schema_validation.keys_only_in_doc` is non-empty, flag each as a potential stale/renamed key. Use `keys_only_in_schema` as candidate replacements. Confidence is medium-high (70-85%) based on `overlap_ratio`.
-- **File paths with `found: false`**: If basename matches exist, likely a moved file. Confidence 70-80%. If no matches at all, confidence <50%.
+6. Return issues in the standard format: `file`, `line`, `description`, `reason`, `confidence`, `severity`. Include the code evidence in `reason`.
 
-**Pass 3: Evidence-based analysis** — For remaining items not resolved by Pass 2:
-- Cross-reference `git_evidence` with search results. Git log mentions of renames or deprecation → medium-high confidence (70-90%).
-- Partial matches or similar-but-different results → medium confidence (50-64%).
-- No matches at all and no git evidence → low confidence (<50%). Could be wrong repo, or reference lives elsewhere.
+## Step 6: Structured Triage (Evidence-Based Classification)
 
-**Pass 4: Read source files** — For items flagged in passes 2-3 with confidence >=50%, read the actual source file referenced by the match to confirm the issue. Do not report issues based solely on search output without verifying against the source.
+Process ALL grounded review results from `/tmp/tech-review-grounded.json` and the API surface from `/tmp/tech-review-api-surface.json` through a classification pipeline. Do NOT skip this step or use ad-hoc exploration.
 
-**Pass 5: Undocumented feature triage** — Process the `comparison` section from `/tmp/tech-review-discover.json`:
-- `undocumented` items: Features found in code but not mentioned in any reviewed doc. Severity: Low-Medium. Confidence: 60-80% (lower because absence from *changed* docs doesn't mean absence from *all* docs).
-- `doc_only` items: References in docs with no corresponding code. Cross-reference with Pass 2/3 results — if already flagged as stale, skip. Otherwise flag as potential stale reference. Confidence: 50-70%.
+**Pass 1: Scope filtering (commands only)** — For each command in the extracted references (`/tmp/tech-review-refs.json`), classify the binary as external or in-scope. External system commands (sudo, dnf, oc, kubectl, docker, git, curl, etc.) cannot be validated against the code repo — tag as `out-of-scope` and skip further analysis.
+
+**Pass 2: Claim verdict analysis** — For each claim result from grounded review:
+- `verdict: "unsupported"` with `confidence > 0.5` → Flag as likely inaccurate. Read the evidence to understand why the claim is unsupported. High confidence (>=80%) when the evidence clearly contradicts the claim.
+- `verdict: "no_evidence_found"` → Check if the claim references something that should be in the repo. Could be wrong repo, or reference lives elsewhere. Medium confidence (50-70%).
+- `verdict: "partially_supported"` with `confidence < 0.5` → Medium confidence. Cross-reference the evidence content snippets to determine what part is wrong.
+- `verdict: "supported"` → No issue. Skip.
+
+**Pass 3: API surface comparison** — Compare the extracted references (`/tmp/tech-review-refs.json`) against the API surface (`/tmp/tech-review-api-surface.json`):
+- For each API, class, or function referenced in the docs, check if it appears in the api_surface output. If absent, flag as potentially stale or renamed. Confidence: 60-80%.
+- For each entity in api_surface not mentioned in the doc references, note as potentially undocumented. Severity: Low-Medium. Confidence: 60-80% (absence from *changed* docs doesn't mean absence from *all* docs).
+
+**Pass 4: Read source files** — For items flagged in passes 2-3 with confidence >=50%, read the actual source file referenced in the grounded review evidence or api_surface to confirm the issue. Do not report issues based solely on verdict output without verifying against the source.
+
+**Pass 5: Cross-reference and deduplicate** — Merge findings from passes 2-4:
+- If a claim flagged in Pass 2 also has a missing API in Pass 3, consolidate into a single issue with the stronger evidence.
+- If an entity flagged as undocumented in Pass 3 appears in supplemental evidence queries, downgrade or remove.
+- Remove duplicate findings that flag the same underlying problem from different angles.
 
 **Assigning severity**: `High` = users will hit errors (broken commands, missing APIs). `Medium` = misleading but not blocking (wrong names, stale options). `Low` = cosmetic or informational (undocumented features, formatting).
 
@@ -357,7 +389,7 @@ Remove issues that:
 
 ## Step 9: Whole-Repo Anti-Pattern Scan (conditional)
 
-**Only runs when Agent 2 ran.** Catches issues extraction+search may miss.
+**Only runs when Agent 2 ran.** Catches issues grounded review may miss.
 
 **Scan scope**: `.adoc` and `.md` files in the parent directories of the files listed in `/tmp/docs-review-doc-files.txt`.
 
@@ -630,15 +662,24 @@ If any changes were applied, remind the user:
 **Source**: [Branch: <branch> vs <base> | PR/MR URL]
 **Date**: YYYY-MM-DD
 
-## Discovery Summary
+## Grounded Review Summary
 
 | Metric | Count |
 |--------|-------|
-| CLI definitions discovered | X |
-| Schema files discovered | Y |
-| Commands: in-scope | A |
-| Commands: external (out-of-scope) | B |
-| Commands: unknown scope | C |
+| Claims extracted | X |
+| Supported | A |
+| Partially supported | B |
+| Unsupported | C |
+| No evidence found | D |
+
+## API Surface Summary
+
+| Metric | Count |
+|--------|-------|
+| Files processed | X |
+| Total entities | Y |
+| Entities in docs | Z |
+| Potentially undocumented | N |
 
 ## Code Repositories
 
@@ -651,10 +692,10 @@ If any changes were applied, remind the user:
 | Pass | Description | Items Processed | Issues Flagged |
 |------|-------------|-----------------|----------------|
 | Pass 1 | Scope filtering | X | Y |
-| Pass 2 | Deterministic validation | X | Y |
-| Pass 3 | Evidence-based analysis | X | Y |
+| Pass 2 | Claim verdict analysis | X | Y |
+| Pass 3 | API surface comparison | X | Y |
 | Pass 4 | Source file verification | X | Y |
-| Pass 5 | Undocumented feature triage | X | Y |
+| Pass 5 | Cross-reference and deduplicate | X | Y |
 
 ## Summary
 
@@ -678,29 +719,29 @@ If any changes were applied, remind the user:
 
 #### Code Validation (if Agent 2 ran)
 
-| Line | Severity | Issue | Evidence | Validation Source |
-|------|----------|-------|----------|-------------------|
+| Line | Severity | Issue | Evidence | Verdict |
+|------|----------|-------|----------|---------|
 
-Show specific value mismatches (e.g., "Docs: pool_size=10, Code: pool_size=5"), undocumented features, and import path errors. Do not list every `found: false` result — only report items where there is concrete evidence of a discrepancy or where a documented feature is provably absent from the code.
+Show specific value mismatches (e.g., "Docs: pool_size=10, Code: pool_size=5"), unsupported claims, and import path errors. Only report items where grounded review returned `unsupported` or `no_evidence_found` with concrete evidence, or where the API surface shows a missing/renamed entity.
 
 ---
 
 ## Required Changes
 
-1. **file.adoc:23** — Description (evidence) [validation: cli_validation]
+1. **file.adoc:23** — Description (evidence) [verdict: unsupported]
 
 ## Suggestions
 
-1. **file.adoc:91** — Description [validation: manual_analysis]
+1. **file.adoc:91** — Description [verdict: no_evidence_found]
 
-## Undocumented Features (if discover ran)
+## Undocumented API Surface (if Agent 2 ran)
 
-Features found in source code but not mentioned in reviewed documentation:
+Entities found in API surface but not referenced in reviewed documentation:
 
-| Category | Name | Source File | Evidence |
-|----------|------|-------------|----------|
-| env_var | SECRET_KEY | src/app.py:15 | os.environ.get("SECRET_KEY") |
-| api_endpoint | /api/v2/health | src/routes.py:42 | @app.route("/api/v2/health") |
+| Type | Name | Source File | Signature |
+|------|------|-------------|-----------|
+| function | list_resources | src/app.py:12 | def list_resources() |
+| class | ExampleClient | src/client.py:2 | class ExampleClient |
 
 ## Out-of-Scope References
 
@@ -734,5 +775,9 @@ Features found in source code but not mentioned in reviewed documentation:
 - Use Bash with heredoc/cat for writing /tmp files (not the Write tool)
 - Include source code evidence in each issue's `reason` field
 - Comments are posted under YOUR username using tokens from `~/.env`
-- The `code_scanner.py` script is co-located in `scripts/` for Agent 2's reference extraction
+- `scripts/extract_refs.py` extracts technical references from doc files (commands, APIs, configs, file paths)
+- Code-finder wrappers live in `${CLAUDE_PLUGIN_ROOT}/skills/code-evidence/scripts/`:
+  - `grounded_review.py` — validates doc claims against code (verdicts: supported/unsupported/partially_supported/no_evidence_found)
+  - `api_surface.py` — extracts public API surface from code (classes, functions, methods with signatures)
+  - `find_evidence.py` — retrieves code snippets matching natural language queries
 - Vale linting is NOT part of the technical review — use `docs-review-style` for that

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Retrieve code evidence from a repository using hybrid search.
 
-Wraps code-finder's Python API (claude_context.skills.evidence_retrieval)
-so the skill can call a script instead of relying on a CLI entry point
-being on $PATH.
+Wraps code-finder's Python API (claude_context.skills.evidence_retrieval).
+Requires the code-finder package to be installed (`python3 -m pip install
+code-finder`) or invoked via `uv run --with code-finder`.
 
 Single query:
     python3 find_evidence.py --repo /path/to/repo --query "search query" \
