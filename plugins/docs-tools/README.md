@@ -123,6 +123,33 @@ Use `--workflow <name>` to maintain different workflows for different purposes:
 /docs-orchestrator PROJ-123 --workflow full
 ```
 
+### Merge-request workflow
+
+The `workflow-merge-request` variant extends the default pipeline with a **create-merge-request** step that creates a feature branch (if needed), commits the written files, pushes to the remote, and opens a merge request (GitLab) or pull request (GitHub). Use this when you want the orchestrator to handle the full end-to-end flow including git operations.
+
+```bash
+/docs-orchestrator PROJ-123 --workflow workflow-merge-request
+```
+
+The workflow runs the following steps in order:
+
+1. **requirements** — analyze documentation requirements from the JIRA ticket
+2. **planning** — create the documentation plan
+3. **writing** — write documentation
+4. **technical-review** — verify technical accuracy
+5. **style-review** — check style guide compliance
+6. **create-merge-request** — create a branch (if needed), commit, push, and open a merge request or pull request
+
+The default workflow (`docs-workflow.yaml`) ends at style-review and leaves the files as uncommitted changes in the repo, so you can create your own branch and MR manually.
+
+To use this workflow without the plugin default, download it into your docs repo:
+
+```bash
+mkdir -p .claude
+curl -sL https://raw.githubusercontent.com/redhat-documentation/redhat-docs-agent-tools/main/plugins/docs-tools/skills/docs-orchestrator/defaults/docs-workflow-merge-request.yaml \
+   -o .claude/docs-workflow-merge-request.yaml
+```
+
 ### Code-evidence workflow
 
 The `workflow-code-evidence` variant adds two code-analysis steps to the standard pipeline: **scope-req-audit** (classifies each JIRA requirement as grounded, partial, or absent in the codebase) and **code-evidence** (retrieves relevant code snippets for each topic in the documentation plan). This workflow requires a source code repository — the orchestrator fails at load time if neither `--source-code-repo` nor `--pr` is provided.
@@ -209,7 +236,7 @@ To write files directly into your repo (update-in-place mode), run as follows:
 /docs-orchestrator PROJ-123
 ```
 
-In update-in-place mode, the orchestrator detects your repo's documentation framework (Antora, ccutil, etc.), writes files to the correct locations, and can create a branch, commit, and open a merge request.
+In update-in-place mode, the orchestrator detects your repo's documentation framework (Antora, ccutil, etc.) and writes files to the correct locations as uncommitted changes. To also create a branch, commit, push, and open a merge request, use `--workflow workflow-merge-request`.
 
 ### Grounding documentation in source code
 
