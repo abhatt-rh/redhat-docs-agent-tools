@@ -32,7 +32,7 @@ When displaying available options to the user (e.g., on skill load or when askin
 - `--pr <url>` — PR/MR URLs (repeatable, accumulated into a list). Accepts GitHub PRs (`gh` CLI) and GitLab MRs (`glab` CLI). Used both as requirements input (agent reads diffs/descriptions) and for source repo resolution (repo URL and branch derived from the first PR/MR). When multiple PRs from different repos are provided, all repos are resolved and treated equally as source material
 - `--mkdocs` — Use Material for MkDocs format instead of AsciiDoc. Propagates to the writing step (generates `.md` with MkDocs front matter) and style-review step (applies Markdown-appropriate rules). Sets `options.format` to `"mkdocs"` in the progress file
 - `--draft` — Write documentation to the staging area (`.claude/docs/<ticket>/writing/`) instead of directly into the repo. Uses DRAFT placement mode: no framework detection, no file placement into the target repo. Without this flag, UPDATE-IN-PLACE is the default
-- `--docs-repo-path <path>` — Target documentation repository for UPDATE-IN-PLACE mode. The docs-writer explores this directory for framework detection (Antora, MkDocs, Docusaurus, etc.) and writes files there instead of the current working directory. Propagates to `prepare-branch`, `writing`, `commit`, and `create-mr` steps (mapped to their internal `--repo-path` flag). **Precedence**: if both `--docs-repo-path` and `--draft` are passed, `--docs-repo-path` wins — log a warning and ignore `--draft`
+- `--docs-repo-path <path>` — Target documentation repository for UPDATE-IN-PLACE mode. The docs-writer explores this directory for framework detection (Antora, MkDocs, Docusaurus, etc.) and writes files there instead of the current working directory. Propagates to `writing` and `create-merge-request` steps (mapped to their internal `--repo-path` flag). **Precedence**: if both `--docs-repo-path` and `--draft` are passed, `--docs-repo-path` wins — log a warning and ignore `--draft`
 - `--source-code-repo <url-or-path>` — Source code repository for code evidence and requirements enrichment. Accepts remote URLs (https://, git@, ssh:// — shallow-cloned to `.claude/docs/<ticket>/code-repo/`) or local paths (used directly). Passed to requirements, code-evidence, and writing steps (mapped to their internal `--repo` flag). Without `--pr`, the entire repo is the subject matter; with `--pr`, the PR branch is checked out so code-evidence reflects the PR's state. Takes highest priority in source resolution, overriding `source.yaml` and PR-derived URLs
 - `--create-jira <PROJECT>` — Create a linked JIRA ticket in the specified project after the planning step completes. Activates the `create-jira` workflow step (guarded by `when: create_jira_project`). Requires `JIRA_API_TOKEN` to be set
 
@@ -238,9 +238,6 @@ Use this absolute `BASE_PATH` for the progress file's `base_path` field and for 
     evidence.json
     summary.md
     step-result.json                 (sidecar: topic_count, snippet_count, repo_path)
-  prepare-branch/
-    branch-info.md
-    step-result.json                 (sidecar: branch, based_on, skipped)
   writing/
     _index.md
     step-result.json                 (sidecar: files, mode, format)
@@ -252,12 +249,8 @@ Use this absolute `BASE_PATH` for the progress file's `base_path` field and for 
   style-review/
     review.md
     step-result.json                 (sidecar: common fields only)
-  commit/
-    commit-info.json
-    step-result.json                 (sidecar: commit_sha, branch, pushed, skipped)
-  create-mr/
-    mr-info.json
-    step-result.json                 (sidecar: url, action, platform, skipped)
+  create-merge-request/
+    step-result.json                 (sidecar: commit_sha, branch, pushed, url, action, platform, skipped)
   workflow/
     docs-workflow_proj-123.json
 ```
@@ -363,12 +356,10 @@ Build the args string for the step skill. The orchestrator maps its user-facing 
 3. **From orchestrator context**: Step-specific args from parsed CLI flags:
    - `requirements`: `[--pr <url>]... [--repo <repo_path>]`
    - `scope-req-audit`: `--repo <repo_path> [--grounded-threshold <float>] [--absent-threshold <float>]`
-   - `prepare-branch`: `[--draft] [--repo-path <path>]`
    - `code-evidence`: `--repo <repo_path> [--scope-include <globs>] [--scope-exclude <globs>] [--reindex]` — scope globs come from `source.yaml` or `options.source.scope` in the progress file
    - `writing`: `--format <adoc|mkdocs> [--draft] [--repo <repo_path>] [--repo-path <path>]`
    - `style-review`: `--format <adoc|mkdocs>`
-   - `commit`: `[--draft] [--repo-path <path>]`
-   - `create-mr`: `[--draft] [--repo-path <path>]`
+   - `create-merge-request`: `[--draft] [--repo-path <path>]`
    - `create-jira`: `--project <PROJECT>`
 
 Step skills derive their own output folder and input folders from `--base-path` and step name conventions. No per-input flag wiring needed.
@@ -408,17 +399,11 @@ After each step completes, apply the rules below. When rules reference sidecar f
 - Log: `"Code evidence retrieved: N topics, N snippets"`
 - If `snippet_count` is 0, **warn**: `"No code snippets found — the writing step will have no code evidence to ground documentation in."`
 
-**prepare-branch**
-- Record `result.branch` and `result.skipped` — these are used by the [Commit confirmation gate](#commit-confirmation-gate)
-
 **writing**
-- If `result.files` is empty or missing, **warn**: `"Writing step produced no files."` Mark the `commit` step as `skipped` with `skip_reason: "no_files"` and record `result.skipped: true`, `result.pushed: false`, `result.commit_sha: null`. Also mark `create-mr` as `skipped` with `result.skipped: true`, `result.url: null`, `result.skip_reason: "no_files"`. Log: `"Skipping commit and create-mr: no files to commit."`
+- If `result.files` is empty or missing, **warn**: `"Writing step produced no files."` Mark the `create-merge-request` step as `skipped` with `skip_reason: "no_files"` and record `result.commit_sha: null`, `result.branch: null`, `result.pushed: false`, `result.url: null`, `result.action: "skipped"`, `result.platform: "unknown"`, `result.skipped: true`. Log: `"Skipping create-merge-request: no files to commit."`
 
-**commit**
-- If `result.skipped` is true or `result.pushed` is false, mark `create-mr` as `skipped` in the progress file with `result.skipped: true`, `result.url: null`, `result.skip_reason: "not_pushed"`. Log: `"Skipping create-mr: commit was not pushed (pushed=<value>, skipped=<value>)."`
-
-**create-mr**
-- Record `result.url` for the [Completion](#completion) summary
+**create-merge-request**
+- Record `result.url`, `result.pushed`, and `result.branch`. If `result.pushed` is false and `result.skipped` is false, log warning: `"create-merge-request: branch was not pushed."` If `result.url` is present, record it for the [Completion](#completion) summary
 
 **create-jira**
 - Record `result.jira_url` and `result.jira_key` for the [Completion](#completion) summary
@@ -473,12 +458,12 @@ The technical review step runs in a loop until confidence is acceptable or three
 
 ## Commit confirmation gate
 
-Before running the `commit` step, **ask the user to confirm** before committing. Show:
-  - The target branch name — from `steps.prepare-branch.result.branch` (NOT `based_on`) in the progress file. `based_on` is the upstream ref the branch was created from — never display it as the push target. If prepare-branch was skipped, show the current branch name (from `git branch --show-current`)
+Before running the `create-merge-request` step, **ask the user to confirm** before committing. Show:
+  - The target branch name — derived from the ticket ID (lowercase). If the repo is already on a feature branch, show the current branch name (from `git branch --show-current`)
   - The repository being committed to (current directory or `--docs-repo-path`)
   - The number of files — from `steps.writing.result.files` array length in the progress file. If unavailable, count files in the writing output folder
 
-If the user declines, mark the `commit` step as `skipped` (with `skip_reason: "user_declined"`) and also skip the `create-mr` step. Record `result.skipped: true` and `result.pushed: false` for commit.
+If the user declines, mark the `create-merge-request` step as `skipped` (with `skip_reason: "user_declined"`). Record `result.commit_sha: null`, `result.branch: null`, `result.pushed: false`, `result.url: null`, `result.action: "skipped"`, `result.platform: "unknown"`, `result.skipped: true`.
 
 ## Completion
 
@@ -488,7 +473,7 @@ After all steps complete (or are skipped):
 2. Display a summary:
    - List all output folders with paths
    - Note any warnings (tech review didn't reach `HIGH`, planning had 0 modules, code-evidence had 0 snippets, etc.)
-   - Show MR/PR URL from `steps.create-mr.result.url` if present
+   - Show MR/PR URL from `steps.create-merge-request.result.url` if present
    - Show JIRA URL from `steps.create-jira.result.jira_url` (with key `result.jira_key`) if present
    - Show module count from `steps.planning.result.module_count` and file count from `steps.writing.result.files` length
 
