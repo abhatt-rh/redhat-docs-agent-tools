@@ -100,7 +100,7 @@ branch=$(git_cmd rev-parse --abbrev-ref HEAD)
 remote_url=$(git_cmd remote get-url origin 2>/dev/null || true)
 
 platform="unknown"
-if [[ "$remote_url" == *github.com* ]]; then
+if [[ "$remote_url" == *github* ]]; then
     platform="github"
 elif [[ "$remote_url" == *gitlab* ]]; then
     platform="gitlab"

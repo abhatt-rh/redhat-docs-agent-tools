@@ -400,7 +400,7 @@ After each step completes, apply the rules below. When rules reference sidecar f
 - If `snippet_count` is 0, **warn**: `"No code snippets found — the writing step will have no code evidence to ground documentation in."`
 
 **writing**
-- If `result.files` is empty or missing, **warn**: `"Writing step produced no files."` Mark the `create-merge-request` step as `skipped` with `skip_reason: "no_files"` and record `result.skipped: true`, `result.pushed: false`, `result.commit_sha: null`, `result.url: null`. Log: `"Skipping create-merge-request: no files to commit."`
+- If `result.files` is empty or missing, **warn**: `"Writing step produced no files."` Mark the `create-merge-request` step as `skipped` with `skip_reason: "no_files"` and record `result.commit_sha: null`, `result.branch: null`, `result.pushed: false`, `result.url: null`, `result.action: "skipped"`, `result.platform: "unknown"`, `result.skipped: true`. Log: `"Skipping create-merge-request: no files to commit."`
 
 **create-merge-request**
 - Record `result.url`, `result.pushed`, and `result.branch`. If `result.pushed` is false and `result.skipped` is false, log warning: `"create-merge-request: branch was not pushed."` If `result.url` is present, record it for the [Completion](#completion) summary
@@ -463,7 +463,7 @@ Before running the `create-merge-request` step, **ask the user to confirm** befo
   - The repository being committed to (current directory or `--docs-repo-path`)
   - The number of files — from `steps.writing.result.files` array length in the progress file. If unavailable, count files in the writing output folder
 
-If the user declines, mark the `create-merge-request` step as `skipped` (with `skip_reason: "user_declined"`). Record `result.skipped: true`, `result.pushed: false`, and `result.url: null`.
+If the user declines, mark the `create-merge-request` step as `skipped` (with `skip_reason: "user_declined"`). Record `result.commit_sha: null`, `result.branch: null`, `result.pushed: false`, `result.url: null`, `result.action: "skipped"`, `result.platform: "unknown"`, `result.skipped: true`.
 
 ## Completion
 
