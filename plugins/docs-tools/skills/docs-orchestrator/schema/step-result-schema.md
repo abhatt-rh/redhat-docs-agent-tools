@@ -38,7 +38,7 @@ All sidecars share these fields:
 
 | Field | Type | Description | Consumed by |
 |---|---|---|---|
-| `title` | string | First heading from requirements.md (max 80 chars, ticket prefix stripped) | `create_mr.py` — PR/MR title |
+| `title` | string | First heading from requirements.md (max 80 chars, ticket prefix stripped) | `create_merge_request.sh` — PR/MR title |
 
 ### scope-req-audit
 
@@ -82,43 +82,6 @@ All sidecars share these fields:
 |---|---|---|---|
 | `module_count` | integer | Number of documentation modules in the plan | Informational (orchestrator summary) |
 
-### prepare-branch
-
-```json
-{
-  "schema_version": 1,
-  "step": "prepare-branch",
-  "ticket": "PROJ-123",
-  "completed_at": "2026-04-23T14:50:00Z",
-  "branch": "proj-123",
-  "based_on": "upstream/main",
-  "skipped": false,
-  "skip_reason": null
-}
-```
-
-When skipped:
-
-```json
-{
-  "schema_version": 1,
-  "step": "prepare-branch",
-  "ticket": "PROJ-123",
-  "completed_at": "2026-04-23T14:50:00Z",
-  "branch": null,
-  "based_on": null,
-  "skipped": true,
-  "skip_reason": "draft"
-}
-```
-
-| Field | Type | Description | Consumed by |
-|---|---|---|---|
-| `branch` | string\|null | Branch name created (null when skipped) | Orchestrator |
-| `based_on` | string\|null | Remote/branch ref used as base (null when skipped) | Orchestrator |
-| `skipped` | boolean | Whether branch creation was skipped | Orchestrator |
-| `skip_reason` | string\|null | `"draft"` or `"repo-path"` when skipped | Orchestrator |
-
 ### writing
 
 ```json
@@ -139,7 +102,7 @@ When skipped:
 
 | Field | Type | Description | Consumed by |
 |---|---|---|---|
-| `files` | string[] | Absolute paths of all files written or modified | `commit.py` — file staging |
+| `files` | string[] | Absolute paths of all files written or modified | `create_merge_request.sh` — file staging |
 | `mode` | string | `"update-in-place"`, `"draft"`, or `"fix"` | Informational |
 | `format` | string | `"adoc"` or `"mkdocs"` | Informational |
 
@@ -205,54 +168,17 @@ No extra fields. Common schema only.
 | `snippet_count` | integer | Total code snippets retrieved across all topics (source + context) | Informational (orchestrator summary) |
 | `repo_path` | string | Absolute path to the source repository searched | Informational |
 
-### commit
+### create-merge-request
 
 ```json
 {
   "schema_version": 1,
-  "step": "commit",
+  "step": "create-merge-request",
   "ticket": "PROJ-123",
-  "completed_at": "2026-04-23T16:00:00Z",
+  "completed_at": "2026-04-23T16:05:00Z",
   "commit_sha": "abc1234",
   "branch": "proj-123",
   "pushed": true,
-  "skipped": false,
-  "skip_reason": null
-}
-```
-
-When skipped (draft mode or no changes):
-
-```json
-{
-  "schema_version": 1,
-  "step": "commit",
-  "ticket": "PROJ-123",
-  "completed_at": "2026-04-23T16:00:00Z",
-  "commit_sha": null,
-  "branch": null,
-  "pushed": false,
-  "skipped": true,
-  "skip_reason": "draft"
-}
-```
-
-| Field | Type | Description | Consumed by |
-|---|---|---|---|
-| `commit_sha` | string\|null | Git commit SHA (null when skipped) | Informational |
-| `branch` | string\|null | Branch name committed to (null when skipped) | Orchestrator |
-| `pushed` | boolean | Whether the branch was pushed to the remote | `create-mr` — skip check |
-| `skipped` | boolean | Whether committing was skipped | Orchestrator |
-| `skip_reason` | string\|null | `"draft"` or `"no_changes"` when skipped | Orchestrator |
-
-### create-mr
-
-```json
-{
-  "schema_version": 1,
-  "step": "create-mr",
-  "ticket": "PROJ-123",
-  "completed_at": "2026-04-23T16:05:00Z",
   "url": "https://github.com/org/repo/pull/42",
   "action": "created",
   "platform": "github",
@@ -261,14 +187,17 @@ When skipped (draft mode or no changes):
 }
 ```
 
-When skipped (draft mode or branch not pushed):
+When skipped (draft mode, no changes, or user declined):
 
 ```json
 {
   "schema_version": 1,
-  "step": "create-mr",
+  "step": "create-merge-request",
   "ticket": "PROJ-123",
   "completed_at": "2026-04-23T16:05:00Z",
+  "commit_sha": null,
+  "branch": null,
+  "pushed": false,
   "url": null,
   "action": "skipped",
   "platform": "unknown",
@@ -279,11 +208,14 @@ When skipped (draft mode or branch not pushed):
 
 | Field | Type | Description | Consumed by |
 |---|---|---|---|
-| `url` | string\|null | MR/PR URL (null when skipped) | Orchestrator (final summary) |
+| `commit_sha` | string\|null | Git commit SHA (null when skipped) | Informational |
+| `branch` | string\|null | Branch name committed to (null when skipped) | Orchestrator |
+| `pushed` | boolean | Whether the branch was pushed to the remote | Orchestrator |
+| `url` | string\|null | MR/PR URL (null when skipped or not pushed) | Orchestrator (final summary) |
 | `action` | string | `"created"`, `"found_existing"`, or `"skipped"` | Orchestrator |
 | `platform` | string | `"github"`, `"gitlab"`, or `"unknown"` | Informational |
-| `skipped` | boolean | Whether MR/PR creation was skipped | Orchestrator |
-| `skip_reason` | string\|null | `"draft"` or `"not_pushed"` when skipped | Orchestrator |
+| `skipped` | boolean | Whether the step was skipped | Orchestrator |
+| `skip_reason` | string\|null | `"draft"`, `"no_changes"`, `"no_files"`, `"user_declined"`, `"on_default_branch"`, `"push_failed"`, `"commit_failed"`, `"create_failed"`, or `"unknown_platform"` when skipped | Orchestrator |
 
 ### create-jira
 

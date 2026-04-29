@@ -14,15 +14,10 @@ workflow:
       description: Create documentation plan
       inputs: [requirements]
 
-    - name: prepare-branch
-      skill: docs-workflow-prepare-branch
-      description: Create a fresh branch from latest upstream default branch
-      inputs: [planning]
-
     - name: writing
       skill: docs-workflow-writing
       description: Write documentation
-      inputs: [planning, prepare-branch]
+      inputs: [planning]
 
     - name: technical-review
       skill: docs-workflow-tech-review
@@ -33,16 +28,6 @@ workflow:
       skill: docs-workflow-style-review
       description: Style guide compliance review
       inputs: [writing, technical-review]
-
-    - name: commit
-      skill: docs-workflow-commit
-      description: Commit and push documentation changes
-      inputs: [writing, style-review, technical-review]
-
-    - name: create-mr
-      skill: docs-workflow-create-mr
-      description: Create merge request or pull request
-      inputs: [commit]
 
     - name: create-jira
       skill: docs-workflow-create-jira
