@@ -47,10 +47,5 @@ workflow:
     - name: create-merge-request
       skill: docs-tools:docs-workflow-create-merge-request
       description: Commit, push, and create merge request or pull request
+      when: create_merge_request
       inputs: [writing, style-review, technical-review]
-
-    - name: create-jira
-      skill: docs-workflow-create-jira
-      description: Create linked JIRA ticket
-      when: create_jira_project
-      inputs: [planning]

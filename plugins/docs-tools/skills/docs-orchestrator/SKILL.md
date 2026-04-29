@@ -2,7 +2,7 @@
 name: docs-orchestrator
 description: Documentation workflow orchestrator. Reads the step list from .claude/docs-workflow.yaml (or the plugin default). Runs steps sequentially, manages progress state, handles iteration and confirmation gates. Claude is the orchestrator — the YAML is a step list, not a workflow engine.
 
-argument-hint: <ticket> [--workflow <name>] [--pr <url>]... [--source-code-repo <url-or-path>] [--mkdocs] [--draft] [--docs-repo-path <path>] [--create-jira <PROJECT>]
+argument-hint: <ticket> [--workflow <name>] [--pr <url>]... [--source-code-repo <url-or-path>] [--mkdocs] [--draft] [--docs-repo-path <path>] [--create-jira <PROJECT>] [--create-merge-request]
 
 allowed-tools: Read, Write, Glob, Grep, Edit, Bash, Skill, AskUserQuestion
 ---
@@ -34,7 +34,8 @@ When displaying available options to the user (e.g., on skill load or when askin
 - `--draft` — Write documentation to the staging area (`.claude/docs/<ticket>/writing/`) instead of directly into the repo. Uses DRAFT placement mode: no framework detection, no file placement into the target repo. Without this flag, UPDATE-IN-PLACE is the default
 - `--docs-repo-path <path>` — Target documentation repository for UPDATE-IN-PLACE mode. The docs-writer explores this directory for framework detection (Antora, MkDocs, Docusaurus, etc.) and writes files there instead of the current working directory. Propagates to `writing` and `create-merge-request` steps (mapped to their internal `--repo-path` flag). **Precedence**: if both `--docs-repo-path` and `--draft` are passed, `--docs-repo-path` wins — log a warning and ignore `--draft`
 - `--source-code-repo <url-or-path>` — Source code repository for code evidence and requirements enrichment. Accepts remote URLs (https://, git@, ssh:// — shallow-cloned to `.claude/docs/<ticket>/code-repo/`) or local paths (used directly). Passed to requirements, code-evidence, and writing steps (mapped to their internal `--repo` flag). Without `--pr`, the entire repo is the subject matter; with `--pr`, the PR branch is checked out so code-evidence reflects the PR's state. Takes highest priority in source resolution, overriding `source.yaml` and PR-derived URLs
-- `--create-jira <PROJECT>` — Create a linked JIRA ticket in the specified project after the planning step completes. Activates the `create-jira` workflow step (guarded by `when: create_jira_project`). Requires `JIRA_API_TOKEN` to be set
+- `--create-jira <PROJECT>` — Create a linked JIRA ticket in the specified project after the planning step completes. Runs the standalone `docs-workflow-create-jira` workflow (use `--workflow workflow-create-jira`). Requires `JIRA_API_TOKEN` to be set
+- `--create-merge-request` — Create a branch, commit, push, and open a merge request or pull request after reviews complete. Activates the `create-merge-request` workflow step (guarded by `when: create_merge_request`). Off by default
 
 ### Examples
 
@@ -51,11 +52,11 @@ When displaying available options to the user (e.g., on skill load or when askin
   --pr https://gitlab.example.com/org/frontend/-/merge_requests/5 \
   --docs-repo-path /home/user/docs-repo
 
-# Source repo without PRs, draft mode, with JIRA ticket creation
+# Source repo without PRs, draft mode, with merge request creation
 /docs-orchestrator PROJ-123 \
   --source-code-repo https://github.com/org/operator \
   --draft \
-  --create-jira DOCS
+  --create-merge-request
 
 # Local source repo + PR (checks out PR branch within repo)
 /docs-orchestrator PROJ-123 \
@@ -160,7 +161,7 @@ Unlike `when` (which makes individual steps conditional), `requires` is a workfl
 
 ### 4. Evaluate `when` conditions
 
-- `when: create_jira_project` → run this step only if `--create-jira` was passed
+- `when: create_merge_request` → run this step only if `--create-merge-request` was passed
 - `when: has_source_repo` → evaluation depends on timing:
   - If a source repo was already resolved pre-flight (via `--source-code-repo`, `--pr`, or `source.yaml`) → step runs normally (`pending`)
   - If no source is resolved yet but post-requirements discovery is possible (case 4 above) → mark the step `deferred` (not `skipped`). The orchestrator re-evaluates after requirements completes
@@ -185,10 +186,10 @@ Steps declare their inputs as a list of upstream step names in the YAML:
   skill: docs-workflow-writing
   inputs: [planning]
 
-- name: create-jira
-  skill: docs-workflow-create-jira
-  when: create_jira_project
-  inputs: [planning]
+- name: create-merge-request
+  skill: docs-tools:docs-workflow-create-merge-request
+  when: create_merge_request
+  inputs: [writing, style-review, technical-review]
 ```
 
 The orchestrator validates at load time that every step name in `inputs` exists in the step list. Step skills read their input data from the upstream step's output folder by convention (see below).
@@ -282,7 +283,7 @@ The `workflow_type` field and filename prefix match the YAML's `workflow.name`. 
   "options": {
     "format": "adoc",
     "draft": false,
-    "create_jira_project": null,
+    "create_merge_request": false,
     "pr_urls": [],
     "source": null,
     "additional_sources": []
@@ -360,7 +361,6 @@ Build the args string for the step skill. The orchestrator maps its user-facing 
    - `writing`: `--format <adoc|mkdocs> [--draft] [--repo <repo_path>] [--repo-path <path>]`
    - `style-review`: `--format <adoc|mkdocs>`
    - `create-merge-request`: `[--draft] [--repo-path <path>]`
-   - `create-jira`: `--project <PROJECT>`
 
 Step skills derive their own output folder and input folders from `--base-path` and step name conventions. No per-input flag wiring needed.
 

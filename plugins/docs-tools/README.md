@@ -103,13 +103,13 @@ Local standalone skills use short names (e.g., `my-review-skill`), while plugin 
 Use the `when` field to make steps run only when a CLI flag is passed:
 
 ```yaml
-- name: create-jira
-  skill: docs-workflow-create-jira
-  when: create_jira_project
-  inputs: [planning]
+- name: create-merge-request
+  skill: docs-tools:docs-workflow-create-merge-request
+  when: create_merge_request
+  inputs: [writing, style-review, technical-review]
 ```
 
-This step only runs when `--create-jira <PROJECT>` is passed to the orchestrator.
+This step only runs when `--create-merge-request` is passed to the orchestrator.
 
 ### Multiple workflow variants
 
@@ -123,32 +123,15 @@ Use `--workflow <name>` to maintain different workflows for different purposes:
 /docs-orchestrator PROJ-123 --workflow full
 ```
 
-### Merge-request workflow
+### Merge request creation
 
-The `workflow-merge-request` variant extends the default pipeline with a **create-merge-request** step that creates a feature branch (if needed), commits the written files, pushes to the remote, and opens a merge request (GitLab) or pull request (GitHub). Use this when you want the orchestrator to handle the full end-to-end flow including git operations.
-
-```bash
-/docs-orchestrator PROJ-123 --workflow workflow-merge-request
-```
-
-The workflow runs the following steps in order:
-
-1. **requirements** — analyze documentation requirements from the JIRA ticket
-2. **planning** — create the documentation plan
-3. **writing** — write documentation
-4. **technical-review** — verify technical accuracy
-5. **style-review** — check style guide compliance
-6. **create-merge-request** — create a branch (if needed), commit, push, and open a merge request or pull request
-
-The default workflow (`docs-workflow.yaml`) ends at style-review and leaves the files as uncommitted changes in the repo, so you can create your own branch and MR manually.
-
-To use this workflow without the plugin default, download it into your docs repo:
+The default workflow includes a **create-merge-request** step that is off by default. Pass `--create-merge-request` to activate it. When enabled, the step creates a feature branch (if needed), commits the written files, pushes to the remote, and opens a merge request (GitLab) or pull request (GitHub).
 
 ```bash
-mkdir -p .claude
-curl -sL https://raw.githubusercontent.com/redhat-documentation/redhat-docs-agent-tools/main/plugins/docs-tools/skills/docs-orchestrator/defaults/docs-workflow-merge-request.yaml \
-   -o .claude/docs-workflow-merge-request.yaml
+/docs-orchestrator PROJ-123 --create-merge-request
 ```
+
+Without the flag, the workflow ends at style-review and leaves the files as uncommitted changes in the repo, so you can create your own branch and MR manually.
 
 ### Code-evidence workflow
 
@@ -169,7 +152,7 @@ The workflow runs the following steps in order:
 5. **writing** — write documentation grounded in the retrieved code evidence
 6. **technical-review** — verify technical accuracy against the source code
 7. **style-review** — check style guide compliance
-8. **create-merge-request** — create a branch (if needed), commit, push, and open a merge request or pull request
+8. **create-merge-request** _(optional, pass `--create-merge-request` to enable)_ — create a branch (if needed), commit, push, and open a merge request or pull request
 
 Compared to the default workflow, the code-evidence variant produces documentation with fewer technical review issues because the writer has actual function signatures and implementation details to work from, rather than generating from the JIRA description alone.
 
@@ -236,7 +219,7 @@ To write files directly into your repo (update-in-place mode), run as follows:
 /docs-orchestrator PROJ-123
 ```
 
-In update-in-place mode, the orchestrator detects your repo's documentation framework (Antora, ccutil, etc.) and writes files to the correct locations as uncommitted changes. To also create a branch, commit, push, and open a merge request, use `--workflow workflow-merge-request`.
+In update-in-place mode, the orchestrator detects your repo's documentation framework (Antora, ccutil, etc.) and writes files to the correct locations as uncommitted changes. To also create a branch, commit, push, and open a merge request, add `--create-merge-request`.
 
 ### Grounding documentation in source code
 

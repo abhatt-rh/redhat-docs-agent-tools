@@ -20,7 +20,7 @@ Same argument set as docs-orchestrator:
 - `--draft` — Write documentation to the staging area (`.claude/docs/<ticket>/writing/`) instead of directly into the repo. Uses DRAFT placement mode: no framework detection, no file placement into the target repo. Without this flag, UPDATE-IN-PLACE is the default
 - `--docs-repo-path <path>` — Target documentation repository for UPDATE-IN-PLACE mode. The docs-writer explores this directory for framework detection (Antora, MkDocs, Docusaurus, etc.) and writes files there instead of the current working directory. Propagates to `writing` and `create-merge-request` steps (mapped to their internal `--repo-path` flag). **Precedence**: if both `--docs-repo-path` and `--draft` are passed, `--docs-repo-path` wins — log a warning and ignore `--draft`
 - `--source-code-repo <url-or-path>` — Source code repository for code evidence and requirements enrichment. Accepts remote URLs (https://, git@, ssh:// — shallow-cloned to `.claude/docs/<ticket>/code-repo/`) or local paths (used directly). Passed to requirements, code-evidence, and writing steps (mapped to their internal `--repo` flag). Without `--pr`, the entire repo is the subject matter; with `--pr`, the PR branch is checked out so code-evidence reflects the PR's state. Takes highest priority in source resolution, overriding `source.yaml` and PR-derived URLs
-- `--create-jira <PROJECT>` — Create a linked JIRA ticket in the specified project after the planning step completes. Activates the `create-jira` workflow step (guarded by `when: create_jira_project`). Requires `JIRA_API_TOKEN` to be set
+- `--create-merge-request` — Create a branch, commit, push, and open a merge request or pull request after reviews complete. Activates the `create-merge-request` workflow step (guarded by `when: create_merge_request`). Off by default
 
 ## Determine mode
 
@@ -111,7 +111,7 @@ You MUST call the AskUserQuestion tool now with 1 question. Set `multiSelect: tr
 | writing | Write documentation from an existing plan |
 | technical-review | Review existing documentation for technical accuracy |
 
-For steps not listed (planning, style-review, create-merge-request, create-jira), the user can type the step name via the "Other" option.
+For steps not listed (planning, style-review, create-merge-request), the user can type the step name via the "Other" option.
 
 **Invalid step names**: If the user enters a step name via "Other" that is not recognized, the dependency resolver will report the error with a list of valid step names. Surface this error to the user and ask them to correct their selection.
 
@@ -120,7 +120,7 @@ After receiving the answer, determine which configuration questions are relevant
 - **Format?** — include if any of these steps are selected: writing, style-review
 - **Source code?** — include if code-evidence is selected
 - **Placement?** — include if any of these steps are selected: writing, create-merge-request
-- **Create JIRA?** — include if create-jira is selected
+- **Create MR/PR?** — include if create-merge-request is selected
 
 If any questions are relevant, call AskUserQuestion with those questions (same text and options as step 3A). If no questions are relevant, proceed to step 4.
 
@@ -282,7 +282,7 @@ If `steps_with_artifacts` is **empty**, skip this question and run all steps.
 For each step in the execution plan with a `when` field:
 
 - `when: has_source_repo` — skip this step if no source repo or PR URL was provided. Log: "Skipping \<step\>: no source repository configured."
-- `when: create_jira_project` — skip this step if create-jira was not selected. Log: "Skipping \<step\>: JIRA creation not requested."
+- `when: create_merge_request` — skip this step if create-merge-request was not selected. Log: "Skipping \<step\>: merge request creation not requested."
 
 ### 7. Run steps sequentially
 
@@ -307,7 +307,6 @@ Skill: <step.skill>, args: "<ticket> --base-path <BASE_PATH> <step-specific-flag
 | style-review | `--format <adoc\|mkdocs>` |
 | technical-review | _(none)_ |
 | create-merge-request | `[--draft] [--repo-path <path>]` |
-| create-jira | `--project <PROJECT>` |
 
 The format flag defaults to `adoc` unless the user selected Material for MkDocs.
 
