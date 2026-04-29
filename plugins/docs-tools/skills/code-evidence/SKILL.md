@@ -108,17 +108,17 @@ Include the full content of each result so the user can see the actual code. If 
 
 Search an entire repo:
 ```text
-Skill: docs-tools:code-evidence, args: "--repo /path/to/repo --query \"how does authentication work\""
+Skill: code-evidence, args: "--repo /path/to/repo --query \"how does authentication work\""
 ```
 
 Search scoped to specific directories:
 ```text
-Skill: docs-tools:code-evidence, args: "--repo /path/to/repo --query \"reconciler builder pattern\" --filter-paths internal/controller,pkg/reconciler"
+Skill: code-evidence, args: "--repo /path/to/repo --query \"reconciler builder pattern\" --filter-paths internal/controller,pkg/reconciler"
 ```
 
 Re-index after pulling new changes:
 ```text
-Skill: docs-tools:code-evidence, args: "--repo /path/to/repo --query \"new feature\" --reindex"
+Skill: code-evidence, args: "--repo /path/to/repo --query \"new feature\" --reindex"
 ```
 
 ---
